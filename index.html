@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Learning Phaser </title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>
+        body {
+            background-color: #f1f1f1;
+        }
+
+        main {
+            background-color: #fff;
+          
+            width: fit-content;
+            margin: 0 auto;
+            padding: 12px;
+            text-align: center;
+
+        }
+        ul{
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap:10px;
+            margin:0 auto;
+            border: thin solid;
+            width: 100%;
+            padding: 0px;
+        }
+        li{
+            cursor: pointer;
+        }
+
+        #gameframe{
+            min-width: 900px;
+            min-height: 700px;
+            background-color: #111;
+        }
+    </style>
+
+</head>
+
+<body>
+    <main>
+        <h1>Learning phaser</h1>
+        <nav>
+            <ul>
+                <linkgame target="game1">Game 1</linkgame>
+                <linkgame target="game2">Game 2</linkgame>
+                <linkgame target="game3">Game 3</linkgame>
+            </ul>
+        </nav>
+        <section>
+            <iframe id="gameframe"></iframe>
+        </section>
+    </main>
+    <script>
+        const gameframe = document.getElementById("gameframe");
+        const elements = document.querySelectorAll("linkgame");
+        const opengame = (target) => { 
+            gameframe.src="./"+target+"/";
+        };
+        (() => {
+            [...elements].forEach((linkgame) => {
+                const parentUl = linkgame.parentElement;
+                const li = document.createElement("li");
+                li.innerHTML = linkgame.innerHTML;
+
+                const target = linkgame.attributes.target.value;
+                li.onclick = () => {
+                    opengame(target);
+                }
+                parentUl.removeChild(linkgame);
+                parentUl.appendChild(li);
+
+            })
+        })();
+    </script>
+</body>
+
+</html>
