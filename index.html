@@ -32,11 +32,14 @@
         }
         li{
             cursor: pointer;
+            border: thin solid #d1d1d1;
+            color:blue;
+            padding:2px 6px;
         }
 
         #gameframe{
-            min-width: 900px;
-            min-height: 700px;
+            width: 80vw;
+            height: 90vh;
             background-color: #111;
         }
     </style>
@@ -47,33 +50,27 @@
     <main>
         <h1>Learning phaser</h1>
         <nav>
-            <ul>
-                <linkgame target="game1">Game 1</linkgame>
-                <linkgame target="game2">Game 2</linkgame>
-                <linkgame target="game3">Game 3</linkgame>
-            </ul>
+            <ul id="links">    </ul>
         </nav>
-        <section>
-            <iframe id="gameframe"></iframe>
-        </section>
+       
     </main>
     <script>
+        const games=["first example","3 en linea","iguales","survive"];
+        const parentUl=document.getElementById("links");
         const gameframe = document.getElementById("gameframe");
         const elements = document.querySelectorAll("linkgame");
+       
         const opengame = (target) => { 
-            gameframe.src="./"+target+"/";
+           // gameframe.src="./game"+target+"/";
+           location.href="./game"+target+"/"
         };
         (() => {
-            [...elements].forEach((linkgame) => {
-                const parentUl = linkgame.parentElement;
+            games.forEach((gamename,index) => { 
                 const li = document.createElement("li");
-                li.innerHTML = linkgame.innerHTML;
-
-                const target = linkgame.attributes.target.value;
+                li.innerHTML = gamename; 
                 li.onclick = () => {
-                    opengame(target);
-                }
-                parentUl.removeChild(linkgame);
+                    opengame(index+1);
+                } 
                 parentUl.appendChild(li);
 
             })

@@ -1,0 +1,16 @@
+{
+    "frames": [
+        {
+            "filename": "player",
+            "rotated": false,
+            "trimmed": false,
+             
+            "frame": {
+                "x": 103,
+                "y": 2,
+                "w": 16,
+                "h": 16
+            }
+        }
+    ]
+}
