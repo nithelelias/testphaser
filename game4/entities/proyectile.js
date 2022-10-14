@@ -8,9 +8,9 @@ export default class Projectile extends Phaser.GameObjects.Container {
         this.incX = 0;
         this.incY = 0;
         this.lifespan = 0; 
-        this.speed = .1;//Phaser.Math.GetSpeed(600, 1);
+        this.speed = Phaser.Math.GetSpeed(600, 1);
         
-        this.setProjectile("bullet");
+        this.setProjectileByName("bullet");
 
     }
     setProjectileByName(bulletName) {
