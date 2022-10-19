@@ -130,6 +130,8 @@ class World extends Phaser.Scene {
         this.updateScale(2);
         //
         this.fitPlayer();
+        // 
+        this.addEnemyWaves();
     }
     fitPlayer() {
         this.player.x =  this.map.getWidth() / 2;
@@ -169,7 +171,7 @@ class World extends Phaser.Scene {
 
     addEnemy() {
 
-        const p = { x: Phaser.Math.Between(10, config.width - 50), y: Phaser.Math.Between(10, config.height - 100) };
+        const p = { x: Phaser.Math.Between(10, this.map.getWidth() - 50), y: Phaser.Math.Between(10, this.map.getHeight() - 100) };
         var enemy = this.enemys.create();
         enemy.setPosition(p.x, p.y);
         enemy.setTarget(this.player);
