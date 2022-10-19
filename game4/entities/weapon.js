@@ -8,7 +8,8 @@ export default class Weapon extends Phaser.GameObjects.Sprite {
         const bullet_start_position = {
             x: 0, y: 0
         }
-        var isDown = false; 
+        var isDown = false;
+        const cam = context.cameras.main
         const size = this.width * 2;
         const dist_to_owner = this.width;;
         const getBulletStartPosition = () => {
@@ -20,47 +21,56 @@ export default class Weapon extends Phaser.GameObjects.Sprite {
         const getDelay = () => {
             return Weapons[weaponName].delay;
         };
-        const getPointer=()=>{
+        const getPointer = () => {
             return context.input.mousePointer;
         };
-
+        const getOwnerGlobalPos = () => {
+            return {
+                x: owner.x - cam.scrollX,
+                y: owner.y - cam.scrollY
+            }
+        }
+        const getPointerAngle = () => {
+            const pointer = getPointer();
+            const ownerpos = getOwnerGlobalPos();
+            return Phaser.Math.Angle.Between(ownerpos.x, ownerpos.y, pointer.x, pointer.y);
+        }
         const shot = () => {
-            const pointer=getPointer();
+
             let bullet = pool.create();
             bullet.setProjectileByName(Weapons[weaponName].bullet)
             const position = getBulletStartPosition();
             bullet.setPosition(position.x, position.y);
-            var angle = Phaser.Math.Angle.Between(
-                owner.x, owner.y,
-                pointer.x, pointer.y);
-            bullet.fire(angle);
+
+            bullet.fire(getPointerAngle());
 
 
         }
 
         const move = () => {
-            const pointer=getPointer();
-            const ang = Phaser.Math.Angle.Between(owner.x, owner.y, pointer.x, pointer.y);
+            const pointer = getPointer();
+            const ownerPos=getOwnerGlobalPos();
+            const ang = getPointerAngle();
             this.setRotation(ang);
             let vx = Math.cos(ang), vy = Math.sin(ang)
             this.x = (vx * dist_to_owner);
             this.y = (vy * dist_to_owner);
             bullet_start_position.x = vx * (dist_to_owner + size);
             bullet_start_position.y = vy * (dist_to_owner + size);
-            this.flipY = pointer.x < owner.x;
+            this.flipY = pointer.x < ownerPos.x;
 
         }
 
 
         context.input.on('pointerdown', (pointer) => {
-            isDown = true; 
+            isDown = true;
         });
         context.input.on('pointerup', () => {
             isDown = false;
         });
-        context.input.on('pointermove', (pointer) => { 
-        
-            move();
+        context.input.on('pointermove', (pointer) => {
+
+            //  move();
         });
         let lastFired = 0;
         this.update = (time, delta) => {
@@ -70,6 +80,7 @@ export default class Weapon extends Phaser.GameObjects.Sprite {
                     lastFired = time + getDelay();
                 }
             }
+            move();
         }
     }
 

@@ -21,7 +21,7 @@ export const Bullets = {
     bullet: {
         frame: Resources.bullets.bullet,
         ang: 2.4,
-        speed:500,
+        speed:600,
     },
     rocket: { 
         frame: Resources.bullets.rocket,

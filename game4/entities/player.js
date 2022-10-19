@@ -6,16 +6,15 @@ export default class Player extends Phaser.GameObjects.Container {
     constructor(context, x, y) {
         super(context, x, y, []);
         this.speed = 200;
-        this.scale = 2;
+        this.scale = 1;
         this.invencible = false;
         this.sprite = this.scene.add.sprite(0, 0, Resources.assetname, Resources.guy);
         this.add(this.sprite);
         this.moveAnimation = stepAnimationFn(this);
-        this.hitAnimation = hitAnimationFn(this.sprite);
-      //  this.sprite.setTint(0x00ff12)
+        this.hitAnimation = hitAnimationFn(this.sprite); 
         this.setSize(this.sprite.width, this.sprite.height);
-
-
+        
+       
     }
 
     move(velocity) {

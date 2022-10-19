@@ -2,18 +2,21 @@ import Resources from "../models/resources.js";
 import hitAnimationFn from "../utils/hitAnimation.js";
 import stepAnimationFn from "../utils/stepAnimation.js";
 
-export default class Enemy extends Phaser.Physics.Arcade.Sprite {
+export default class Enemy extends Phaser.GameObjects.Container {
     constructor(context) {
-        super(context, 0, 0, Resources.assetname, Resources.mobs.scorpion);
+        super(context, 0, 0, []);
         this.target = null;
-        this.speed = 50;//Phaser.Math.GetSpeed(900, 1);
-        this.moveAnimation = stepAnimationFn(this);
-        this.hitAnimation = hitAnimationFn(this);
+        this.speed = 50;//Phaser.Math.GetSpeed(900, 1);a
+        this.sprite = this.scene.add.sprite(0, 0, Resources.assetname, Resources.mobs.scorpion);
+        this.add(this.sprite);
+        this.setSize(this.sprite.width,this.sprite.height)
+        this.moveAnimation = stepAnimationFn(this.sprite);
+        this.hitAnimation = hitAnimationFn(this.sprite);
         this.life = Phaser.Math.Between(1, 3);
         this.stun = false;
-        this.scale=this.life;
+        this.scale = this.life;
     }
-    
+
     setTarget(target) {
         this.target = target;
     }
@@ -23,7 +26,7 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     onHit(fromTarget) {
         this.stun = true;
-        this.body.setVelocity(0,0);
+        this.body.setVelocity(0, 0);
         this.life -= 1;
         return this.hitAnimation({
             x: (this.x - fromTarget.x) / 10,
@@ -31,14 +34,14 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
         }).then(async () => {
 
 
-           
+
             if (this.life <= 0) {
                 this.remove();
                 return;
             }
-           
-                this.stun = false;
-            
+
+            this.stun = false;
+
         })
     }
     update(time, delta) {

@@ -6,6 +6,7 @@ import Projectile from "./entities/proyectile.js";
 import Viewport from "./entities/viewport.js";
 import Weapon from "./entities/weapon.js";
 import Resources from "./models/resources.js";
+import Map from "./entities/map.js";
 
 function JsonPacked() {
     const json = {
@@ -15,7 +16,6 @@ function JsonPacked() {
     const dim = [784, 352];
     const maxX = dim[0] / size;
     const maxY = dim[1] / size;
-
     for (let i = 0; i < maxX; i++) {
         for (let j = 0; j < maxY; j++) {
             json.frames.push({
@@ -65,20 +65,24 @@ class World extends Phaser.Scene {
     }
     create() {
         this.userKeyControl = new UserKeyControls(this);
-
+        this.scale = 4;
+        this.map = new Map(this);
         this.enemys = this.physics.add.group({
             classType: Enemy, runChildUpdate: true
         });
         this.playerProjectiles = this.physics.add.group({
-            classType: Projectile, runChildUpdate: true
+            classType: Projectile, runChildUpdate: true,
         });
+        this.worldlayer = this.physics.add.group();
+
+        // physics
 
         this.stage = this.add.group({
             runChildUpdate: true
         });
-        this.player = new Player(this, config.width / 2, config.height / 2);
-        // adding physincs...
-        this.stage.add(this.physics.add.existing(this.add.existing(this.player)));
+        this.player = new Player(this, 0, 0);
+        // adding physincs... 
+        this.stage.add(this.physics.add.existing(this.add.existing(this.player)))
         // WEAPON
         this.player.addWeapon(new Weapon(this, this.player, "gun", this.playerProjectiles));
         this.stage.add(this.player.weapon);
@@ -93,20 +97,24 @@ class World extends Phaser.Scene {
             });
         }
         // -- viepowr
-        this.viewport = new Viewport(this, config.width, config.height, this.player);
+        //this.viewport = new Viewport(this, this.map.getWidth(), this.map.getHeight(), this.player);
         //-- COLLISIONS....
+        this.physics.add.collider(this.player, this.map.layer);
+        this.physics.add.collider(this.enemys, this.map.layer);
+        this.physics.add.collider(this.playerProjectiles, this.map.layer, (bullet) => {
+            bullet.hit();
+            this.addbulletBlow(bullet);
+        }, null, this);
+
         this.physics.add.overlap(this.enemys, this.playerProjectiles, (enemy, bullet) => {
-
-            this.addbulletBlow(  bullet);
-
+            this.addbulletBlow(bullet);
+            console.log(enemy)
             enemy.onHit(bullet).then(() => {
                 setTimeout(() => {
                     this.addEnemyWaves();
                 }, 1000)
             })
             bullet.hit();
-
-
             this.addEnemyWaves()
         }, null, this);
 
@@ -115,14 +123,28 @@ class World extends Phaser.Scene {
             this.player.onHit(enemy);
         }, null, this);
 
-        // __ game start now. 
-        this.addEnemyWaves();
 
+        // CAMARA 
+        this.cameras.main.startFollow(this.player);
+        // scale
+        this.updateScale(2);
+        //
+        this.fitPlayer();
+    }
+    fitPlayer() {
+        this.player.x =  this.map.getWidth() / 2;
+        this.player.y =  this.map.getHeight()-100
+    }
+    updateScale(_scale) {
+        this.scale = _scale;
+        this.enemys.scale = _scale;
+        this.map.setScale(this.scale);
+        this.player.setScale(this.scale);
     }
     addbulletBlow(pos) {
-        this.add.sprite(pos.x, pos.y, Resources.assetname, Resources.blow[0]) 
+        this.add.sprite(pos.x, pos.y, Resources.assetname, Resources.blow[0])
             .on("animationstart", (_, _2, self) => {
-               
+
                 this.tweens.add({
                     ease: "power2",
                     targets: self,
@@ -157,7 +179,6 @@ class World extends Phaser.Scene {
     }
 
     update(time, delta) {
-        this.viewport.update(time, delta);
         this.userKeyControl.update(time, delta);
 
         this.player.move(this.userKeyControl.getMovingVelocity());
@@ -175,6 +196,7 @@ var config = {
         default: "arcade",
         arcade: {
             debug: true,
+            tileBias: 16,
         },
     },
     scene: [Boot, World],
