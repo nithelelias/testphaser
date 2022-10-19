@@ -108,7 +108,7 @@ class World extends Phaser.Scene {
 
         this.physics.add.overlap(this.enemys, this.playerProjectiles, (enemy, bullet) => {
             this.addbulletBlow(bullet);
-            console.log(enemy)
+            // --console.log(enemy)
             enemy.onHit(bullet).then(() => {
                 setTimeout(() => {
                     this.addEnemyWaves();
