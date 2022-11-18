@@ -18,7 +18,7 @@ export default class Player extends Phaser.GameObjects.Container {
     }
 
     move(velocity) {
-        // console.log(velocity,this.speed)
+         
         this.body.setVelocity(velocity.x * this.speed, velocity.y * this.speed);
         if (velocity.x != 0 || velocity.y != 0) {
             this.moveAnimation(velocity.x);

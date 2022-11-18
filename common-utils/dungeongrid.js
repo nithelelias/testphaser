@@ -1,6 +1,4 @@
-const random = (min, max) => {
-    return Math.floor(Math.random() * (max - min) + min);
-}
+ import random from './random.js';
 export default function generateDungeonGridRooms(limitX, limitY) {
 
     // GENERATE ROOMS

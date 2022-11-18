@@ -151,8 +151,8 @@ class TheGame extends Phaser.Scene {
     super("game");
 
     this.grid;
-    this.gridWidth = 9;
-    this.gridHeight = 9;
+    this.gridWidth = 8;
+    this.gridHeight = 6;
     this.gridSize = 64;
     this.selected = null;
     this.map = {};

@@ -41,9 +41,9 @@ export default class Weapon extends Phaser.GameObjects.Sprite {
             bullet.setProjectileByName(Weapons[weaponName].bullet)
             const position = getBulletStartPosition();
             bullet.setPosition(position.x, position.y);
-
+            
             bullet.fire(getPointerAngle());
-
+             
 
         }
 

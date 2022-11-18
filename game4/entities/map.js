@@ -1,6 +1,15 @@
 import generateDungeonGridRooms from "../../common-utils/dungeongrid.js";
 import Resources from "../models/resources.js";
-
+const getFrame = (arrowPos) => {
+    return (arrowPos[0]) + (arrowPos[1] * Resources.cols);
+}
+const toArray = (frame) => {
+    return [{ index: frame, weight: 1 }]
+}
+const DOORS = {
+    close: getFrame(Resources.maps.door.close),
+    open: getFrame(Resources.maps.door.open),
+}
 export default class Map {
     constructor(context) {
         this.scale = 1;
@@ -8,34 +17,10 @@ export default class Map {
         this.tileMapConfigs = {
             tileWidth: this.tileSize,//tileSize
             tileHeight: this.tileSize,//tileSize
-            width: 30,// cols
-            height: 30// rows
+            width:  Phaser.Math.Between(15,25),// cols
+            height:  Phaser.Math.Between(15,25)// rows
         };
-
-
-        this.width = this.tileMapConfigs.width * this.tileSize;
-        this.height = this.tileMapConfigs.height * this.tileSize;
-
-
-        this.map = context.make.tilemap(this.tileMapConfigs);
-
-        const tileset = this.map.addTilesetImage(Resources.assetname, Resources.assetname, this.tileSize, this.tileSize);
-        this.layer = this.map.createBlankLayer("layer1", tileset);
-        this.layer.setCollisionByProperty({ collides: true });
-
-
-        this.layer.setScale(this.scale);
-        // lets fill the layer with custom frame
-        this.layer.fill(0);
-
-
-        const getFrame = (arrowPos) => {
-            return (arrowPos[0]) + (arrowPos[1] * Resources.cols);
-        }
-        const toArray = (frame) => {
-            return [{ index: frame, weight: 1 }]
-        }
-        const WALLS = {
+        this.WALLS = {
             topleft: 0,
             topright: 0,
             bottomleft: 0,
@@ -46,6 +31,32 @@ export default class Map {
             left: 0,
             right: 0,
         };
+        this.room = {};
+
+        this.map = context.make.tilemap(this.tileMapConfigs);
+
+        const tileset = this.map.addTilesetImage(Resources.assetname, Resources.assetname, this.tileSize, this.tileSize);
+        this.layer = this.map.createBlankLayer("layer1", tileset);
+        this.layer.setCollisionByProperty({ collides: true });
+        this.layer.setScale(this.scale);
+
+
+        this.bounds = {
+            x: this.layer.x * this.scale,
+            y: this.layer.y * this.scale,
+            width: this.layer.width * this.scale,
+            height: this.layer.height * this.scale
+        };
+
+
+
+
+    }
+    generateRoom() {
+        // lets fill the layer with custom frame
+        this.layer.fill(0);
+
+        const WALLS = this.WALLS;
         const wallFrames = Resources.maps.level1.walls;
         const floorFrames = [].concat(Resources.maps.level1.floor);
         const FLOOR = floorFrames.map((arrayFrame) => ({ index: getFrame(arrayFrame), weight: 1 })).concat([
@@ -56,13 +67,14 @@ export default class Map {
             { index: 4, weight: 2 },
         ]);
 
+
         for (let key in wallFrames) {
             WALLS[key] = getFrame(wallFrames[key]);
         }
-        const createRoom = (room, haveFloor = true) => {
+        const createRoom = (room) => {
             // FLOOR
-            if (haveFloor)
-                this.map.weightedRandomize(FLOOR, room.x, room.y, room.width, room.height);
+            this.room = room;
+            this.map.weightedRandomize(FLOOR, room.x, room.y, room.width, room.height);
             // // corners
             this.map.putTileAt(WALLS.topleft, room.x, room.y);
             this.map.putTileAt(WALLS.bottomleft, room.x, room.y + room.height);
@@ -72,30 +84,72 @@ export default class Map {
             this.map.weightedRandomize(toArray(WALLS.top), room.x + 1, room.y, room.width - 1, 1);
             this.map.weightedRandomize(toArray(WALLS.left), room.x, room.y + 1, 1, room.height - 1);
             this.map.weightedRandomize(toArray(WALLS.right), room.x + room.width, room.y + 1, 1, room.height - 1);
-            this.map.weightedRandomize(toArray(WALLS.top), room.x + 1, room.y + room.height, room.width - 1, 1);
-            // 
-            room.doors.forEach((door) => {
-                this.map.putTileAt(FLOOR[0].index, door.x, door.y);
-            })
+            this.map.weightedRandomize(toArray(WALLS.bottom), room.x + 1, room.y + room.height, room.width - 1, 1);
+
         }
 
         createRoom({
-            x: 0, y: 0, width: this.tileMapConfigs.width - 1, height: this.tileMapConfigs.height - 1, doors: []
+            x: 0, y: 0, width: this.tileMapConfigs.width - 1, height: this.tileMapConfigs.height - 1,
+            interactions: [{
+                x: parseInt((this.tileMapConfigs.width - 1) / 2) - 5,
+                y: 0,
+                type: "door",
+                data: "door-left"
+
+            }, {
+                x: parseInt((this.tileMapConfigs.width - 1) / 2) + 5,
+                y: 0,
+                type: "door",
+                data: "door-left"
+            }]
         }, false)
 
 
-        this.layer.setCollision(Object.values(WALLS), true);
+        this.layer.setCollision(Object.values(WALLS).concat(DOORS.close), true);
 
+    }
 
+    removeWallsAt(tiles) {
+        tiles.forEach((tile)=>{
+            this.map.putTileAt(0, tile.x, tile.y);
+        })
     }
     setScale(_scale) {
         this.scale = _scale;
         this.layer.setScale(_scale);
+
+        this.bounds = {
+            x: this.layer.x * this.scale,
+            y: this.layer.y * this.scale,
+            width: this.layer.width * this.scale,
+            height: this.layer.height * this.scale
+        };
+
     }
     getWidth() {
-        return this.width * this.scale;
+        return this.bounds.width;
     }
     getHeight() {
-        return this.height * this.scale;
+        return this.bounds.height;
+    }
+    getBounds() {
+        return this.bounds
+    }
+    getTileMapBounds() {
+        return this.tileMapConfigs;
+    }
+    getWorlPositionFromTilePosition(tileP) {
+        return this.map.tileToWorldX(tileP) + this.tileSize;
+    }
+    getCenterTilePosition() {
+        const x = (parseInt(this.getTileMapBounds().width / 2));
+        const y = (parseInt(this.getTileMapBounds().height / 2));
+        return { x, y }
+    }
+    getCenterTileToWorld() {
+        const centerTile = this.getCenterTilePosition();
+        const x = this.getWorlPositionFromTilePosition(centerTile.x);
+        const y = this.getWorlPositionFromTilePosition(centerTile.y);
+        return { x, y }
     }
 }

@@ -13,31 +13,33 @@
 
         main {
             background-color: #fff;
-          
+
             width: fit-content;
             margin: 0 auto;
             padding: 12px;
             text-align: center;
 
         }
-        ul{
+
+        ul {
             list-style: none;
             display: flex;
             justify-content: center;
-            gap:10px;
-            margin:0 auto;
+            gap: 10px;
+            margin: 0 auto;
             border: thin solid;
             width: 100%;
             padding: 0px;
         }
-        li{
+
+        li {
             cursor: pointer;
             border: thin solid #d1d1d1;
-            color:blue;
-            padding:2px 6px;
+            color: blue;
+            padding: 2px 6px;
         }
 
-        #gameframe{
+        #gameframe {
             width: 80vw;
             height: 90vh;
             background-color: #111;
@@ -50,27 +52,26 @@
     <main>
         <h1>Learning phaser</h1>
         <nav>
-            <ul id="links">    </ul>
+            <ul id="links"> </ul>
         </nav>
-       
     </main>
     <script>
-        const games=["first example","3 en linea","iguales","balas"];
-        const parentUl=document.getElementById("links");
+        const games = ["first example", "3 en linea", "iguales", "balas","tetris"];
+        const parentUl = document.getElementById("links");
         const gameframe = document.getElementById("gameframe");
         const elements = document.querySelectorAll("linkgame");
-       
-        const opengame = (target) => { 
-           // gameframe.src="./game"+target+"/";
-           location.href="./game"+target+"/"
+
+        const opengame = (target) => {
+            // gameframe.src="./game"+target+"/";
+            location.href = "./game" + target + "/"
         };
         (() => {
-            games.forEach((gamename,index) => { 
+            games.forEach((gamename, index) => {
                 const li = document.createElement("li");
-                li.innerHTML = gamename; 
+                li.innerHTML = gamename;
                 li.onclick = () => {
-                    opengame(index+1);
-                } 
+                    opengame(index + 1);
+                }
                 parentUl.appendChild(li);
 
             })
