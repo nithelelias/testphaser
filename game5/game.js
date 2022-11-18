@@ -4,9 +4,14 @@ const grid = {
   width: 9, // pon esto de 4 para validar la rotacion posible
   height: 16,
   size: 48,
-  color1: 0x999999,
-  color2: 0x666666,
+  color1: 0x141414,
+  color2: 0x101e45,
 };
+const dimensions = {
+  w: 400,
+  h: 600,
+};
+const isMobile = (maxWidth = 1024) => window.innerWidth < maxWidth;
 const generateHexaColor = () => {
   return "0x" + Math.floor(Math.random() * 16777215).toString(16);
 };
@@ -16,7 +21,22 @@ class Boot extends Phaser.Scene {
     // AQUI SE INICIA TODO /precarga
   }
 
-  init() {}
+  init() {
+    let grid_width = dimensions.w;
+    let grid_height = (grid.height + 6) * grid.size;
+
+    const sw = gameConfig.width / grid_width;
+    const sh = gameConfig.height / grid_height;
+    const scale = Math.min(sw, sh);
+    //this.game.canvas.style.transform = `scale(${sw})`;
+
+    grid.size = Math.min(48, Math.round(grid.size * scale + 1));
+
+    Object.assign(this.game.canvas.style, {
+      width: "100vw",
+      height: "100vh",
+    });
+  }
 
   preload() {
     // this.load.atlas("pack", "../common-assets/colored-transparent_packed.png", JsonPacked());
@@ -35,15 +55,17 @@ class Game extends Phaser.Scene {
     console.log("START");
     window.$stage = this;
     this.waitingNewPiece = null;
-    this.waitingNewPiece_delay = 1000;
+    this.waitingNewPiece_delay = 800;
     this.pieces = [];
-    this.speed = 210;
+    this.speed = 410;
     this.map = {};
     this.gridXInit = 0;
     this.gridYInit = 0;
     this.controlPieces = [];
     this.movedir = { x: 0, y: 0 };
     this.lastPiece = null;
+    this.repeatLastPieceSum = 0;
+
     this.graphics = {
       i: {
         points: [
@@ -52,7 +74,7 @@ class Game extends Phaser.Scene {
           [0, 2],
           [0, 3],
         ],
-        color: generateHexaColor(),
+        color: 0x8f00ff,
       },
       o: {
         points: [
@@ -61,7 +83,7 @@ class Game extends Phaser.Scene {
           [0, 1],
           [1, 1],
         ],
-        color: generateHexaColor(),
+        color: 0xffdd00,
       },
       l: {
         points: [
@@ -70,7 +92,7 @@ class Game extends Phaser.Scene {
           [0, 2],
           [1, 2],
         ],
-        color: generateHexaColor(),
+        color: 0xff7d00,
       },
       j: {
         points: [
@@ -79,7 +101,7 @@ class Game extends Phaser.Scene {
           [0, 2],
           [-1, 2],
         ],
-        color: generateHexaColor(),
+        color: 0xff006d,
       },
       z: {
         points: [
@@ -88,7 +110,7 @@ class Game extends Phaser.Scene {
           [0, 1],
           [1, 1],
         ],
-        color: generateHexaColor(),
+        color: 0xadff02,
       },
       s: {
         points: [
@@ -97,7 +119,7 @@ class Game extends Phaser.Scene {
           [0, 0],
           [1, 0],
         ],
-        color: generateHexaColor(),
+        color: 0x8f00ff,
       },
       t: {
         points: [
@@ -107,7 +129,7 @@ class Game extends Phaser.Scene {
           [0, 0],
           [0, 1],
         ],
-        color: generateHexaColor(),
+        color: 0xff5ebd,
       },
     };
     this.avaibleGraphics = Object.keys(this.graphics);
@@ -116,13 +138,14 @@ class Game extends Phaser.Scene {
   create() {
     console.log("CREATE");
     this.map = {};
-    grid.x = gameConfig.width / 2;
-    grid.y = grid.size;
+    this.initPool = [];//["i", "i", "o", "o", "i", "o", "i", "o", "i"];
     grid.h = grid.height * grid.size;
     grid.w = grid.width * grid.size;
-    this.gridXInit = grid.x - grid.w / 2;
-    this.gridYInit = grid.y;
+    grid.x = this.game.scale.width / 2 - grid.w / 2;
+    grid.y = grid.size * 4;
 
+    this.gridXInit = grid.x;
+    this.gridYInit = grid.y;
     this.centerX = this.gridXInit + parseInt(grid.width / 2) * grid.size;
     this.add
       .grid(
@@ -136,7 +159,7 @@ class Game extends Phaser.Scene {
         1,
         grid.color2
       )
-      .setOrigin(0.5, 0);
+      .setOrigin(0);
     this.timer = this.time.addEvent({
       delay: this.speed,
       callback: this.moveBlocks,
@@ -161,23 +184,14 @@ class Game extends Phaser.Scene {
   }
   initDragListener() {
     let pointer_down = null;
-    let canRotate = {
-      state: false,
-      set: () => {
-        canRotate.state = true;
-        canRotate.timeout = setTimeout(() => {
-          canRotate.state = false;
-        }, 200);
-      },
-      clear: () => {
-        clearTimeout(canRotate.timeout);
-      },
-    };
+    let eventTimeStamp = null;
+
     this.input.on(
       "pointerdown",
       (pointer) => {
-        pointer_down = { x: pointer.x };
-        canRotate.set();
+        pointer_down = { x: pointer.x, y: pointer.y };
+        //canRotate.set();
+        eventTimeStamp = Date.now();
       },
       this.scene
     );
@@ -186,9 +200,13 @@ class Game extends Phaser.Scene {
       () => {
         pointer_down = null;
         this.movedir.x = 0;
-        if (canRotate.state) {
-          canRotate.clear();
-          this.rotatePiece();
+        this.timer.delay = this.speed;
+        if (eventTimeStamp != null) {
+          let diff_now = Date.now() - eventTimeStamp;
+          if (diff_now >= 60) {
+            this.rotatePiece();
+          }
+          eventTimeStamp = null;
         }
       },
       this.scene
@@ -200,99 +218,49 @@ class Game extends Phaser.Scene {
           return;
         }
         let dirx = parseInt((pointer.x - pointer_down.x) / grid.size);
+        let diry = parseInt(pointer.y - pointer_down.y) / grid.size;
+        if (diry > 2) {
+          eventTimeStamp = null;
+          this.timer.delay = diry > 4 ? this.speed / diry : 120;
+          //pointer_down = { x: pointer.x, y: pointer.y };
+        }
         if (dirx != 0) {
           dirx = dirx / Math.abs(dirx);
-          pointer_down = { x: pointer.x };
+          pointer_down.x = pointer.x;
+          eventTimeStamp = null;
         }
+
         this.movedir.x = dirx;
       },
       this.scene
     );
   }
-
-  rotatePiece() {
-    if (this.lastPiece === "o") {
-      return;
-    }
-    // ROTATE THE PIECES
-    let center = this.controlPieces[2];
-    let centerPosition = this.getGridPositionOfCell(center);
-    let canmove = true;
-    const newPositions = []; 
-    const condition = (x, y) =>
-      this.isCellOccupied(x, y) || x >= grid.width || x < 0 || y >= grid.height;
-    
-    for (let i = 0; i < 4; i++) {
-      const rect = this.controlPieces[i];
-      let position = this.getGridPositionOfCell(rect);
-      let offset_x = position.x - centerPosition.x;
-      let offset_y = position.y - centerPosition.y;
-
-      let new_offset_x = offset_y;
-      let new_offset_y = -offset_x;
-      let x = centerPosition.x + new_offset_x;
-      let y = centerPosition.y + new_offset_y;
-      if (condition(x, y)) {
-        canmove = false;
-        break;
-      }
-
-      newPositions.push({ x, y });
-    }
-    if (canmove) {
-      console.log(newPositions);
-      newPositions.forEach((position, index) => {
-        const rect = this.controlPieces[index];
-        const coordinates = this.getCoordinatesFromGridPosition(position);
-
-        rect.x = coordinates.x;
-        rect.y = coordinates.y;
-      });
-    }
-  }
-
-  getGridPositionOfCell(rect) {
-    const x = Math.abs(this.gridXInit - rect.x) / grid.size;
-    const y = Math.abs(this.gridYInit - rect.y) / grid.size;
-    return { x, y };
-  }
-  getCoordinatesFromGridPosition(position) {
-    const x = Math.abs(this.gridXInit + position.x * grid.size);
-    const y = Math.abs(this.gridYInit + position.y * grid.size);
-    return { x, y };
-  }
-  isCellOccupied(x, y) {
-    return this.map.hasOwnProperty(x + "-" + y);
-  }
-  setPieceOnMap(rect) {
-    const position = this.getGridPositionOfCell(rect);
-    let key = position.x + "-" + position.y;
-    this.map[key] = rect;
-  }
-  removePieceOnMap(position) {
-    let key = position.x + "-" + position.y;
-    delete this.map[key];
-  }
-  destroyCell(col, row) {
-    this.map[col + "-" + row].destroy();
-    delete this.map[col + "-" + row];
-  }
   addNewPiece() {
     const x0 = this.gridXInit;
     const y0 = this.gridYInit;
     const entryX = parseInt(grid.width / 2);
-
+    const getRndNewPiece = () =>
+      this.avaibleGraphics[
+        Phaser.Math.Between(0, this.avaibleGraphics.length - 1)
+      ];
     count++;
     if (count >= grid.width) {
       count = 0;
     }
     /// NEW PIECE WITH OUT REPEAT IT SELF
-    let rnd = this.lastPiece;
-    while (this.lastPiece == rnd) {
-      rnd =
-        this.avaibleGraphics[
-          Phaser.Math.Between(0, this.avaibleGraphics.length - 1)
-        ];
+    let rnd = getRndNewPiece();
+    if (this.initPool.length > 0) {
+      rnd = this.initPool.shift();
+    } else {
+      if (rnd === this.lastPiece) {
+        this.repeatLastPieceSum++;
+      }
+      if (this.repeatLastPieceSum > 2) {
+        this.repeatLastPieceSum = 0;
+        while (rnd === this.lastPiece) {
+          rnd = getRndNewPiece();
+        }
+      }
     }
     this.lastPiece = rnd;
     ////// .....
@@ -337,6 +305,88 @@ class Game extends Phaser.Scene {
       });
     });
   }
+  rotatePiece() {
+    if (this.lastPiece === "o") {
+      return;
+    }
+
+    // ROTATE THE PIECES
+    let center = this.controlPieces[2];
+    let centerPosition = this.getGridPositionOfCell(center);
+    let canmove = true;
+    let bounce = { x: 0 };
+    const newPositions = [];
+    const condition = (x, y) => this.isCellOccupied(x, y) || y >= grid.height;
+
+    for (let i = 0; i < 4; i++) {
+      const rect = this.controlPieces[i];
+      if (rect.stuck) {
+        return;
+      }
+      let position = this.getGridPositionOfCell(rect);
+      let offset_x = position.x - centerPosition.x;
+      let offset_y = position.y - centerPosition.y;
+
+      let new_offset_x = offset_y;
+      let new_offset_y = -offset_x;
+      let x = centerPosition.x + new_offset_x;
+      let y = centerPosition.y + new_offset_y;
+      if (condition(x, y)) {
+        canmove = false;
+        break;
+      }
+      if (x < 0) {
+        bounce.x += 1;
+      }
+      if (x >= grid.width) {
+        bounce.x -= 1;
+      }
+      newPositions.push({ x, y });
+    }
+    if (canmove) {
+      newPositions.forEach((position, index) => {
+        let newP = {
+          x: bounce.x + position.x,
+          y: position.y,
+        };
+        if (condition(newP.x, newP.y) || newP.x < 0 || newP.x >= grid.width) {
+          canmove = false;
+          return;
+        }
+        newPositions[index] = { ...newP };
+      });
+
+      newPositions.forEach((position, index) => {
+        const rect = this.controlPieces[index];
+        const coordinates = this.getCoordinatesFromGridPosition(position);
+        rect.x = coordinates.x;
+        rect.y = coordinates.y;
+      });
+    }
+  }
+
+  getGridPositionOfCell(rect) {
+    const x = Math.abs(this.gridXInit - rect.x) / grid.size;
+    const y = Math.abs(this.gridYInit - rect.y) / grid.size;
+    return { x, y };
+  }
+  getCoordinatesFromGridPosition(position) {
+    const x = Math.abs(this.gridXInit + position.x * grid.size);
+    const y = Math.abs(this.gridYInit + position.y * grid.size);
+    return { x, y };
+  }
+  isCellOccupied(x, y) {
+    return this.map.hasOwnProperty(x + "-" + y);
+  }
+  setPieceOnMap(rect) {
+    const position = this.getGridPositionOfCell(rect);
+    let key = position.x + "-" + position.y;
+    this.map[key] = rect;
+  }
+  removePieceOnMap(position) {
+    let key = position.x + "-" + position.y;
+    delete this.map[key];
+  }
 
   moveControlBlocksX() {
     if (this.movedir.x == 0) {
@@ -358,7 +408,7 @@ class Game extends Phaser.Scene {
       if (this.isCellOccupied(position.x + this.movedir.x, position.y)) {
         // not same as
         canmove = false;
-        console.log("cell occupied");
+
         break;
       }
     }
@@ -420,15 +470,17 @@ class Game extends Phaser.Scene {
   moveBlocks() {
     // validate if controlBlocks can move
     if (this.moveControlBlocksY()) {
-      this.clearWaitingNewPiece();
       return;
     }
 
-    if (this.validate()) {
-      this.clearWaitingNewPiece();
-      return;
-    }
-    this.waitNewPiece();
+    this.validate().then(() => {
+      // record
+      this.controlPieces.forEach((rect) => {
+        rect.stuck = true;
+        this.setPieceOnMap(rect);
+      });
+      this.addNewPiece();
+    });
   }
   moveAllDownFromRow(maxRow) {
     // clean map
@@ -446,39 +498,7 @@ class Game extends Phaser.Scene {
     }
     // refill
   }
-  destroyRow(row) {
-    for (let col = 0; col < grid.width; col++) {
-      this.destroyCell(col, row);
-    }
-  }
-  validate() {
-    let breakline = false;
-    /**
-     * Validate rows from 0 to grid.height
-     */
-    for (let row = 0; row < grid.height; row++) {
-      let colsFilled = true;
-      for (let col = 0; col < grid.width; col++) {
-        if (!this.isCellOccupied(col, row)) {
-          colsFilled = false;
-          break;
-        }
-      }
-      if (colsFilled) {
-        console.log("BREAK LINE");
-        this.destroyRow(row);
-        this.moveAllDownFromRow(row);
-        breakline = true;
-        break;
-      }
-    }
-    return breakline;
-  }
 
-  clearWaitingNewPiece() {
-    clearTimeout(this.waitingNewPiece);
-    this.waitingNewPiece = null;
-  }
   waitNewPiece() {
     if (!this.waitingNewPiece) {
       this.waitingNewPiece = setTimeout(() => {
@@ -497,6 +517,92 @@ class Game extends Phaser.Scene {
         this.addNewPiece();
       }, this.waitingNewPiece_delay);
     }
+  }
+  validate() {
+    return new Promise((resolve, reject) => {
+      const cycle = () => {
+        /**
+         * Validate rows from 0 to grid.height
+         */
+        let breakline = false;
+        let promise=[];
+        for (let row = grid.height; row > 0; row--) {
+          let colsFilled = true;
+          for (let col = 0; col < grid.width; col++) {
+            if (!this.isCellOccupied(col, row)) {
+              colsFilled = false;
+              break;
+            }
+          }
+          if (colsFilled) {
+            this.destroyRow(row).then(() => {
+              this.moveAllDownFromRow(row);
+              cycle();
+            });
+            breakline = true;
+            break;
+          }
+        }
+
+        if (!breakline) {
+          resolve();
+        }
+      };
+
+      cycle();
+    });
+  }
+
+  clearWaitingNewPiece() {
+    clearTimeout(this.waitingNewPiece);
+    this.waitingNewPiece = null;
+  }
+  destroyRow(row) {
+    return new Promise((resolve) => {
+      let targets = [];
+      for (let col = 0; col < grid.width; col++) {
+        targets.push(this.map[col + "-" + row]);
+        delete this.map[col + "-" + row];
+      }
+
+      const completeDestroy = () => {
+        targets.forEach((rect) => {
+          rect.destroy();
+        });
+      };
+
+      let promises = [];
+      targets.forEach((rect, index) => {
+        promises.push(
+          new Promise((onComplete) => {
+            let delay = index * 10;
+            this.tweens.add({
+              targets: rect,
+              props: {
+                fillAlpha: {
+                  value: 0,
+                  duration: 100,
+                  delay: delay + 510,
+                  ease: "Bounce.easeOut",
+                },
+                fillColor: {
+                  value: 0xffffff,
+                  duration: 100,
+                  delay,
+                  ease: "Linear",
+                },
+              },
+              onComplete,
+            });
+          })
+        );
+      });
+
+      Promise.all(promises).then(() => {
+        completeDestroy();
+        resolve();
+      });
+    });
   }
   gameOver() {
     this.scene.pause();
@@ -616,10 +722,11 @@ class GameOver extends Phaser.Scene {
     this.scene.start("game");
   }
 }
+
 const gameConfig = {
   type: Phaser.AUTO,
-  width: window.innerWidth - 50,
-  height: window.innerHeight - 100,
+  width: window.innerWidth,
+  height: window.innerHeight,
   pixelArt: true,
   parent: document.querySelector(".game__wrapper"),
 

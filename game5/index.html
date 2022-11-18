@@ -8,25 +8,27 @@
   <title>juegito 5</title>
 
   <style>
+    body{
+      margin: 0px;
+      background-color: #111;
+    }
     .game__wrapper {
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      width: 100%;
-      height: 100%;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+    }
+    .game__wrapper canvas{
+      width: 400px;
+      height: 600px;
     }
   </style>
 </head>
 
-<body>
-  <p>ONLY WORKS ON DESKTOP: move with arrows ←↑→ or W A S D and click to shot
-  </p>
+<body> 
   <div class="game__wrapper">
-  </div>
-  <section>
-    <h3>TO DO:</h3>
-    
-  </section>
+  </div> 
   <script src="../phaser.min.js"></script>
 
   <script type="module" src="game.js"></script>
