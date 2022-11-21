@@ -183,8 +183,8 @@ class TheGame extends Phaser.Scene {
     let gh = this.gridHeight;
 
     let size = this.gridSize;
-    let color1 = "0x33DDFF"; // 0x999999;
-    let color2 = 0x666666;
+    let color1 = "0x141414"; // 0x999999;
+    let color2 = 0x101e45;  
 
     this.elementsGroup = this.add.group();
 
