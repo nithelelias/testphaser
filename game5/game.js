@@ -11,10 +11,6 @@ const dimensions = {
   w: 400,
   h: 600,
 };
-const isMobile = (maxWidth = 1024) => window.innerWidth < maxWidth;
-const generateHexaColor = () => {
-  return "0x" + Math.floor(Math.random() * 16777215).toString(16);
-};
 class Boot extends Phaser.Scene {
   constructor() {
     super("boot");
@@ -63,9 +59,9 @@ function TimeOutEvent(scope, callback, time, step) {
       delay,
       callback: () => {
         countDown -= delay;
-        if(countDown>this.time){
-          countDown=this.time;
-        } 
+        if (countDown > this.time) {
+          countDown = this.time;
+        }
         if (countDown <= 0) {
           if (this.callback) {
             this.callback();
@@ -98,7 +94,6 @@ function TimeOutEvent(scope, callback, time, step) {
 class Game extends Phaser.Scene {
   constructor() {
     super("game");
-    console.log("START");
     window.$stage = this;
     this.STATES = {
       idle: 0,
@@ -111,10 +106,11 @@ class Game extends Phaser.Scene {
     this.gridXInit = 0;
     this.gridYInit = 0;
     this.controlPieces = [];
+    this.previewPiece = [];
     this.movedir = { x: 0, y: 0 };
     this.lastPiece = null;
-    this.repeatLastPieceSum = 0;
-
+    this.points = 0;
+    this.combo = 0;
     this.graphics = {
       i: {
         points: [
@@ -185,9 +181,12 @@ class Game extends Phaser.Scene {
   }
 
   create() {
-    console.log("CREATE");
     this.map = {};
-    this.initPool = ["i", "i", "o", "o", "i", "o", "i", "o", "i"];
+    this.initPool = [
+      this.getNewRandomPiece(),
+      this.getNewRandomPiece(),
+      this.getNewRandomPiece(),
+    ]; //["i", "i", "o", "o", "i", "o", "i", "o", "i"];
     grid.h = grid.height * grid.size;
     grid.w = grid.width * grid.size;
     grid.x = this.game.scale.width / 2 - grid.w / 2;
@@ -232,19 +231,22 @@ class Game extends Phaser.Scene {
     this.recttouch = this.add
       .rectangle(
         this.gridXInit,
-        this.gridYInit - grid.size,
+        this.gridYInit + grid.h,
         grid.size - 1,
         grid.size - 1,
         0xfff000
       )
       .setOrigin(0);
-
+    this.previewPiece = [];
     this.addNewPiece();
+    this.points = 0;
+    this.combo = 0;
   }
   update(time, delta) {
     if (this.state === this.STATES.moving) {
       this.moveControlBlocksX();
     }
+    this.text.setText(["Puntos: " + this.points, "Combo: " + this.combo]);
   }
   updateProgress(time, maxTime) {
     {
@@ -310,50 +312,24 @@ class Game extends Phaser.Scene {
       this.scene
     );
   }
-  addNewPiece() {
-    this.timer.delay = this.speed;
-    this.timer.paused = true;
+  getNewRandomPiece() {
+    return this.avaibleGraphics[
+      Phaser.Math.Between(0, this.avaibleGraphics.length - 1)
+    ];
+  }
+  createPieceAt(pieceName, initPosition) {
+    let pieces = [];
+    let graphic = this.graphics[pieceName];
+    let peaceColor = graphic.color;
     const x0 = this.gridXInit;
     const y0 = this.gridYInit;
-    const entryX = parseInt(grid.width / 2);
-    const getRndNewPiece = () =>
-      this.avaibleGraphics[
-        Phaser.Math.Between(0, this.avaibleGraphics.length - 1)
-      ];
-
-    /// NEW PIECE WITH OUT REPEAT IT SELF
-    let rnd = getRndNewPiece();
-    if (this.initPool.length > 0) {
-      rnd = this.initPool.shift();
-    } else {
-      if (rnd === this.lastPiece) {
-        this.repeatLastPieceSum++;
-      }
-      if (this.repeatLastPieceSum > 2) {
-        this.repeatLastPieceSum = 0;
-        while (rnd === this.lastPiece) {
-          rnd = getRndNewPiece();
-        }
-      }
-    }
-    this.lastPiece = rnd;
-    ////// .....
-    let graphic = this.graphics[rnd];
-    this.recttouch.x = this.centerX;
-    this.controlPieces = [];
-    let peaceColor = graphic.color;
-    const binds = [];
-    let is_game_over = false;
     for (let i in graphic.points) {
       let position = graphic.points[i];
-      let px = entryX + position[0];
+      let px = initPosition.x + position[0];
+      let py = initPosition.y + position[1];
       let x = px * grid.size;
-      let y = position[1] * grid.size;
+      let y = py * grid.size;
 
-      if (this.isCellOccupied(px, position[1])) {
-        is_game_over = true;
-        break;
-      }
       // ADD ELEMENT
       const rect = this.add.rectangle(
         x0 + x,
@@ -364,8 +340,36 @@ class Game extends Phaser.Scene {
       );
       rect.stuck = false;
       rect.setOrigin(0);
-      this.controlPieces.push(rect);
-      binds.push(rect);
+      pieces.push(rect);
+    }
+
+    return pieces;
+  }
+  addNewPiece() {
+    this.timer.delay = this.speed;
+    this.timer.paused = true;
+
+    /// NEW PIECE WITH OUT REPEAT IT SELF
+    this.initPool.push(this.getNewRandomPiece());
+    this.lastPiece = this.initPool.shift();
+    ////// .....
+    this.recttouch.x = this.centerX;
+    const binds = [];
+    let is_game_over = false;
+
+    this.controlPieces = [
+      ...this.createPieceAt(this.lastPiece, {
+        x: parseInt(grid.width / 2),
+        y: 0,
+      }),
+    ];
+    for (let i in this.controlPieces) {
+      let position = this.getGridPositionOfCell(this.controlPieces[i]);
+      if (this.isCellOccupied(position.x, position.y)) {
+        is_game_over = true;
+        break;
+      }
+      binds.push(this.controlPieces[i]);
     }
     if (is_game_over) {
       console.log("GAME END");
@@ -377,6 +381,17 @@ class Game extends Phaser.Scene {
         return b_rect != rect;
       });
     });
+    //
+    // -show preview
+    this.previewPiece.forEach((rect) => {
+      rect.destroy();
+    });
+    this.previewPiece = [
+      ...this.createPieceAt(this.initPool[0], {
+        x: parseInt(grid.width / 2),
+        y: this.initPool[0] === "i" ? -4 : -3,
+      }),
+    ];
     this.timer.paused = false;
     this.state = this.STATES.moving;
   }
@@ -566,6 +581,7 @@ class Game extends Phaser.Scene {
 
   validate() {
     return new Promise((resolve, reject) => {
+      this.combo = 0;
       const cycle = () => {
         /**
          *   rows from 0 to grid.height
@@ -582,6 +598,9 @@ class Game extends Phaser.Scene {
           }
           if (colsFilled) {
             console.log("DESTROY ROW");
+
+            this.combo++;
+            this.points += 100 * this.combo;
             promises.push(
               this.destroyRow(row).then(() => {
                 this.moveAllDownFromRow(row);
@@ -589,7 +608,7 @@ class Game extends Phaser.Scene {
               })
             );
             breakline = true;
-         //   break;
+            //   break;
           }
         }
         console.log("BREAK LINE?", breakline);
