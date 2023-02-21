@@ -1,8 +1,10 @@
+import Snake from "./snake.js";
+
 const grid = {
   x: 0,
   y: 0,
-  width: 9, // pon esto de 4 para validar la rotacion posible
-  height: 16,
+  width: 12, // pon esto de 4 para validar la rotacion posible
+  height: 21,
   size: 48,
   color1: 0x141414,
   color2: 0x101e45,
@@ -36,6 +38,35 @@ class Boot extends Phaser.Scene {
 
   preload() {
     // this.load.atlas("pack", "../common-assets/colored-transparent_packed.png", JsonPacked());
+    this.load.atlas("snake", "./assets/snake.png", {
+      frames: [
+        {
+          filename: "head",
+          frame: { x: 0, y: 0, w: 42, h: 42 }, 
+        },
+        {
+          filename: "body",
+          frame: { x: 94, y: 84, w: 22, h: 41 }, 
+        },
+      
+        {
+          filename: "tail",
+          frame: { x: 52, y: 84, w: 22, h: 41 }, 
+        },
+        {
+          filename: "left",
+          frame: { x: 52, y: 10, w: 32, h: 32 }, 
+        },
+        {
+          filename: "right",
+          frame: { x: 94, y: 10, w: 32, h: 32 }, 
+        },
+      ],
+    });
+
+    this.load.image("food", "./assets/food.png");
+    this.load.image("eyes", "./assets/eyes.png");
+    //this.load.image("body", "./assets/green-orb.png");
   }
 
   create() {
@@ -91,6 +122,58 @@ function TimeOutEvent(scope, callback, time, step) {
     }
   };
 }
+
+function GestureController(scope) {
+  this.input = scope.input;
+  let direction = {
+    x: 0,
+    y: 0,
+  };
+  let isClicking = false;
+  const calcDir = (prop) => {
+    const upperProp = prop.toUpperCase();
+    direction[prop] = 0;
+    let dist = Math.abs(
+      this.input.activePointer["up" + upperProp] -
+        this.input.activePointer["down" + upperProp]
+    );
+    if (dist >= 1) {
+      if (
+        this.input.activePointer["up" + upperProp] <
+        this.input.activePointer["down" + upperProp]
+      ) {
+        //direction[prop] = -1;
+        return -dist;
+      } else if (
+        this.input.activePointer["up" + upperProp] >
+        this.input.activePointer["down" + upperProp]
+      ) {
+        // direction[prop] = 1;
+        return dist;
+      }
+    }
+    return 0;
+  };
+  this.update = () => {
+    if (!this.input.activePointer.isDown && isClicking == true) {
+      isClicking = false;
+      let ydist = calcDir("y");
+      let xdist = calcDir("x");
+      if (Math.abs(xdist) > Math.abs(ydist)) {
+        direction.y = 0;
+        direction.x = xdist > 0 ? 1 : -1;
+      } else {
+        direction.x = 0;
+        direction.y = ydist > 0 ? 1 : -1;
+      }
+    } else if (this.input.activePointer.isDown && isClicking == false) {
+      isClicking = true;
+    }
+  };
+  this.getDirection = () => {
+    return direction;
+  };
+}
 class Game extends Phaser.Scene {
   constructor() {
     super("game");
@@ -101,22 +184,20 @@ class Game extends Phaser.Scene {
       validating: 2,
     };
     this.state = 0;
-    this.speed = 410;
+
     this.map = {};
     this.gridXInit = 0;
-    this.gridYInit = 0; 
-    this.movedir = { x: 0, y: 0 }; 
+    this.gridYInit = 0;
+    this.movedir = { x: 0, y: 0 };
     this.points = 0;
     this.combo = 0;
-     
   }
 
   create() {
-   
     grid.h = grid.height * grid.size;
     grid.w = grid.width * grid.size;
     grid.x = this.game.scale.width / 2 - grid.w / 2;
-    grid.y = grid.size * 4;
+    grid.y = grid.size * 2;
 
     this.gridXInit = grid.x;
     this.gridYInit = grid.y;
@@ -130,82 +211,28 @@ class Game extends Phaser.Scene {
         grid.size,
         grid.size,
         grid.color1,
-        1,
-        grid.color2
+        1
       )
+      .setAltFillStyle(grid.color2)
       .setOrigin(0);
 
-     
-    this.graphic_progress = this.add.graphics({ x: this.gridXInit, y: 0 });
+    this.snake = new Snake(this, grid, this.gridXInit, this.gridYInit);
 
-    this.text = this.add.text(32, 32); 
-    
+    this.text = this.add.text(32, 32);
+
     this.points = 0;
     this.combo = 0;
-    this.initDragListener();
+    this.gestures = new GestureController(this);
+    this.snake.init();
   }
-  initDragListener() {
-    let pointer_down = null;
-    let eventTimeStamp = null;
 
-    this.input.on(
-      "pointerdown",
-      (pointer) => {
-        pointer_down = { x: pointer.x, y: pointer.y };
-        //canRotate.set();
-        eventTimeStamp = Date.now();
-        this.delayUntilNextPieceTimer.time = 1000;
-      },
-      this.scene
-    );
-    this.input.on(
-      "pointerup",
-      () => {
-        pointer_down = null;
-        this.movedir.x = 0;
-        this.timer.delay = this.speed;
-        this.delayUntilNextPieceTimer.time = 100;
-        if (eventTimeStamp != null) {
-          let diff_now = Date.now() - eventTimeStamp;
-          if (diff_now >= 60) {
-            this.rotatePiece();
-          }
-          eventTimeStamp = null;
-        }
-      },
-      this.scene
-    );
-    this.input.on(
-      "pointermove",
-      (pointer) => {
-        if (!pointer_down) {
-          return;
-        }
-        let dirx = parseInt((pointer.x - pointer_down.x) / grid.size);
-        let diry = parseInt(pointer.y - pointer_down.y) / grid.size;
-        if (diry > 2) {
-          eventTimeStamp = null;
-          this.timer.delay = diry > 4 ? this.speed / diry : 120;
-          //pointer_down = { x: pointer.x, y: pointer.y };
-        }
-        if (dirx != 0) {
-          dirx = dirx / Math.abs(dirx);
-          pointer_down.x = pointer.x;
-          eventTimeStamp = null;
-        }
-
-        this.movedir.x = dirx;
-      },
-      this.scene
-    );
-  }
   update(time, delta) {
-    if (this.state === this.STATES.moving) {
-      this.moveControlBlocksX();
-    }
     this.text.setText(["Puntos: " + this.points, "Combo: " + this.combo]);
+    this.gestures.update(time, delta);
+    this.snake.setDirection(this.gestures.getDirection());
+    this.snake.update();
   }
- 
+
   gameOver() {
     this.scene.pause();
     this.scene.run("gameOver");

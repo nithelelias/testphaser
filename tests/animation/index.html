@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animacion</title>
+    <style>
+      body{
+        background-color: rgb(28, 4, 28);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ANIMATCION</h1>
+    <div class="anim">
+      <div class="anim__container"> 
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.5.9/lottie.min.js"></script>
+    <script >
+      const anims = document.querySelectorAll(".anim__container");
+      let jsonAnimation = {};
+      fetch("./animation.json")
+        .then((r) => r.json())
+        .then((_json) => {
+          jsonAnimation = _json;
+          initiate();
+        });
+      const initiate = () => {
+        anims.forEach((anim, index) => {
+          console.log("animation 1")
+          lottie.loadAnimation({
+            container: anim,
+            loop: true,
+            autoplay: true,
+            animationData: jsonAnimation,
+          });
+        });
+      };
+    </script>
+  </body>
+</html>

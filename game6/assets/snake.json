@@ -1,0 +1,16 @@
+{
+  "frames": [
+    {
+      "filename": "head",
+      "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
+      "rotated": false,
+      "trimmed": false
+    },
+    {
+      "filename": "body",
+      "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
+      "rotated": false,
+      "trimmed": false
+    }
+  ]
+}
