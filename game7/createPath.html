@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>juegito</title>
+    <script src="../phaser.min.js"></script>
+
+    <link rel="stylesheet" href="0.css" />
+  </head>
+  <body>
+    <div class="game__wrapper">
+      <canvas class="game__canvas"></canvas>
+    </div>
+    <script>
+      var points = [];
+      var config = {
+        type: "customEnvironment",
+        customEnvironment: true,
+        canvas: document.querySelector(".game__canvas"),
+        width: window.innerWidth,
+        height: window.innerHeight,
+        scene: { preload, create },
+      };
+      function preload() {
+        this.load.image("ball", "ball.png");
+      }
+
+      function create() {
+        console.log("on create ready");
+        let text = this.add
+          .text(config.width / 2, config.height / 2, "Click to START")
+          .setOrigin(0.5);
+        let active = false;
+
+        this.input.once("pointerdown", (p, gameObjects) => {
+          active = true;
+          text.destroy();
+        });
+        this.input.on("pointermove", (p, gameObjects) => {
+          if (!active) {
+            return;
+          }
+          active = false;
+          let img = this.add.image(p.x, p.y, "ball");
+          points.push({ x: p.x, y: p.y });
+          this.add.tween({
+            targets: img,
+            alpha: 0,
+            onComplete: () => {
+              img.destroy();
+              active = true;
+            },
+            duration: 500,
+          });
+        });
+      }
+
+      var game = new Phaser.Game(config);
+    </script>
+  </body>
+</html>
