@@ -1,0 +1,14 @@
+body{
+  margin: 0px;
+}
+.game__wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  
+}
+.game__canvas {
+  border: solid red;
+  box-sizing: border-box;
+}

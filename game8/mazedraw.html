@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>juegito 8 (pacman)</title>
+
+    <style>
+      body {
+        margin: 0px;
+        background-color: #111;
+      }
+      label {
+        color: white;
+      }
+      .game__wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        border: solid red;
+      }
+      #btnterminar {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+      }
+      canvas {
+        border: solid red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="game__wrapper">
+      <label>Cols:</label><input type="number" id="cols" value="17" />
+      <label>Rows:</label><input type="number" id="rows" value="17" />
+
+      <button onClick="gamestart()">Iniciar</button>
+    </div>
+    <script src="../phaser.min.js"></script>
+
+    <script>
+      const config = {
+        type: Phaser.WEBGL,
+        width: 300,
+        height: 500,
+        parent: document.querySelector(".game__wrapper"),
+        pixelArt: true,
+        transparent: true,
+
+        scale: {
+          mode: Phaser.Scale.RESIZE,
+          autoCenter: Phaser.Scale.CENTER_BOTH,
+
+          // Or put game size here
+          // width: 1024,
+          // height: 768,
+
+          // Minimum size
+          min: {
+            width: 300,
+            height: 500,
+          },
+          // Or set minimum size like these
+          // minWidth: 800,
+          // minHeight: 600,
+
+          // Maximum size
+          max: {
+            width: 600,
+            height: 1000,
+          },
+          // Or set maximum size like these
+          // maxWidth: 1600,
+          // maxHeight: 1200,
+
+          zoom: 1, // Size of game canvas = game size * zoom
+        },
+        scene: {
+          preload,
+          create,
+        },
+      };
+      var tileSize = 32;
+      var frame_size = 32;
+      var mazeConfig = {
+        tileWidth: tileSize, //tileSize
+        tileHeight: tileSize, //tileSize
+        width: 17, // cols
+        height: 17, // rows
+      };
+      var layer,
+        map,
+        lastCell,
+        matrix = [];
+      function iterateUntil(min, max, callback) {
+        let i = min + 0;
+        while (i < max) {
+          if (callback(i) === false) {
+            break;
+          }
+          i++;
+        }
+      }
+      function scaleGame() {
+        var width = mazeConfig.width * tileSize;
+        var height = mazeConfig.height * tileSize;
+        this.scale.resize(width, height);
+        this.scale.refresh();
+      }
+
+      function preload() {
+        this.load.image("tiles", ["assets/tiles/drawtiles1.png"]);
+        // this.load.tilemapCSV("map", "assets/grid.csv");
+      }
+      function toggleAt(pointer) {
+        let cell = {
+          col: parseInt(pointer.x / tileSize),
+          row: parseInt(pointer.y / tileSize),
+        };
+        let cellkey = cell.col + "_" + cell.row;
+        if (lastCell == cellkey) {
+          return;
+        }
+        lastCell = cellkey;
+        let _frame = map.getTileAt(cell.col, cell.row);
+        map.putTileAt(_frame.index === 1 ? 2 : 1, cell.col, cell.row);
+      }
+      function generateMazeData() {
+        let matrix = layer.getTilesWithin(0, 0, 17, 17).map((t) => t.index);
+        console.log(matrix);
+        return matrix;
+      }
+      function create() {
+        scaleGame.call(this);
+        console.log(mazeConfig);
+        map = this.make.tilemap({ ...mazeConfig });
+        var tileset = map.addTilesetImage("tiles", null, 32, 32, 1, 2);
+        layer = map.createBlankLayer("layer1", tileset);
+        map.fill(1);
+        let down = false;
+        this.input.on("pointerdown", (pointer) => {
+          down = true;
+          toggleAt(pointer);
+        });
+        this.input.on("pointerup", () => {
+          down = false;
+          lastCell = null;
+        });
+        this.input.on("pointermove", (pointer) => {
+          if (!down) {
+            return;
+          }
+          toggleAt(pointer);
+        });
+      }
+      function gamestart() {
+        var rows = document.getElementById("rows").value;
+        var cols = document.getElementById("cols").value;
+        if (rows && cols) {
+          mazeConfig.width = parseInt(cols);
+          mazeConfig.height = parseInt(rows);
+
+          config.parent.innerHTML = "";
+          const game = new Phaser.Game(config);
+          // SCALE.
+
+          const button = document.createElement("button");
+          button.id = "btnterminar";
+          button.innerHTML = "Generar";
+          button.onClick = () => {
+            generateMazeData();
+          };
+          document.body.appendChild(button);
+        }
+      }
+    </script>
+  </body>
+</html>

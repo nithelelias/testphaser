@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="qr-container"></div>
+    <script type="module">
+      import QRCode from "https://cdn.jsdelivr.net/npm/qrcode@latest";
+      const qrContainer = document.getElementById("qr-container");
+
+      // Crea un objeto de opciones para el código QR
+      //   const options = {
+      //     text: "La información que quieres codificar en el código QR", // Aquí es donde debes agregar la información que deseas codificar
+      //     width: 256,
+      //     height: 256,
+      //     colorDark: "#000000",
+      //     colorLight: "#ffffff",
+      //     correctLevel: QRCode.CorrectLevel.H,
+      //   };
+
+      //   // Crea el código QR y agrega al contenedor
+      //   new QRCode(qrContainer, options);
+    </script>
+  </body>
+</html>

@@ -1,82 +1,87 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Learning Phaser </title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Learning Phaser</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        body {
-            background-color: #f1f1f1;
-        }
+      body {
+        background-color: #f1f1f1;
+      }
 
-        main {
-            background-color: #fff;
+      main {
+        background-color: #fff;
 
-            width: fit-content;
-            margin: 0 auto;
-            padding: 12px;
-            text-align: center;
+        width: fit-content;
+        margin: 0 auto;
+        padding: 12px;
+        text-align: center;
+      }
 
-        }
+      ul {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 0 auto;
+        border: thin solid;
+        width: 100%;
+        padding: 0px;
+      }
 
-        ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 0 auto;
-            border: thin solid;
-            width: 100%;
-            padding: 0px;
-        }
+      li {
+        cursor: pointer;
+        border: thin solid #d1d1d1;
+        color: blue;
+        padding: 2px 6px;
+      }
 
-        li {
-            cursor: pointer;
-            border: thin solid #d1d1d1;
-            color: blue;
-            padding: 2px 6px;
-        }
-
-        #gameframe {
-            width: 80vw;
-            height: 90vh;
-            background-color: #111;
-        }
+      #gameframe {
+        width: 80vw;
+        height: 90vh;
+        background-color: #111;
+      }
     </style>
+  </head>
 
-</head>
-
-<body>
+  <body>
     <main>
-        <h1>Learning phaser</h1>
-        <nav>
-            <ul id="links"> </ul>
-        </nav>
+      <h1>Learning phaser</h1>
+      <nav>
+        <ul id="links"></ul>
+      </nav>
     </main>
     <script>
-        const games = ["first example", "3 en linea", "iguales", "balas","tetris","snake","OSU!"];
-        const parentUl = document.getElementById("links");
-        const gameframe = document.getElementById("gameframe");
-        const elements = document.querySelectorAll("linkgame");
+      const games = [
+        "phasertest",
+        "match3",
+        "iguales",
+        "balas",
+        "tetris",
+        "snake",
+        "OSU!",
+        "pacman",
+        "developer",
+      ];
+      const parentUl = document.getElementById("links");
+      const gameframe = document.getElementById("gameframe");
+      const elements = document.querySelectorAll("linkgame");
 
-        const opengame = (target) => {
-            // gameframe.src="./game"+target+"/";
-            location.href = "./game" + target + "/"
-        };
-        (() => {
-            games.forEach((gamename, index) => {
-                const li = document.createElement("li");
-                li.innerHTML = gamename;
-                li.onclick = () => {
-                    opengame(index + 1);
-                }
-                parentUl.appendChild(li);
-
-            })
-        })();
+      const opengame = (target) => {
+        // gameframe.src="./game"+target+"/";
+        location.href = "./game" + target + "/";
+      };
+      (() => {
+        games.forEach((gamename, index) => {
+          const li = document.createElement("li");
+          li.innerHTML = gamename;
+          li.onclick = () => {
+            opengame(index + 1);
+          };
+          parentUl.appendChild(li);
+        });
+      })();
     </script>
-</body>
-
+  </body>
 </html>
