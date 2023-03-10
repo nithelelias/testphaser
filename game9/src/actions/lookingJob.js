@@ -1,15 +1,20 @@
-import { ProgressBar } from "../ui.js";
+import { ProgressBar } from "../ui/ui.js";
 import { Deffered } from "../utils.js";
 
 export default function LookingJobState(scene) {
   // add progress bar of day at top
   var deferred = new Deffered();
-  console.log("START DAY");
-  var startY = 100;
+  var startY = scene.player.y - 100;
   var titleBar = scene.add
-    .bitmapText(scene.scale.width / 2, startY, "font1", ["Dia en progreso"], 16)
+    .bitmapText(
+      scene.scale.width / 2,
+      startY,
+      "font1",
+      ["Buscando Trabajo"],
+      16
+    )
     .setOrigin(0.5, 1);
-  var progressBar = ProgressBar(
+  var progressBar = new ProgressBar(
     scene,
     10,
     startY + 20,

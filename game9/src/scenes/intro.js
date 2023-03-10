@@ -1,10 +1,7 @@
-import { HurryText } from "../ui.js";
+import { COLORS } from "../constants.js";
+import { HurryText } from "../ui/ui.js";
 import { random } from "../utils.js";
-const COLORS = {
-  yellow: 0xfff757,
-  green: 0x97ff7f,
-  red: 0xff4757,
-};
+
 export class Intro extends Phaser.Scene {
   constructor() {
     super("intro");

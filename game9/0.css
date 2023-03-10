@@ -1,5 +1,6 @@
 body{
   margin: 0px;
+  background-color: #111;
 }
 .game__wrapper {
   display: flex;
@@ -8,7 +9,6 @@ body{
   box-sizing: border-box;
   
 }
-.game__canvas {
-  border: solid red;
+.game__canvas { 
   box-sizing: border-box;
 }

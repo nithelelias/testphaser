@@ -20,35 +20,20 @@ export function tweenOnPromise(scene, config) {
 
   return deferred.promise;
 }
-export function spriteConfigPack(
-  frame_size = 16,
-  resource_dimension = [128, 128],
-  preName = ""
-) {
-  const json = {
-    frames: [],
-  };
-  const size = frame_size;
-  const dim = resource_dimension;
-  const maxX = dim[0] / size;
-  const maxY = dim[1] / size;
-  let n = 0;
-  for (let i = 0; i < maxX; i++) {
-    for (let j = 0; j < maxY; j++) {
-      n++;
-      json.frames.push({
-        filename: preName + n,
-        rotated: false,
-        trimmed: false,
-        frame: {
-          x: j * size,
-          y: i * size,
-          w: size,
-          h: size,
-        },
-      });
-    }
-  }
+export function definePropertyToChild(self, prop, child) {
+  Object.defineProperty(self, prop, {
+    set: function (_v) {
+      child[prop] = _v;
+    },
+    get: function () {
+      return child[prop];
+    },
+  });
+}
+export function minutesToMilliseconds(m) {
+  return m * 60 * 1000;
+}
 
-  return json;
+export function padStartNum(num, total = 2, preNum = "0") {
+  return num.toString().padStart(total, preNum);
 }

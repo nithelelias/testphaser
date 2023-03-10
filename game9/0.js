@@ -10,7 +10,7 @@ const config = {
   scale: {
     mode: Phaser.Scale.FIT,
   },
-  scene: [Main, Intro],
+  scene: [Intro, Main],
   // --  doesnt work...initialScene: "main",
 };
 
