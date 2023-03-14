@@ -19,9 +19,9 @@ import Calendar from "../ui/calendar.js";
 import {
   addHour,
   canAdanceSeniority,
-  getKnowledgeLevel,
+   
   getSeniority,
-} from "../Context.js";
+} from "../context.js";
 import Sleep from "../actions/sleep.js";
 import learn from "../actions/learn.js";
 import {
@@ -29,7 +29,7 @@ import {
   populateNewJobOfferts,
   removeJobFromPool,
 } from "../jobOfferPool.js";
-import JobOffert from "../ui/joboffert.js";
+import JobOffert from "../ui/jobOffert.js";
 import { AnimFadeIn } from "../ui/transitions.js";
 import jobInterview from "../actions/jobInterview.js";
 import workOnJob from "../actions/workOnJob.js";
