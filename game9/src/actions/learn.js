@@ -1,4 +1,4 @@
-import { getKnowledgeLevel, progressOnKnowledge } from "../Context.js";
+import { getKnowledgeLevel, progressOnKnowledge } from "../context.js";
 import STATE from "../state.js";
 import { Button, ProgressBar, typedMessage } from "../ui/ui.js";
 import { Deffered } from "../utils.js";
