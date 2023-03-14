@@ -1,37 +1,25 @@
 import { COLORS } from "../constants.js";
-import { HurryText } from "../ui/ui.js";
-import { random } from "../utils.js";
+import preload from "../preload.js";
+import STATE from "../state.js";
+import { generateRectTexture, HurryText } from "../ui/ui.js";
+import { random, tweenOnPromise } from "../utils.js";
 
 export class Intro extends Phaser.Scene {
   constructor() {
     super("intro");
+    window.$intro = this;
   }
   preload() {
-    this.load.bitmapFont(
-      "font1",
-      "assets/fonts/gem.png",
-      "assets/fonts/gem.xml"
-    );
-    this.load.spritesheet("computer", "assets/images/pc.png", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet("player", "assets/images/player.png", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-
-    this.load.audio("step", "./assets/audio/step.mp3");
-    this.load.audio("typing", "./assets/audio/typing.mp3");
+    preload.call(this)
   }
   create() {
-    window.$intro = this;
+    generateRectTexture(this);
     var w = this.game.scale.width;
     var h = this.game.scale.height;
     this.sounds = {
       step: this.sound.add("step", { loop: false, volume: 0.2, rate: 2 }),
       step2: this.sound.add("step", { loop: false, volume: 0.1 }),
-      typing: this.sound.add("typing", { loop: false, volume: 0.1 }),
+      typing: this.sound.add("typing", { loop: false, volume: 0.06 }),
     };
 
     this.sounds.typing.addMarker({ name: "key1", start: 2.3, duration: 0.2 });
@@ -71,6 +59,7 @@ export class Intro extends Phaser.Scene {
       () => {
         text2StartTween.remove();
         text2Start.destroy();
+
         this.start(title);
       },
       this
@@ -91,7 +80,11 @@ export class Intro extends Phaser.Scene {
       y: 100,
       duration: 3000,
     });
-    this.playerWalkUp();
+    if (STATE.num > 0) {
+      this.goToMainScene();
+    } else {
+      this.playerWalkUp();
+    }
   }
 
   playerWalkUp() {
@@ -250,7 +243,8 @@ export class Intro extends Phaser.Scene {
       targets: p,
       value: 1,
       loop: -1,
-      duration: 500,
+      duration: 200,
+      timeScale: 1,
       onUpdate: () => {
         if (p.value !== 1) {
           return;
@@ -310,7 +304,8 @@ export class Intro extends Phaser.Scene {
         () => {
           // SPEED DOWN
           addKey();
-          animText.timeScale += 0.2;
+          animText.timeScale += 0.6;
+          //console.log(animText.timeScale);
         },
         true
       );
@@ -318,7 +313,20 @@ export class Intro extends Phaser.Scene {
 
     this.input.on("pointerdown", onPointerDown, true);
   }
-  goToMainScene() {
+  async goToMainScene() {
+    let bg = this.add
+      .image(0, 0, "rect")
+      .setTintFill(0)
+      .setOrigin(0)
+      .setDisplaySize(this.scale.width, this.scale.height)
+      .setAlpha(0);
+
+    await tweenOnPromise(this, {
+      targets: bg,
+      alpha: 1,
+      duration: 1000,
+    });
+
     this.scene.start("main");
   }
 }

@@ -1,11 +1,10 @@
 import {
   COLORS,
-  KNOWLEDGE_ROADMAP,
+  SENIORITY_LEVELS,
   TICK_HOUR,
   TODO_LIST,
 } from "../constants.js";
 import STATE from "../state.js";
-import LookingJobState from "../actions/lookingJob.js";
 import {
   Button,
   FullPanelWrapper,
@@ -14,64 +13,48 @@ import {
   UI_textAndBar,
 } from "../ui/ui.js";
 import { random, tweenOnPromise } from "../utils.js";
+import KNOWLEDGE_ROADMAP from "../data/knowledgeMap.js";
 import DayTimer from "../ui/daytimer.js";
 import Calendar from "../ui/calendar.js";
-import { addHour, getKnowledgeLevel, getSeniority } from "../Context.js";
+import {
+  addHour,
+  canAdanceSeniority,
+  getKnowledgeLevel,
+  getSeniority,
+} from "../Context.js";
 import Sleep from "../actions/sleep.js";
 import learn from "../actions/learn.js";
+import {
+  getJobPool,
+  populateNewJobOfferts,
+  removeJobFromPool,
+} from "../jobOfferPool.js";
+import JobOffert from "../ui/joboffert.js";
+import { AnimFadeIn } from "../ui/transitions.js";
+import jobInterview from "../actions/jobInterview.js";
+import workOnJob from "../actions/workOnJob.js";
 
 export default class Main extends Phaser.Scene {
   constructor() {
     super("main");
     window.$main = this;
-  }
-  preload() {
-    this.load.bitmapFont(
-      "font1",
-      "assets/fonts/gem.png",
-      "assets/fonts/gem.xml"
-    );
-    this.load.spritesheet("icons", "assets/images/icons.png", {
-      frameWidth: 16,
-      frameHeight: 16,
-    });
-    this.load.spritesheet("computer", "assets/images/pc.png", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet("bed", "assets/images/bed.png", {
-      frameWidth: 32,
-      frameHeight: 48,
-    });
-    this.load.spritesheet("player", "assets/images/player.png", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-
-    this.load.image("wood-panel", "assets/images/panel.png");
-    this.load.image("calendar", "assets/images/calendar.png");
-    this.load.image("sun", "assets/images/sun.png");
-    this.load.image("moon", "assets/images/moon.png");
-    this.load.audio("step", "./assets/audio/step.mp3");
-    this.load.audio("typing", "./assets/audio/typing.mp3");
-    this.load.audio("tap", "./assets/audio/tap-effect.mp3");
-    this.load.audio("click", "./assets/audio/click.mp3");
-  }
+  } 
   create() {
-    var w = this.game.scale.width;
-    var h = this.game.scale.height;
     this._initSounds();
     this._initPlayer();
     this._initUI();
-    this.initClock();
     this.__everyTick();
+    let anim = new AnimFadeIn(this, () => {
+      this.initClock();
+      anim.destroy();
+    });
   }
 
   _initSounds() {
     this.sounds = {
       step: this.sound.add("step", { loop: false, volume: 0.2, rate: 2 }),
       step2: this.sound.add("step", { loop: false, volume: 0.1 }),
-      typing: this.sound.add("typing", { loop: false, volume: 0.1 }),
+      typing: this.sound.add("typing", { loop: false, volume: 0.5 }),
       tap: this.sound.add("tap", { loop: false, volume: 0.3, rate: 3 }),
       click: this.sound.add("click", { loop: false, volume: 0.3, rate: 1 }),
     };
@@ -116,6 +99,7 @@ export default class Main extends Phaser.Scene {
       });
     }
   }
+
   _initPlayer() {
     var location = {
       x: this.scale.width / 2,
@@ -189,7 +173,7 @@ export default class Main extends Phaser.Scene {
         () => {
           // SPEED DOWN
 
-          this.sounds.typing.play("key" + random(1, 9));
+          this.sounds.typing.play("key" + random(1, 9), 0.1);
           this.player.hinge();
           if (this.player.__onAct) {
             this.spendHP();
@@ -311,7 +295,9 @@ export default class Main extends Phaser.Scene {
       "    Trabajos"
     )
       .addIcon(this.add.sprite(0, 0, "icons", 3).setDisplaySize(32, 32))
-      .onClick(() => {});
+      .onClick(() => {
+        this.workPanel.show();
+      });
 
     this.menu = this.add.container(0, 0, [
       btnDormir.getContent(),
@@ -348,67 +334,148 @@ export default class Main extends Phaser.Scene {
     ).alignCenter();
     this.moneyPanel.text.setDropShadow(0, 2, 0x111111, 1);
   }
-  _initPanelViews() {
+  _initPanelWork() {
+    const maxW = this.scale.width * 0.8;
+    //
+    const addTitle = (_text) => {
+      let t = this.add
+        .bitmapText(0, 0, "font1", _text, 32)
+        .setDropShadow(1, 1)
+        .setOrigin(0.5)
+        .setMaxWidth(maxW);
+      return t;
+    };
+    const addSubTitle = (_text) => {
+      let t = this.add
+        .bitmapText(0, 0, "font1", _text, 22)
+        .setDropShadow(1, 1)
+        .setOrigin(0.5)
+        .setMaxWidth(maxW);
+      return t;
+    };
+    const template_page1 = {
+      title: addTitle("Trabajos"),
+      subtitle: addSubTitle(["Busca trabajos abajo", ""]),
+    };
+
+    this.workPanel = new FullPanelWrapper(this, [
+      template_page1.title,
+      template_page1.subtitle,
+    ]);
+    this.workPanel.panelBG.setTintFill(0x010101).setAlpha(1);
+    this.workPanel.hide();
+    let lastJobOfferList = [];
+    this.workPanel.onShow(() => {
+      // UPDATE VIEW
+      lastJobOfferList.forEach((element) => {
+        element.destroy();
+      });
+      if (STATE.ACTUAL_JOB) {
+        let offerView = new JobOffert(this, 0, 0, STATE.ACTUAL_JOB, maxW);
+        // offerView.applyBtn.setVisible(false);
+        offerView.applyBtn.text.setText("Trabajar");
+        offerView.rateText.setText("Maestria: " + offerView, rate + "%");
+        offerView.onClick((job, mastery) => this._doJobWork(job, mastery));
+        lastJobOfferList = [offerView];
+      } else {
+        populateNewJobOfferts();
+        const jobpool = getJobPool();
+        lastJobOfferList = [
+          ...jobpool.map((job) => {
+            let offerView = new JobOffert(this, 0, 0, job, maxW);
+            offerView.onClick((job, successRate) =>
+              this._onJobOfferApply(job, successRate)
+            );
+            return offerView;
+          }),
+        ];
+      }
+      this.workPanel.bodycontent.setContent([
+        template_page1.title,
+        template_page1.subtitle,
+        ...lastJobOfferList,
+      ]);
+    });
+  }
+
+  _initPanelLearn() {
     let learningList = [];
     let maxWidth = 300;
-    let current_cost = 0;
-    for (let seniority in KNOWLEDGE_ROADMAP) {
-      let title = this.add
-        .bitmapText(0, 0, "font1", seniority, 32)
 
-        .setDropShadow(1, 1)
-        .setOrigin(0.5);
-      learningList.push(title);
-      for (let i in KNOWLEDGE_ROADMAP[seniority]) {
-        current_cost += 1;
+    let updateLearningList = () => {
+      // CLEAR LIST!
 
-        let topic = {
-          text: KNOWLEDGE_ROADMAP[seniority][i],
-          seniority,
-          cost: current_cost + 0,
-          index: parseInt(i),
-        };
-        let btn = new Button(this, 10, 0, topic.text)
-          .onClick(() => {
-            this.learningPanel.hide();
-            learn(this, topic).then(() => {
-              this.updateInformation();
-            });
-          })
-          .setMaxWidth(maxWidth);
-        btn.progress = new ProgressBar(
-          this,
-          -btn.displayWidth / 2,
-          btn.displayHeight/2,
-          btn.displayWidth,
-          1,
-          {
-            color: 0xff0000,
-          }
-        );
-        btn.add(btn.progress.getContainer());
-        btn.progress.setValue(0);
-        btn.topic = topic;
-        btn.isButton = true;
-        btn.text.setDropShadow(0, 0);
-        learningList.push(btn);
+      let maxSeniorityLevel = STATE.SENIORITY;
+      if (canAdanceSeniority()) {
+        maxSeniorityLevel += 1;
       }
-      current_cost -= 2;
-    }
+
+      learningList.forEach((element) => {
+        element.destroy();
+      });
+      {
+        let current_cost = 0;
+        learningList = [];
+        for (let seniority in KNOWLEDGE_ROADMAP) {
+          if (SENIORITY_LEVELS.indexOf(seniority) > maxSeniorityLevel) {
+            return;
+          }
+          let title = this.add
+            .bitmapText(0, 0, "font1", seniority, 32)
+            .setDropShadow(1, 1)
+            .setOrigin(0.5);
+
+          learningList.push(title);
+
+          for (let i in KNOWLEDGE_ROADMAP[seniority]) {
+            current_cost += 1;
+            let topic = {
+              text: KNOWLEDGE_ROADMAP[seniority][i],
+              seniority,
+              cost: current_cost + 0,
+              index: parseInt(i),
+            };
+            let btn = new Button(this, 10, 0, topic.text)
+              .onClick(() => {
+                this.learningPanel.hide();
+                learn(this, topic).then(() => {
+                  this.updateInformation();
+                });
+              })
+              .setMaxWidth(maxWidth);
+            btn.progress = new ProgressBar(
+              this,
+              -btn.displayWidth / 2,
+              btn.displayHeight / 2,
+              btn.displayWidth,
+              1,
+              {
+                color: 0xff0000,
+              }
+            );
+            btn.add(btn.progress.getContainer());
+            btn.progress.setValue(0);
+            btn.topic = topic;
+            btn.isButton = true;
+            btn.text.setDropShadow(0, 0);
+            btn.seniority_level = SENIORITY_LEVELS.indexOf(seniority);
+            learningList.push(btn);
+          }
+          current_cost -= 2;
+        }
+      }
+    };
 
     this.learningPanel = new FullPanelWrapper(this, learningList);
     this.learningPanel.hide();
     this.learningPanel.onShow(() => {
-      learningList.forEach((element) => {
-        if (element.isButton) {
-          element.progress.setValue(getKnowledgeLevel(element.topic.text));
-        }
-      });
+      updateLearningList();
+      this.learningPanel.bodycontent.setContent(learningList);
     });
-    // [
-    //   new Button(this, 0, 0, " elemento1 este es primero"),
-
-    // ]
+  }
+  _initPanelViews() {
+    this._initPanelLearn();
+    this._initPanelWork();
   }
   _todo() {
     var position = {
@@ -465,9 +532,22 @@ export default class Main extends Phaser.Scene {
       },
     });
   }
-  goForJob() {
-    LookingJobState(this).then(() => {
-      console.log("DAY END!");
+  _onJobOfferApply(job, successRate) {
+    this.workPanel.hide();
+    jobInterview(this, job, successRate).then((success) => {
+      STATE.ACTUAL_JOB = job;
+      STATE.ACTUAL_JOB.progress = 0;
+      STATE.save();
+    });
+    removeJobFromPool(job);
+    // REMOVE JOB FROM POOL
+  }
+  _doJobWork(job, mastery) {
+    this.workPanel.hide();
+    workOnJob(this, job, mastery).then((finished) => {
+      if (finished) {
+        // GET PAID!
+      }
     });
   }
   recoverHP() {

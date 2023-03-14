@@ -1,0 +1,44 @@
+@keyframes fade {
+    0% {
+            opacity: 1;
+      }
+    100% {
+        opacity: 0;
+    }
+  }
+  #anim {
+    
+    width: 130px;
+    height: 300px; 
+    border: solid red;
+    position: fixed; 
+  }
+  #anim::before{
+    animation: fade 3s infinite; 
+    content: ' ';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-image: url(".../../../common-assets/hohoho.jpeg");
+    background-color: blue;
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation-timing-function: step-start;
+  }
+  #anim::after{
+    animation: fade 3s infinite; 
+    animation-direction: reverse;
+    animation-timing-function: step-start;
+    content: ' ';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-image: url(".../../../common-assets/logo.png");
+    background-color: red;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }

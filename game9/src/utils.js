@@ -1,7 +1,16 @@
 export function random(m1, m2) {
   return Phaser.Math.Between(m1, m2);
 }
-
+export function iterate(total, callback) {
+  let i = 0;
+  while (i < total) {
+    let result = callback(i);
+    if (result === false) {
+      break;
+    }
+    i++;
+  }
+}
 export function Deffered() {
   this.promise = new Promise((resolve) => {
     this.resolve = resolve;
@@ -36,4 +45,10 @@ export function minutesToMilliseconds(m) {
 
 export function padStartNum(num, total = 2, preNum = "0") {
   return num.toString().padStart(total, preNum);
+}
+
+export function waitTimeout(time = 1000) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
 }

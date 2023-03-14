@@ -1,0 +1,26 @@
+const COMPANIES = [
+  "InnovaSoft",
+  "TechVision",
+  "CodeForge",
+  "AppHive",
+  "SoftSolutions",
+  "PixelGenie",
+  "CyberForge",
+  "ByteWise",
+  "DataVision",
+  "SiliconLogic",
+  "CodeWave",
+  "Innovatech",
+  "MindSpark",
+  "TechGenius",
+  "SoftLabs",
+  "NimbleSoft",
+  "DataCrush",
+  "iCode",
+  "PixelRage",
+  "CodeCore",
+  "GameCo",
+  "IAExplorer",
+];
+
+export default COMPANIES;

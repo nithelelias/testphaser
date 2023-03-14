@@ -1,4 +1,5 @@
-import { KNOWLEDGE_ROADMAP, SENIORITY_LEVELS } from "./constants.js";
+import { SENIORITY_LEVELS } from "./constants.js";
+import KNOWLEDGE_ROADMAP from "./data/knowledgeMap.js";
 import STATE from "./state.js";
 export function addHour(plus = 1) {
   STATE.DATE.hour += plus;
@@ -27,11 +28,8 @@ export function getNextSeniority() {
     Math.min(STATE.SENIORITY + 1, SENIORITY_LEVELS.length - 1)
   ];
 }
-export function advanceSeniority() {
+export function canAdanceSeniority() {
   let seniority = getSeniority();
-  let next = getNextSeniority();
-  console.log(seniority, next);
-  // NEED TO KNOW EVERY TOPIC ON HIS SENIORITY LEVEL AT LEAST 30%
   for (let i in KNOWLEDGE_ROADMAP[seniority]) {
     let mustknow = KNOWLEDGE_ROADMAP[seniority][i];
     let p = STATE.KNOWLEDGE[mustknow] || 0;
@@ -39,6 +37,14 @@ export function advanceSeniority() {
       return false;
     }
   }
+  return true;
+}
+export function advanceSeniority() {
+  if (!canAdanceSeniority()) {
+    return;
+  }
+  // KNOW AT LEAST 1 to 30 to advance
+  let next = getNextSeniority();
   {
     let mustknow_toadvance = KNOWLEDGE_ROADMAP[next][0];
     let p = STATE.KNOWLEDGE[mustknow_toadvance] || 0;
@@ -47,7 +53,7 @@ export function advanceSeniority() {
     }
   }
   // ADVANCE!
-  console.log("ADVANCE!")
+  console.log("ADVANCE!");
   STATE.SENIORITY += 1;
 }
 export function getKnowledgeLevel(topic) {

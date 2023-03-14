@@ -24,8 +24,6 @@ export function ProgressBar(
     settings
   );
 
-  generateRectTexture(scene);
-
   let backgroundBar = scene.add
     .image(0, 0, "bar")
     .setOrigin(0, 0.5)
@@ -303,7 +301,7 @@ export class Button extends Phaser.GameObjects.Container {
   constructor(scene, x, y, labelText, fontSize = 16, color = 0xf1f1f1) {
     super(scene, x, y, []);
     scene.add.existing(this);
-    generateRectTexture(scene);
+    this.isButton = true;
     var padding = 10;
     var callback_onCLick = null;
     this.text = scene.add
@@ -317,7 +315,7 @@ export class Button extends Phaser.GameObjects.Container {
       .setTintFill(color);
 
     const backgroundShadow = scene.add
-      .image(0, background.displayHeight * 0.54, "rect")
+      .image(0, background.displayHeight * 0.4, "rect")
       .setOrigin(0.5)
       .setTintFill(0x808080);
 
@@ -329,7 +327,10 @@ export class Button extends Phaser.GameObjects.Container {
         this.text.width + padding,
         this.text.height + padding
       );
-      backgroundShadow.setDisplaySize(background.displayWidth, 4);
+      backgroundShadow.setDisplaySize(
+        background.displayWidth,
+        background.displayHeight * 0.3
+      );
       this.x = this.text.width / 2 + x;
       this.setSize(background.displayWidth, background.displayHeight + 5);
       this.setInteractive();
@@ -373,6 +374,7 @@ export class Button extends Phaser.GameObjects.Container {
         true
       );
     };
+  
     renderInteracive();
     this.on("pointerdown", onPointerDown, true);
     //scene.input.enableDebug(container, 0xff00ff);
@@ -389,7 +391,6 @@ export function PanelInfo(
   labelColor = 0x111111,
   panelColor = 0xffffff
 ) {
-  generateRectTexture(scene);
   this.panelBG = scene.add
     .image(0, 0, "rect")
     .setOrigin(0)
@@ -422,9 +423,8 @@ export class FullPanelWrapper extends Phaser.GameObjects.Container {
     super(scene, 0, 0, []);
     var on_show_callback = null;
     scene.add.existing(this);
-    generateRectTexture(scene);
 
-    const panelBG = scene.add
+    this.panelBG = scene.add
       .image(0, 0, "rect")
       .setOrigin(0)
       .setTintFill(0x1e1c1c)
@@ -442,7 +442,7 @@ export class FullPanelWrapper extends Phaser.GameObjects.Container {
     btn.onClick(() => {
       this.hide();
     });
-    const bodycontent = new VerticalScrollLayout(
+    this.bodycontent = new VerticalScrollLayout(
       scene,
       10,
       40,
@@ -451,9 +451,10 @@ export class FullPanelWrapper extends Phaser.GameObjects.Container {
       bodychilds
     );
 
-    this.add([panelBG, btn.getContent(), bodycontent]);
+    this.add([this.panelBG, btn.getContent(), this.bodycontent]);
 
     this.show = () => {
+      this.bodycontent.scrollTop();
       this.setVisible(true);
       on_show_callback && on_show_callback();
     };
@@ -471,34 +472,24 @@ export class VerticalScrollLayout extends Phaser.GameObjects.Container {
     super(scene, x + width / 2, y + height / 2, [
       scene.add.container(15, 0, []),
     ]);
-
-    var contentlist = this.list[0];
-    contentlist.add(elements);
-
-    let start = {
-      x: -width / 2,
-      y: -height / 2,
+    this.start = {
+      x: 0,
+      y: 0,
     };
-    let pointerX = 0;
-    let pointerY = 0;
-    let margin = 10;
-    let maxScrollY = 0;
-    elements.forEach((element, idx) => {
-      let w = element.displayWidth || element.width;
-      let h = element.displayHeight || element.height;
-      element.x = start.x + pointerX + w / 2;
-      element.y = start.y + pointerY + h / 2;
-      pointerY += h + margin;
-    });
-    maxScrollY = Math.min(0, height - pointerY);
     this.setSize(width, height);
     this.setInteractive();
+    this.contentlist = this.list[0];
+    this.contentlist.add(elements);
+    this.fit();
+
     const hideElementsOutBounds = () => {
-      let topY = start.y - contentlist.y;
-      let bottomY = topY + height;
-      elements.forEach((element, idx) => {
-        element.setVisible(element.y > topY && element.y < bottomY);
-      });
+      // NO
+      return;
+      // let topY = this.start.y - this.contentlist.y;
+      // let bottomY = topY + this.height;
+      // this.contentlist.list.forEach((element, idx) => {
+      //   element.setVisible(element.y > topY && element.y < bottomY);
+      // });
     };
     //  scene.input.enableDebug(this, 0xff0000);
     // drag and drop
@@ -512,7 +503,10 @@ export class VerticalScrollLayout extends Phaser.GameObjects.Container {
         return;
       }
       let vy = p.y - fromP.y;
-      contentlist.y = Math.max(maxScrollY, Math.min(0, contentlist.y + vy));
+      this.contentlist.y = Math.max(
+        this.maxScrollY,
+        Math.min(0, this.contentlist.y + vy)
+      );
       fromP = { x: p.x, y: p.y };
       hideElementsOutBounds();
       // HIDE ELEMENTS
@@ -538,4 +532,78 @@ export class VerticalScrollLayout extends Phaser.GameObjects.Container {
     );
     hideElementsOutBounds();
   }
+  fit() {
+    this.start = {
+      x: -this.width / 2,
+      y: -this.height / 2,
+    };
+    let pointerX = 0;
+    let pointerY = 0;
+    let margin = 10;
+    this.maxScrollY = 0;
+    this.contentlist.list.forEach((element, idx) => {
+      let w = element.displayWidth || element.width;
+      let h = element.displayHeight || element.height;
+      element.x = this.start.x + pointerX + w / 2;
+      element.y = this.start.y + pointerY + h / 2;
+      pointerY += h + margin;
+    });
+    this.maxScrollY = Math.min(0, this.height - pointerY);
+  }
+  setContent(_elements) {
+    // remove elements
+    this.contentlist.remove(this.contentlist.list);
+    this.contentlist.add(_elements);
+    this.fit();
+  }
+  scrollTop() {
+    this.contentlist.y = 0;
+  }
+}
+export function typedMessage(scene, text, x, y, fontSize = 16) {
+  var deferred = new Deffered();
+  let parsedText = [].concat(text).map((t) => [...t]);
+
+  let totalChars = parsedText.join("\n").split(",").length;
+  let message_text = new Array(parsedText.length).fill("");
+  //  [ "...","...."]
+  var bitmapText = scene.add.dynamicBitmapText(
+    x,
+    y,
+    "font1",
+    message_text,
+    fontSize
+  );
+  let maxIdx = parsedText.length - 1;
+  let idx = 0;
+  let count = 0;
+  var clock = scene.time.addEvent({
+    delay: 100,
+    loop: true,
+    callback: () => {
+      if (idx > maxIdx) {
+        deferred.resolve();
+        return;
+      }
+      count++;
+
+      let char = parsedText[idx].shift();
+      message_text[idx] += char;
+      bitmapText.setText(message_text);
+      if (parsedText[idx].length === 0) {
+        idx++;
+      }
+    },
+  });
+
+  return {
+    clock,
+    bitmapText,
+    promise: deferred.promise,
+    destroy: () => {
+      bitmapText.destroy();
+      clock.destroy();
+    },
+    onComplete: (callback) => deferred.promise.then(callback),
+  };
 }

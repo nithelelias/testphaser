@@ -1,17 +1,23 @@
-import { getKnowledgeLevel, progressOnKnowledge } from "../Context.js";
+import { getKnowledgeLevel } from "../Context.js";
 import STATE from "../state.js";
-import { Button, ProgressBar, typedMessage } from "../ui/ui.js";
+import { ProgressBar } from "../ui/ui.js";
 import { Deffered } from "../utils.js";
 
-function actionStart(scene, topic, progressStart) {
-  var deferred = new Deffered();
+export default function workOnJob(scene, job, mastery) {
+  scene.menu.hide();
+  scene.time.timeScale = 2;
+  if (STATE.ACTUAL_JOB) {
+    return Promise.resolve();
+  }
   var width = 300;
   var centerX = scene.scale.width / 2;
   var startY = scene.scale.height / 2 + 12;
-  let topic_cost = topic.cost;
-  let advance_value = Math.max(0.01, STATE.ACTION_STUDY / topic_cost);
-  let progress = progressStart;
+  // CALCULAR
 
+  let tick_value = Math.max(0.01, 1 / mastery);
+
+  let progress = STATE.ACTUAL_JOB.progress;
+  var deferred = new Deffered();
   var progressBar = new ProgressBar(
     scene,
     scene.scale.width / 2 - width / 2,
@@ -21,7 +27,7 @@ function actionStart(scene, topic, progressStart) {
   );
   progressBar.setValue(progress);
   var progressText = scene.add
-    .bitmapText(centerX, startY - 32, "font1", [parseInt(progress) + "%"], 32)
+    .bitmapText(centerX, startY - 32, "font1", [progress + "%"], 32)
     .setCenterAlign()
     .setTint(0xfff1a1)
     .setOrigin(0.5, 1);
@@ -30,7 +36,7 @@ function actionStart(scene, topic, progressStart) {
       centerX,
       startY - 12,
       "font1",
-      ["Taza de progreso: " + STATE.ACTION_STUDY + "/" + topic_cost],
+      ["Taza de progreso: " + 1 + "/" + mastery],
       16
     )
     .setCenterAlign()
@@ -64,18 +70,19 @@ function actionStart(scene, topic, progressStart) {
       16
     )
     .setOrigin(0.5, 1);
-
-  var unbind = scene.player.onAct(() => {
-    progress += advance_value;
-    progressBar.setValue(progress);
-    progressText.setText([parseInt(progress) + "%"]);
-    if (progress >= 100) {
-      onended();
-    }
-  });
-
+  //console.log("topic_cost ", topic_cost, "tick_value", tick_value);
+  if (progress < 100) {
+    var unbind = scene.player.onAct(() => {
+      progress += tick_value;
+      progressBar.setValue(progress);
+      progressText.setText([parseInt(progress) + "%"]);
+      if (progress >= 100) {
+        unbind();
+        onended();
+      }
+    });
+  }
   const onended = () => {
-    unbind();
     titleBar.destroy();
     progressBar.destroy();
     cancelButton.destroy();
@@ -83,33 +90,10 @@ function actionStart(scene, topic, progressStart) {
     tazaText.destroy();
     progressText.destroy();
     deferred.resolve();
+    scene.menu.show();
+    scene.time.timeScale = 1;
     progressOnKnowledge(topic.text, progress);
   };
 
-  if (progress >= 100) {
-    onended();
-  }
-
   return deferred.promise;
-}
-export default async function learn(scene, topic) {
-  // add progress bar of day at top
-  scene.menu.hide();
-  scene.time.timeScale = 2;
-  let progress = getKnowledgeLevel(topic.text);
-  if (progress < 100) {
-    await actionStart(scene, topic, progress);
-  } else {
-    let message1 = typedMessage(
-      scene,
-      ["Ya domine este tema!!"],
-      scene.scale.width / 2,
-      scene.scale.height / 2 + 12,
-      32
-    );
-    await message1.promise;
-  }
-
-  scene.menu.show();
-  scene.time.timeScale = 1;
 }
