@@ -28,7 +28,10 @@
         right: 10px;
       }
       canvas {
-        border: solid red;
+        border: thin solid white;
+        position: relative;
+        left: 10px;
+        top: 10px;
       }
     </style>
   </head>
@@ -37,45 +40,24 @@
     <div class="game__wrapper">
       <label>Cols:</label><input type="number" id="cols" value="17" />
       <label>Rows:</label><input type="number" id="rows" value="17" />
-
+      <input type="file" accept=".json" id="upload" />
       <button onClick="gamestart()">Iniciar</button>
     </div>
     <script src="../phaser.min.js"></script>
 
     <script>
+      const uploadInput = document.getElementById("upload");
+      uploadInput.onchange = uploadData;
+      var data = [];
       const config = {
         type: Phaser.WEBGL,
-        width: 300,
-        height: 500,
+
         parent: document.querySelector(".game__wrapper"),
         pixelArt: true,
         transparent: true,
 
         scale: {
           mode: Phaser.Scale.RESIZE,
-          autoCenter: Phaser.Scale.CENTER_BOTH,
-
-          // Or put game size here
-          // width: 1024,
-          // height: 768,
-
-          // Minimum size
-          min: {
-            width: 300,
-            height: 500,
-          },
-          // Or set minimum size like these
-          // minWidth: 800,
-          // minHeight: 600,
-
-          // Maximum size
-          max: {
-            width: 600,
-            height: 1000,
-          },
-          // Or set maximum size like these
-          // maxWidth: 1600,
-          // maxHeight: 1200,
 
           zoom: 1, // Size of game canvas = game size * zoom
         },
@@ -85,7 +67,9 @@
         },
       };
       var tileSize = 32;
-      var frame_size = 32;
+      var frame_size = 16;
+      var empty = 3;
+      var currentFrame = 0;
       var mazeConfig = {
         tileWidth: tileSize, //tileSize
         tileHeight: tileSize, //tileSize
@@ -96,6 +80,36 @@
         map,
         lastCell,
         matrix = [];
+      function uploadData(event) {
+        event.preventDefault();
+
+        // If there's no file, do nothing
+        if (event.target.files.length === 0) return;
+        let file = event.target.files[0];
+
+        // Create a new FileReader() object
+        let reader = new FileReader();
+
+        // Setup the callback event to run when the file is read
+        reader.onload = storeData;
+
+        // Read the file
+        reader.readAsText(file);
+      }
+      /**
+       * Log the uploaded file to the console
+       * @param {event} Event The file loaded event
+       */
+      function storeData(event) {
+        let str = event.target.result;
+        let json = JSON.parse(str);
+        data = json;
+        document.getElementById("rows").value = data.length;
+        document.getElementById("cols").value = data[0].length;
+      }
+      function getStoreData() {
+        return [].concat(data || []);
+      }
       function iterateUntil(min, max, callback) {
         let i = min + 0;
         while (i < max) {
@@ -113,8 +127,12 @@
       }
 
       function preload() {
-        this.load.image("tiles", ["assets/tiles/drawtiles1.png"]);
-        // this.load.tilemapCSV("map", "assets/grid.csv");
+        this.load.image("tiles", ["assets/tiles/maptile.png"]);
+        this.load.spritesheet("maptiles", "assets/tiles/maptile.png", {
+          frameWidth: 16,
+          frameHeight: 16,
+        });
+        this.load.tilemapCSV("map", "assets/grid.csv");
       }
       function toggleAt(pointer) {
         let cell = {
@@ -127,20 +145,72 @@
         }
         lastCell = cellkey;
         let _frame = map.getTileAt(cell.col, cell.row);
-        map.putTileAt(_frame.index === 1 ? 2 : 1, cell.col, cell.row);
+        if (_frame) {
+          map.putTileAt(
+            _frame.index === empty ? currentFrame : empty,
+            cell.col,
+            cell.row
+          );
+        }
       }
       function generateMazeData() {
-        let matrix = layer.getTilesWithin(0, 0, 17, 17).map((t) => t.index);
+        let matrix = new Array(mazeConfig.height);
+        for (let row = 0; row < mazeConfig.height; row++) {
+          matrix[row] = new Array(mazeConfig.width);
+          for (let col = 0; col < mazeConfig.width; col++) {
+            try {
+              matrix[row][col] = layer.getTileAt(col, row).index; //0 o 1
+            } catch (e) {
+              console.log("error at", col, row);
+            }
+          }
+        }
+
         console.log(matrix);
         return matrix;
       }
       function create() {
         scaleGame.call(this);
-        console.log(mazeConfig);
+        var piece_scale = 3;
+        var piece_scale_frame_size = frame_size * piece_scale;
+        var tile_selected = this.add
+          .sprite(this.scale.width / 2 + 100, 0, "maptiles", 0)
+          .setScale(piece_scale)
+          .setOrigin(0);
+        var tiles_img_control = this.add
+          .image(this.scale.width - (piece_scale + 1) * 64, 0, "tiles")
+          .setScale(piece_scale)
+          .setOrigin(0)
+          .setInteractive()
+          .on("pointerdown", (pointer) => {
+            let close = {
+              x: parseInt(
+                (pointer.x - tiles_img_control.x) / piece_scale_frame_size
+              ),
+              y: parseInt(
+                (pointer.y - tiles_img_control.y) / piece_scale_frame_size
+              ),
+            };
+            var frame = close.x + close.y * 4;
+            console.log(close, frame);
+            tile_selected.setFrame(frame);
+            currentFrame = frame;
+          });
         map = this.make.tilemap({ ...mazeConfig });
-        var tileset = map.addTilesetImage("tiles", null, 32, 32, 1, 2);
+        var tileset = map.addTilesetImage(
+          "tiles",
+          null,
+          frame_size,
+          frame_size
+        );
         layer = map.createBlankLayer("layer1", tileset);
-        map.fill(1);
+        map.fill(empty);
+
+        getStoreData().forEach((row, y) => {
+          row.forEach((frameKey, x) => {
+            map.putTileAt(frameKey, x, y);
+          });
+        });
         let down = false;
         this.input.on("pointerdown", (pointer) => {
           down = true;
@@ -171,7 +241,7 @@
           const button = document.createElement("button");
           button.id = "btnterminar";
           button.innerHTML = "Generar";
-          button.onClick = () => {
+          button.onclick = () => {
             generateMazeData();
           };
           document.body.appendChild(button);

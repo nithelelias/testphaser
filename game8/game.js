@@ -90,9 +90,8 @@ function create() {
   player.y = 11 * tileSize;
   cursors = this.input.keyboard.createCursorKeys();
 
-  light = this.lights.addLight(0, 0, 200).setScrollFactor(0.0);
+  
 
-  this.lights.enable().setAmbientColor(0x555555);
   this.container = this.add.container(
     mazeConfig.initX * tileSize,
     mazeConfig.initY * tileSize,
@@ -105,7 +104,8 @@ function create() {
   //     light.y = pointer.y;
 
   // });
-
+  light = this.lights.addLight(0, 0, 200).setScrollFactor(0.0); 
+  this.lights.enable().setAmbientColor(0x555555);
   this.lights.addLight(0, 100, 100).setColor(0xff0000).setIntensity(3.0);
   this.lights.addLight(0, 200, 100).setColor(0x00ff00).setIntensity(3.0);
   this.lights.addLight(0, 300, 100).setColor(0x0000ff).setIntensity(3.0);
