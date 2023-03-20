@@ -1,7 +1,9 @@
 export const COLORS = {
+  white: 0xffffff,
   yellow: 0xfff757,
   yello_dark: 0x92861b,
   green: 0x97ff7f,
+  green_real:0x008000,
   green_dark: 0x0c330d,
   red: 0xff4757,
   red_darker: 0x520a10,
@@ -11,6 +13,7 @@ export const COLORS = {
   sunny: 0xffaa11,
   night: 0x343479,
   evening: 0x0076ff,
+  brown:0x422303
 };
 export const COLORS_SENIORITY = {
   aprendiz: 0xffffff,
@@ -22,6 +25,7 @@ export const COLORS_SENIORITY = {
 export const TICK_HOUR = 6000;
 
 export const MONTHS = [
+  "NONE",
   "ENE",
   "FEB",
   "MAR",

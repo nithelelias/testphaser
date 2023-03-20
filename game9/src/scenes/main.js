@@ -7,17 +7,30 @@ import {
 import STATE from "../state.js";
 import {
   Button,
+  ButtonWithProgress,
   FullPanelWrapper,
   PanelInfo,
   ProgressBar,
   typedMessage,
   UI_textAndBar,
 } from "../ui/ui.js";
-import { random, tweenOnPromise, waitTimeout } from "../utils.js";
+import {
+  Deffered,
+  random,
+  shakeObject,
+  tweenOnPromise,
+  waitTimeout,
+} from "../utils.js";
 import KNOWLEDGE_ROADMAP from "../data/knowledgeMap.js";
 import DayTimer from "../ui/daytimer.js";
 import Calendar from "../ui/calendar.js";
-import { addHour, canAdanceSeniority, getSeniority } from "../context.js";
+import {
+  addHour,
+  canAdanceSeniority,
+  getKnowledgeLevel,
+  getSeniority,
+  saveState,
+} from "../context.js";
 import learn from "../actions/learn.js";
 import {
   getJobPool,
@@ -32,6 +45,7 @@ import Player from "../player.js";
 import getPaidByJob from "../actions/getPaidByJob.js";
 import SOUNDS from "../sounds.js";
 import Kitchen from "../kitchen.js";
+import GameBroadcast from "../GameBroadcast.js";
 
 export default class Main extends Phaser.Scene {
   constructor() {
@@ -39,17 +53,97 @@ export default class Main extends Phaser.Scene {
     window.$main = this;
   }
   create() {
+    this._initLight();
     this._initSounds();
     this._initPlayer();
     this._initUI();
     this.__everyTick();
-
     AnimFadeIn(this);
 
     this._initClock();
     this.updateInformation();
-  }
 
+    this._initTutorial();
+  }
+  async _initTutorial() {
+    if (!STATE.tutorial) {
+      return;
+    }
+
+    this.clock.timeScale = 0;
+    this.player.setBusy(true);
+    this.player.setFrame(0);
+    this.menu.hide();
+    await this.printMessage(["HOLA MUNDO!!"]);
+    await this.printMessage(["Ayudame, no se nada sobre ser un DEVELOPER"]);
+    this.menu.show();
+    /*
+     btnDormir,
+      btnEat,
+      btnfindjob,
+      btnlearn,
+      btnTodo,*/
+    this.menu.list.forEach((btn) => {
+      btn.setVisible(false);
+    });
+
+    // LETSW MOCK ONCLICK
+    var deferred = new Deffered();
+    this._continueTutorial = () => {
+      deferred.resolve();
+    };
+    let startHealt = 0 + STATE.HEALTH;
+    this.player.setBusy(false);
+    this.player.setFrame(1);
+    await this.printMessage(["Elije algo que aprender"]);
+    this.menu.list[3].setVisible(true);
+    shakeObject(this.menu.list[3], 100, 0.1);
+    await deferred.promise;
+    this.menu.list[3].setVisible(false);
+    this.player.setBusy(true);
+    this.player.setFrame(0);
+    await this.printMessage(["Gracias!", "siento que subi de nivel!!"]);
+    if (startHealt === STATE.HEALTH) {
+      await this.printMessage(["Aunque siento que pude esforzarme mas!!"]);
+    }
+    await this.printMessage("RECUERDA!");
+    await this.printMessage([
+      "cuando CLICK entonces ESFUERZO",
+      "si ESFUERZO entonces VIDA-1",
+    ]);
+
+    this.player.setBusy(false);
+    this.player.setFrame(1);
+    await this.printMessage(["Veamos si encuentro trabajo!"]);
+    this.menu.list[2].setVisible(true);
+    shakeObject(this.menu.list[2], 100, 0.1);
+    deferred = new Deffered();
+    await deferred.promise;
+    this.menu.list[2].setVisible(false);
+    this.player.setBusy(true);
+    this.player.setFrame(0);
+    this.player.hinge();
+    await this.printMessage(["Wow!!", "A la primera ! "]);
+    this.clock.timeScale = 1;
+    this.player.setBusy(false);
+    this.player.setFrame(1);
+    deferred = new Deffered();
+    await this.printMessage(["Ahora vamos a trabajar "]);
+    this.menu.list[2].setVisible(true);
+    shakeObject(this.menu.list[2], 100, 0.1);
+    await deferred.promise;
+    this.menu.hide();
+    this.menu.list.forEach((btn) => {
+      btn.setVisible(true);
+    });
+    await this.printMessage(["el dia aveces no alcanza"]);
+    await this.printMessage(["No se te olvide comer y dormir"]);
+
+    this.menu.show();
+    this._continueTutorial = () => {};
+    STATE.tutorial = false;
+    saveState();
+  }
   _initSounds() {
     this.sounds = SOUNDS;
     this.sounds.melody1.play();
@@ -60,6 +154,7 @@ export default class Main extends Phaser.Scene {
       x: this.scale.width / 2,
       y: this.scale.height / 2 + 100,
     };
+
     const bed = this.add.image(200, 48, "bed", 0).setDisplaySize(128, 192);
     const sheet = this.add.image(200, 48, "bed", 1).setDisplaySize(128, 192);
     const pc = this.add.image(0, 0, "computer", 0).setDisplaySize(102, 102);
@@ -78,11 +173,7 @@ export default class Main extends Phaser.Scene {
         "pointerup",
         () => {
           // SPEED DOWN
-          if (this.player.isBusy()) {
-            return;
-          }
-          this.sounds.typing.play("key" + random(1, 9), 0.1);
-          this.player.hinge();
+          this.player.doTyping();
           if (this.player.__onAct) {
             this.spendHP();
             this.player.__onAct();
@@ -96,6 +187,61 @@ export default class Main extends Phaser.Scene {
     playerContainer.on("pointerdown", onPointerDown, true);
 
     //this.input.enableDebug(playerContainer, 0xff00ff);
+  }
+  _initLight() {
+    //  Enable lights and set a dark ambient color
+    this.lights.enable().setAmbientColor(0x111111);
+    this.sunLight = this.add
+      .image(this.scale.width, -100, "white")
+      .setDisplaySize(this.scale.height, this.scale.height)
+      .setBlendMode(1)
+      .setPipeline("Light2D");
+    this.lights
+      .addLight(this.scale.width, 0, 200)
+      .setColor(0xffffff)
+      .setIntensity(5);
+    let lastColor = COLORS.night;
+    this.sunLight.update = () => {
+      //let progress = STATE.DATE.hour / 24;
+      let color = COLORS.night;
+      if (STATE.DATE.hour >= 6 && STATE.DATE.hour <= 12) {
+        color = COLORS.yellow;
+      }
+      if (STATE.DATE.hour >= 13 && STATE.DATE.hour <= 16) {
+        color = COLORS.white;
+      }
+      if (STATE.DATE.hour > 16 && STATE.DATE.hour < 18) {
+        color = COLORS.blue;
+      }
+      if (color != lastColor) {
+        let holder = { value: 0 };
+        let fromColor = new Phaser.Display.Color.ColorToRGBA(lastColor);
+        let toColor = new Phaser.Display.Color.ColorToRGBA(color);
+        lastColor = color;
+        this.add.tween({
+          targets: holder,
+          value: 1,
+          duration: 1000,
+          onUpdate: () => {
+            let rgbColor = Phaser.Display.Color.Interpolate.ColorWithColor(
+              fromColor,
+              toColor,
+              1,
+              holder.value
+            );
+            let colornum = Phaser.Display.Color.GetColor(
+              rgbColor.r,
+              rgbColor.g,
+              rgbColor.b
+            );
+            this.sunLight.setTintFill(colornum);
+          },
+          onComplete: () => {
+            //this.sunLight.setTintFill(color);
+          },
+        });
+      }
+    };
   }
   _initLifeBar() {
     this.lifeBar = new UI_textAndBar(
@@ -150,47 +296,26 @@ export default class Main extends Phaser.Scene {
   }
   _initMenuUI() {
     var minX = 16;
-    var minY = 180;
     var maxY = this.scale.height - 32;
     var margin = 16;
 
-    const btnDormir = new Button(this, minX, minY, "Dormir", 20).onClick(
-      async () => {
-        this.__goToBed();
-      }
-    );
-    const btneat = new Button(
+    const btnDormir = new Button(
       this,
-      btnDormir.x + btnDormir.width / 2 + margin,
-      minY,
-      "    Comer"
-    )
+      this.scale.width - 32,
+      this.scale.height / 2,
+      "Dormir",
+      20
+    ).onClick(async () => {
+      this.__goToBed();
+    });
+    btnDormir.x -= btnDormir.width;
+    const btnEat = new Button(this, 32, this.scale.height / 2, "    Comer")
 
       .addIcon(this.add.sprite(0, 0, "icons", 27).setDisplaySize(32, 32))
       .onClick(() => {
         this.__goToKitchen();
       });
 
-    const btnrelax = new Button(
-      this,
-      btneat.x + btneat.width / 2 + margin,
-      minY,
-      "    Relax"
-    )
-
-      .addIcon(
-        this.add
-          .sprite(0, 0, "icons", 30)
-          .setTint(0x00afa1)
-          .setDisplaySize(32, 32)
-      )
-      .onClick(() => {});
-    const btnExercise = new Button(
-      this,
-      btnrelax.x + btneat.width / 2 + margin,
-      minY,
-      "Entrenar"
-    ).onClick(() => {});
     //
     const btnlearn = new Button(this, minX + 50, maxY, "   Aprender", 20)
 
@@ -210,21 +335,36 @@ export default class Main extends Phaser.Scene {
         this.workPanel.show();
       });
 
-    const btnTodo = this._BtnTodo(this.scale.width - 40, btnExercise.y + 40);
+    const btnSave = new Button(this, this.scale.width - 40, 180, "   ")
+      .addIcon(
+        this.add
+          .sprite(0, 0, "icons", 31)
+          .setDisplaySize(32, 32)
+          .setTintFill(COLORS.green_dark)
+      )
+      .onClick(() => {
+        saveState();
+      });
+    const btnTodo = this._BtnTodo(this.scale.width - 40, 220);
     this.menu = this.add.container(0, 0, [
       btnDormir,
-      btneat,
-      btnrelax,
+      btnEat,
       btnfindjob,
       btnlearn,
-      btnExercise,
       btnTodo,
+      btnSave,
     ]);
     this.menu.hide = function () {
       this.setVisible(false);
     };
     this.menu.show = function () {
       this.setVisible(true);
+      btnfindjob.text.setText(
+        STATE.ACTUAL_JOB ? "    Trabajar" : "    Trabajos"
+      );
+      btnfindjob.icon.setTintFill(
+        STATE.ACTUAL_JOB ? COLORS.green_real : COLORS.brown
+      );
     };
   }
   _initInfoViews() {
@@ -320,9 +460,32 @@ export default class Main extends Phaser.Scene {
 
   _initPanelLearn() {
     let learningList = [];
-    let maxWidth = 300;
+    const maxWidth = 300;
+    const addLearnButton = (topic) => {
+      const progressValue = getKnowledgeLevel(topic.text);
+      const btn = new ButtonWithProgress(this, 0, 0, topic.text);
+      btn.updateWidth(maxWidth);
+      btn.progress.backgroundBar.setTintFill(COLORS.yello_dark);
+      btn.progress.bar.setTintFill(
+        progressValue < 20
+          ? COLORS.red
+          : progressValue < 50
+          ? COLORS.orange
+          : progressValue < 80
+          ? COLORS.yellow
+          : COLORS.green
+      );
+      btn.topic = topic;
+      btn.isButton = true;
+      btn.seniority_level = SENIORITY_LEVELS.indexOf(topic.seniority);
+      btn.progress.setValue(progressValue);
+      btn.onClick(() => {
+        this._doLearning(topic);
+      });
+      return btn;
+    };
 
-    let updateLearningList = () => {
+    const updateLearningList = () => {
       // CLEAR LIST!
 
       let maxSeniorityLevel = STATE.SENIORITY;
@@ -355,28 +518,8 @@ export default class Main extends Phaser.Scene {
               cost: current_cost + 0,
               index: parseInt(i),
             };
-            let btn = new Button(this, 10, 0, topic.text)
-              .onClick(() => {
-                this._doLearning(topic);
-              })
-              .setMaxWidth(maxWidth);
-            btn.progress = new ProgressBar(
-              this,
-              -btn.displayWidth / 2,
-              btn.displayHeight / 2,
-              btn.displayWidth,
-              1,
-              {
-                color: 0xff0000,
-              }
-            );
-            btn.add(btn.progress.getContainer());
-            btn.progress.setValue(0);
-            btn.topic = topic;
-            btn.isButton = true;
-            btn.text.setDropShadow(0, 0);
-            btn.seniority_level = SENIORITY_LEVELS.indexOf(seniority);
-            learningList.push(btn);
+
+            learningList.push(addLearnButton(topic));
           }
           current_cost -= 2;
         }
@@ -465,13 +608,20 @@ export default class Main extends Phaser.Scene {
     this.workPanel.hide();
     this.menu.hide();
 
-    jobInterview(this, job, successRate).then((success) => {
-      STATE.ACTUAL_JOB = job;
-      STATE.ACTUAL_JOB.progress = 0;
-      STATE.save();
+    jobInterview(this, job, STATE.tutorial ? 100 : successRate).then(
+      (success) => {
+        if (success) {
+          STATE.ACTUAL_JOB = job;
+          STATE.ACTUAL_JOB.progress = 0;
+        }
 
-      this.menu.show();
-    });
+        this.menu.show();
+
+        if (STATE.tutorial) {
+          this._continueTutorial();
+        }
+      }
+    );
     removeJobFromPool(job);
     // REMOVE JOB FROM POOL
   }
@@ -493,7 +643,9 @@ export default class Main extends Phaser.Scene {
 
           STATE.ACTUAL_JOB = null;
         }
-        STATE.save();
+        if (STATE.tutorial) {
+          this._continueTutorial();
+        }
         this.menu.show();
       }
     );
@@ -503,6 +655,9 @@ export default class Main extends Phaser.Scene {
     this.menu.hide();
     learn(this, topic).then(() => {
       this.menu.show();
+      if (STATE.tutorial) {
+        this._continueTutorial();
+      }
     });
   }
   async __goToBed() {
@@ -554,7 +709,6 @@ export default class Main extends Phaser.Scene {
       if (!this.player.isFainted()) {
         await this.player.faint();
         this.menu.show();
-        STATE.save();
       }
     }
     this.lifeBar.setValue(STATE.HEALTH);
@@ -562,7 +716,11 @@ export default class Main extends Phaser.Scene {
 
   __everyTick() {
     addHour();
+    GameBroadcast.emit("hour", {
+      hour: STATE.DATE.hour,
+    });
     this.calendar.update();
+    this.sunLight.update();
   }
   update() {
     this._validateLife();

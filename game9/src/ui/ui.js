@@ -3,7 +3,8 @@ import { Deffered, definePropertyToChild, iterate } from "../utils.js";
 export function generateRectTexture(scene) {
   if (!scene.textures.list.hasOwnProperty("bar")) {
     let g = scene.make.graphics({ add: false });
-    g.fillStyle(0xff0000);
+
+    g.fillStyle(0xffffff);
     g.fillRect(0, 0, 10, 10);
     g.generateTexture("bar", 8, 8);
     g.generateTexture("rect", 8, 8);
@@ -11,77 +12,81 @@ export function generateRectTexture(scene) {
   }
 }
 
-export function ProgressBar(
-  scene,
-  x,
-  y,
-  width = 100,
-  height = 30,
-  settings = { color: 0xffffff, backgroundColor: 0x111111 }
-) {
-  settings = Object.assign(
-    { color: 0xffffff, backgroundColor: 0x111111 },
-    settings
-  );
+export class ProgressBar extends Phaser.GameObjects.Container {
+  constructor(
+    scene,
+    x,
+    y,
+    width = 100,
+    height = 30,
+    settings = { color: 0xffffff, backgroundColor: 0x111111 }
+  ) {
+    super(scene, x, y, []);
+    scene.add.existing(this);
+    this.value = 0;
+    this.setSize(width, height);
+    if (!settings.color) {
+      settings.color = 0xffffff;
+    }
+    if (!settings.backgroundColor) {
+      settings.backgroundColor = 0x111111;
+    }
+    const backgroundBar = scene.add
+      .image(0, 0, "bar")
+      .setOrigin(0, 0.5)
+      .setDisplaySize(width, height)
+      .setTintFill(settings.backgroundColor);
+    this.backgroundBar = backgroundBar;
+    const barBorder = scene.add
+      .image(-2, 0, "bar")
+      .setOrigin(0, 0.5)
+      .setTintFill(0x111111)
+      .setDisplaySize(width + 4, height + 4);
+    this.barBorder = barBorder;
+    const bar = scene.add
+      .image(0, 0, "bar")
+      .setOrigin(0, 0.5)
+      .setTintFill(settings.color);
+    this.bar = bar;
 
-  let backgroundBar = scene.add
-    .image(0, 0, "bar")
-    .setOrigin(0, 0.5)
-    .setDisplaySize(width, height)
-    .setTintFill(settings.backgroundColor);
+    this.add([backgroundBar, barBorder, bar]);
 
-  let barBorder = scene.add
-    .image(-2, 0, "bar")
-    .setOrigin(0, 0.5)
-    .setTintFill(0x111111)
-    .setDisplaySize(width + 4, height + 4);
+    this.getContainer = () => this;
 
-  let bar = scene.add
-    .image(0, 0, "bar")
-    .setOrigin(0, 0.5)
-    .setTintFill(settings.color);
+    this.setTimeout = (timeLoops, callback, type) => {
+      var deffered = new Deffered();
+      /// 3 real seconds, 2 game minutes., 1 GAME HOURS
+      const delay = type === 3 ? 1000 : type === 2 ? TICK_HOUR / 60 : TICK_HOUR;
+      let cicles = 0;
+      let clock = scene.time.addEvent({
+        delay,
+        repeat: timeLoops,
+        callback: () => {
+          cicles++;
+          let progress = (cicles / timeLoops) * 100;
+          this.setValue(progress);
+          callback && callback(progress);
+          if (progress >= 100) {
+            clock.destroy();
+            deffered.resolve();
+          }
+        },
+      });
 
-  const container = scene.add.container(x, y, [backgroundBar, barBorder, bar]);
-
-  definePropertyToChild(this, "x", container);
-  definePropertyToChild(this, "y", container);
-  this.width = width;
-  this.height = height;
-
-  this.setValue = (p) => {
-    bar.setDisplaySize(width * (p / 100), height);
+      return deffered.promise;
+    };
+    this.setValue(0);
+  }
+  setValue = (v) => {
+    this.value = v;
+    this.bar.setDisplaySize(this.width * (this.value / 100), this.height);
   };
-
-  this.getContainer = () => container;
-  this.destroy = () => {
-    bar.destroy();
-    backgroundBar.destroy();
-    barBorder.destroy();
-    container.destroy();
-  };
-  this.setTimeout = (timeLoops, callback, type) => {
-    var deffered = new Deffered();
-    /// 3 real seconds, 2 game minutes., 1 GAME HOURS
-    const delay = type === 3 ? 1000 : type === 2 ? TICK_HOUR / 60 : TICK_HOUR;
-    let cicles = 0;
-    let clock = scene.time.addEvent({
-      delay,
-      repeat: timeLoops,
-      callback: () => {
-        cicles++;
-        let progress = (cicles / timeLoops) * 100;
-        this.setValue(progress);
-        callback && callback(progress);
-        if (progress >= 100) {
-          clock.destroy();
-          deffered.resolve();
-        }
-      },
-    });
-
-    return deffered.promise;
-  };
-  this.setValue(0);
+  setMaxWidth(w) {
+    this.setSize(w, this.height);
+    this.backgroundBar.setDisplaySize(this.width, this.height);
+    this.barBorder.setDisplaySize(this.width + 4, this.height + 4);
+    this.setValue(this.value);
+  }
 }
 
 export function addMessages(scene, messages) {
@@ -304,6 +309,7 @@ export class Button extends Phaser.GameObjects.Container {
     super(scene, x, y, []);
     scene.add.existing(this);
     this.isButton = true;
+    this.icon = null;
     var padding = 10;
     var callback_onCLick = null;
     this.text = scene.add
@@ -347,8 +353,10 @@ export class Button extends Phaser.GameObjects.Container {
       return this;
     };
     this.addIcon = (icon) => {
-      icon.x = this.width / -2 + icon.displayWidth / 2;
-      this.add(icon);
+      this.icon = icon;
+      this.icon.x = this.width / -2 + icon.displayWidth / 2;
+      this.add(this.icon);
+
       return this;
     };
     this.setMaxWidth = (width) => {
@@ -676,5 +684,28 @@ export class FullBar extends Phaser.GameObjects.Container {
         bar.x = this.partSize * idx + this.offset * idx;
       }
     });
+  }
+}
+
+export class ButtonWithProgress extends Button {
+  constructor(scene, x, y, text) {
+    super(scene, x, y, text);
+
+    this.progress = new ProgressBar(
+      scene,
+      -this.displayWidth / 2,
+      this.height / 2,
+      this.displayWidth,
+      4
+    );
+
+    this.add(this.progress);
+    this.text.setDropShadow(0, 0);
+  }
+  updateWidth(w) {
+    this.setMaxWidth(w);
+    this.progress.setMaxWidth(this.displayWidth);
+    this.progress.x = -this.displayWidth / 2;
+    this.progress.y = this.displayHeight / 2;
   }
 }

@@ -91,10 +91,12 @@ function calcJobSalary(job) {
 function addJobToPool(jobType) {
   let newjob = new Job();
   let companyName = COMPANIES[random(0, MAX_IDX_COMPANIES)];
-  let seniorityJobLevel = random(
-    jobType.level,
-    Math.min(MAX_POSIBLE_SENIORITY_LEVEL, STATE.SENIORITY + 1)
-  );
+  let seniorityJobLevel = STATE.tutorial
+    ? jobType.level
+    : random(
+        jobType.level,
+        Math.min(MAX_POSIBLE_SENIORITY_LEVEL, STATE.SENIORITY + 1)
+      );
 
   // FROM CURRENT DATE
   let expirationDate = addDaysToDate(
@@ -106,11 +108,9 @@ function addJobToPool(jobType) {
     random(2, 10)
   );
   let seniorityChoose = SENIORITY_LEVELS[seniorityJobLevel];
-  let requirements = getJobRandomRequirements(
-    jobType,
-    seniorityChoose,
-    seniorityJobLevel
-  );
+  let requirements = STATE.tutorial
+    ? []
+    : getJobRandomRequirements(jobType, seniorityChoose, seniorityJobLevel);
 
   newjob = Object.assign(newjob, {
     jobTitle: jobType.type,
@@ -122,12 +122,24 @@ function addJobToPool(jobType) {
     requirements,
     expirationDate,
   });
-  calcJobSalary(newjob);
+  if (STATE.tutorial) {
+    newjob.salary = 2;
+  } else {
+    calcJobSalary(newjob);
+  }
   JobPool.push(newjob);
 }
 
 export function populateNewJobOfferts() {
   // ITERATE POOL AND REMOVE JOB PASSED
+  if (STATE.tutorial) {
+    addJobToPool({
+      type: "Asistente de Tutor de computacion",
+      requireKnowledge: [],
+      level: 0,
+    });
+    return;
+  }
   removeExpirateJobs();
   if (lastJobSeekDay === STATE.DATE.day) {
     return;
@@ -135,7 +147,9 @@ export function populateNewJobOfferts() {
   lastJobSeekDay = STATE.DATE.day;
 
   // ADD NEW JOB OFFERS
-  let total = random(3, 6);
+  let total = STATE.tutorial
+    ? 1
+    : Math.max(1, random(STATE.SENIORITY, STATE.SENIORITY * 2));
 
   let posibleJobList = JOBTYPES.filter((jobtype) => {
     return jobtype.level <= STATE.SENIORITY;

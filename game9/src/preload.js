@@ -30,12 +30,16 @@ export default function preload() {
   this.load.image("calendar", "assets/images/calendar.png");
   this.load.image("sun", "assets/images/sun.png");
   this.load.image("moon", "assets/images/moon.png");
+  this.load.image("white", "assets/images/white.png");
+  this.load.image("red", "assets/images/red.png");
+  this.load.image("blue", "assets/images/blue.png");
 
   // AUDIOS
   this.load.audio("tap", "./assets/audio/tap-effect.mp3");
   this.load.audio("click", "./assets/audio/click.mp3");
   this.load.audio("money", "./assets/audio/money.wav");
   this.load.audio("money-come", "./assets/audio/comes-the-money.mp3");
+  this.load.audio("victory", "./assets/audio/victory.mp3");
   this.load.audio("melody1", "./assets/audio/chilli-melody-lofi.mp3");
   // AUDIO MEALS
   this.load.audio(

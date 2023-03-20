@@ -1,5 +1,5 @@
 import { COLORS } from "../constants.js";
-import { Deffered, tweenOnPromise, waitTimeout } from "../utils.js";
+import { Deffered, repeatFlash, tweenOnPromise, waitTimeout } from "../utils.js";
 
 async function hereCOmesTheMOney(scene) {
   //FADE OUT
@@ -15,15 +15,9 @@ async function hereCOmesTheMOney(scene) {
     },
   });
 }
+
 export default async function getPaidByJob(scene, job) {
-  let iteration = 0;
-  let intervalId = setInterval(() => {
-    iteration++;
-    scene.cameras.main.flash(100);
-    if (iteration > 3) {
-      clearInterval(intervalId);
-    }
-  }, 100);
+  repeatFlash(scene);
 
   // HIDE EVERYTHING
   scene.hideUI();

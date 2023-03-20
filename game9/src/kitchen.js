@@ -199,7 +199,7 @@ export default class Kitchen extends Phaser.GameObjects.Container {
     };
     const onTake = () => {
       this.ingredientText.setVisible(false);
-      STATE.INVENTORY.coffee = Math.max(1, STATE.INVENTORY.coffee - 1);
+      STATE.INVENTORY.coffee = Math.max(0, STATE.INVENTORY.coffee - 1);
       container.setVisible(false);
       SOUNDS.coffee_preparation.play();
       this.doAction("Preparando cafe", FOODS.coffee.preparation_time)
@@ -294,7 +294,7 @@ export default class Kitchen extends Phaser.GameObjects.Container {
         this.scene.scale.width / 2,
         titleText.y + titleText.height / 2 + 12,
         "font1",
-        "Se usaran todos los ingredientes",
+        ["Se usaran todos los ingredientes","Que tomes del regrigerador"],
         16
       )
       .setTint(0xffffff)
@@ -339,7 +339,7 @@ export default class Kitchen extends Phaser.GameObjects.Container {
 
       // UPDATE INGREDIENTS FROM INVENTORY
       STATE.INVENTORY.ingredients = Math.max(
-        1,
+        0,
         STATE.INVENTORY.ingredients - this.fridge_ingredients
       );
       // REDUCE

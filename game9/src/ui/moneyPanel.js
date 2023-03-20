@@ -1,8 +1,7 @@
-import STATE from "../state.js";
-import { generateRectTexture } from "./ui.js";
+import STATE from "../state.js"; 
 
 export function MoneyPanel(scene, x, y) {
-  generateRectTexture(scene);
+  
   const panelBG = scene.add
     .image(0, 0, "rect")
     .setOrigin(0)

@@ -86,3 +86,17 @@ export function shakeObject(gameObject, duration, intensity) {
   });
   return deferred.promise;
 }
+
+export function repeatFlash(scene, iterations = 3, delay = 100) {
+  var deferred = new Deffered();
+  let iteration = 0;
+  let intervalId = setInterval(() => {
+    iteration++;
+    scene.cameras.main.flash(100);
+    if (iteration > iterations) {
+      clearInterval(intervalId);
+      deferred.resolve();
+    }
+  }, delay);
+  return deferred.promise;
+}

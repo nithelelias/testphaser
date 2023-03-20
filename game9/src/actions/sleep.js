@@ -1,4 +1,5 @@
 import { TICK_HOUR } from "../constants.js";
+import { recoverHPBySleep } from "../context.js";
 import { ProgressBar } from "../ui/ui.js";
 import { Deffered } from "../utils.js";
 
@@ -27,7 +28,7 @@ export default function Sleep(scene) {
   scene.time.timeScale = 8;
   progressBar
     .setTimeout(8, (progress) => {
-      scene.recoverHPBySleep();
+       recoverHPBySleep();
     })
     .then(() => {
       titleBar.destroy();

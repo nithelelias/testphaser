@@ -101,23 +101,34 @@ function doJob(scene, job) {
       16
     )
     .setOrigin(0.5, 1);
-
-  var unbind = scene.player.onAct(() => {
+  const advance = () => {
     progress += tick_value;
     progressBar.setValue(progress);
     progressText.setText([parseInt(progress) + "%"]);
     if (progress >= 100) {
       onended();
     }
-  });
+  };
+  var unbind = scene.player.onAct(advance);
 
   var unbindFaint = scene.player.onFaint(() => {
     onended();
   });
-
+  var unbinIdleAdvance = (() => {
+    const timeEvent = scene.time.addEvent({
+      delay: 1000,
+      loop: true,
+      callback: () => {
+        scene.player.doTyping();
+        advance();
+      },
+    });
+    return () => timeEvent.destroy();
+  })();
   const unbindAll = () => {
     unbindFaint();
     unbind();
+    unbinIdleAdvance();
     titleBar.destroy();
     progressBar.destroy();
     cancelButton.destroy();

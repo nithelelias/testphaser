@@ -4,15 +4,15 @@
 const FOODS = {
   coffee: {
     max: 5,
-    preparation_time: 6,
-    consume_time: 5,
+    preparation_time: 2,
+    consume_time: 2,
     recover: 10,
     cost: 2,
   },
   water: {
     max: 1,
-    preparation_time: 3,
-    consume_time: 3,
+    preparation_time: 1,
+    consume_time: 1,
     recover: 2,
     cost: 1,
   },

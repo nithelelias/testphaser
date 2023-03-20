@@ -1,6 +1,7 @@
 import Sleep from "./actions/sleep.js";
+import SOUNDS from "./sounds.js";
 import STATE from "./state.js";
-import { tweenOnPromise, waitTimeout } from "./utils.js";
+import { random, tweenOnPromise, waitTimeout } from "./utils.js";
 
 export default class Player extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y, room) {
@@ -11,6 +12,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
     this.__sleeping = false;
     this.__onkitchen = false;
     this.__fainted = false;
+    this.__busy = false;
     this.room = room;
   }
   onAct(_callback) {
@@ -25,13 +27,16 @@ export default class Player extends Phaser.GameObjects.Sprite {
       this.__onFaint_callback = null;
     };
   }
+  setBusy(state) {
+    this.__busy = state;
+  }
   isFainted() {
     return this.__fainted;
   }
   isBusy() {
-    return this.__sleeping || this.__fainted || this.__onkitchen;
+    return this.__busy || this.__sleeping || this.__fainted || this.__onkitchen;
   }
-  async hinge() {
+  async hinge(withSound = false) {
     if (this.__higing) {
       return;
     }
@@ -41,6 +46,13 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
 
     this.setAngle(0);
+    if (withSound) {
+      if (this.__hinge_dir > 0) {
+        SOUNDS.step2.play();
+      } else {
+        SOUNDS.step.play();
+      }
+    }
     await tweenOnPromise(this.scene, {
       targets: this,
       angle: 12 * this.__hinge_dir,
@@ -64,7 +76,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
       x: "-=200",
       duration: 2200,
       onUpdate: () => {
-        this.hinge();
+        this.hinge(true);
       },
     });
     await Sleep(this.scene);
@@ -74,7 +86,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
       x: "+=200",
       duration: 2200,
       onUpdate: () => {
-        this.hinge();
+        this.hinge(true);
       },
     });
     this.setFrame(1);
@@ -91,7 +103,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
       x: "+=332",
       duration: 3200,
       onUpdate: () => {
-        this.hinge();
+        this.hinge(true);
       },
     });
     this.setFrame(1);
@@ -108,7 +120,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
       x: "-=332",
       duration: 3200,
       onUpdate: () => {
-        this.hinge();
+        this.hinge(true);
       },
     });
     this.setFrame(1);
@@ -154,5 +166,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
   }
   getState() {
     return STATE;
+  }
+  doTyping() {
+    if (this.isBusy()) {
+      return;
+    }
+    SOUNDS.typing.play("key" + random(1, 9), 0.1);
+    this.hinge();
   }
 }

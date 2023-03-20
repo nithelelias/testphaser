@@ -25,7 +25,7 @@ export default function Calendar(scene, x, y) {
   ]);
 
   this.update = () => {
-    calendarMonthText.setText([MONTHS[STATE.DATE.month - 1]]);
+    calendarMonthText.setText([MONTHS[STATE.DATE.month]]);
     dateText.setText([padStartNum(STATE.DATE.day)]);
   };
   this.getContainer = () => {

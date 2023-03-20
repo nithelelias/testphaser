@@ -1,27 +1,32 @@
 const SOUNDS = {};
 
 export function initSounds() {
-  (SOUNDS.step = this.sound.add("step", { loop: false, volume: 0.2, rate: 2 })),
-    (SOUNDS.step2 = this.sound.add("step", { loop: false, volume: 0.1 })),
-    (SOUNDS.typing = this.sound.add("typing", { loop: false, volume: 0.5 })),
-    (SOUNDS.tap = this.sound.add("tap", { loop: false, volume: 0.3, rate: 3 })),
-    (SOUNDS.click = this.sound.add("click", {
-      loop: false,
-      volume: 0.3,
-      rate: 1,
-    })),
-    (SOUNDS.money = this.sound.add("money", {
-      loop: false,
-      volume: 0.3,
-      rate: 1,
-    })),
-    (SOUNDS.melody1 = this.sound.add("melody1", { loop: true, volume: 0.01 })),
-    (SOUNDS.moneyCome = this.sound.add("money-come", {
-      loop: false,
-      volume: 0.3,
-      rate: 1,
-    })),
-    SOUNDS.typing.addMarker({ name: "key1", start: 2.3, duration: 0.2 });
+  SOUNDS.step = this.sound.add("step", { loop: false, volume: 0.2, rate: 2 });
+  SOUNDS.step2 = this.sound.add("step", { loop: false, volume: 0.1 });
+  SOUNDS.typing = this.sound.add("typing", { loop: false, volume: 0.5 });
+  SOUNDS.tap = this.sound.add("tap", { loop: false, volume: 0.3, rate: 3 });
+  SOUNDS.click = this.sound.add("click", {
+    loop: false,
+    volume: 0.3,
+    rate: 1,
+  });
+  SOUNDS.money = this.sound.add("money", {
+    loop: false,
+    volume: 0.3,
+    rate: 1,
+  });
+  SOUNDS.melody1 = this.sound.add("melody1", { loop: true, volume: 0.01 });
+  SOUNDS.moneyCome = this.sound.add("money-come", {
+    loop: false,
+    volume: 0.3,
+    rate: 1,
+  });
+  SOUNDS.victory = this.sound.add("victory", {
+    loop: false,
+    volume: 0.3,
+    rate: 1,
+  });
+  SOUNDS.typing.addMarker({ name: "key1", start: 2.3, duration: 0.2 });
   SOUNDS.typing.addMarker({ name: "key2", start: 2.5, duration: 0.1 });
   SOUNDS.typing.addMarker({ name: "key3", start: 2.6, duration: 0.1 });
   SOUNDS.typing.addMarker({ name: "key4", start: 2.7, duration: 0.1 });

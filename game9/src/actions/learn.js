@@ -10,9 +10,10 @@ function actionStart(scene, topic, progressStart) {
   var centerX = scene.scale.width / 2;
   var startY = scene.scale.height / 2 + 12;
   let topic_cost = topic.cost;
-  let advance_value = Math.max(0.01, STATE.ACTION_STUDY / topic_cost);
-  let progress = progressStart;
 
+  let advance_value = parseFloat((1 / (topic_cost * 10)).toFixed(2));
+  let progress = progressStart;
+  console.log("topic_cost", topic_cost, "advance_value", advance_value);
   var progressBar = new ProgressBar(
     scene,
     scene.scale.width / 2 - width / 2,
@@ -31,7 +32,7 @@ function actionStart(scene, topic, progressStart) {
       centerX,
       startY - 12,
       "font1",
-      ["Taza de progreso: " + STATE.ACTION_STUDY + "/" + topic_cost],
+      ["Taza de progreso: " + advance_value],
       16
     )
     .setCenterAlign()
@@ -66,14 +67,27 @@ function actionStart(scene, topic, progressStart) {
     )
     .setOrigin(0.5, 1);
 
-  var unbind = scene.player.onAct(() => {
+  const advance = () => {
     progress += advance_value;
     progressBar.setValue(progress);
     progressText.setText([parseInt(progress) + "%"]);
     if (progress >= 100) {
       onended();
     }
-  });
+  };
+  var unbind = scene.player.onAct(advance);
+
+  var unbinIdleAdvance = (() => {
+    const timeEvent = scene.time.addEvent({
+      delay: 1000,
+      loop: true,
+      callback: () => {
+        scene.player.doTyping();
+        advance();
+      },
+    });
+    return () => timeEvent.destroy();
+  })();
 
   var unbindFaint = scene.player.onFaint(() => {
     onended();
@@ -82,6 +96,7 @@ function actionStart(scene, topic, progressStart) {
   const unbindAll = () => {
     unbind();
     unbindFaint();
+    unbinIdleAdvance();
 
     titleBar.destroy();
     progressBar.destroy();
@@ -105,7 +120,6 @@ function actionStart(scene, topic, progressStart) {
 export default async function learn(scene, topic) {
   // add progress bar of day at top
 
-  scene.time.timeScale = 2;
   let progress = getKnowledgeLevel(topic.text);
   if (progress < 100) {
     await actionStart(scene, topic, progress);
@@ -113,10 +127,11 @@ export default async function learn(scene, topic) {
     let message1 = typedMessage(
       scene,
       ["Ya domine este tema!!"],
-      0,
+      scene.scale.width / 2,
       scene.scale.height / 2 + 12,
       32
     );
+    message1.bitmapText.setOrigin(0.5);
     await message1.promise;
     await tweenOnPromise(scene, {
       targets: [message1.bitmapText],
@@ -126,6 +141,4 @@ export default async function learn(scene, topic) {
     });
     message1.destroy();
   }
-
-  scene.time.timeScale = 1;
 }

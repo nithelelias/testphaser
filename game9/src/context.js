@@ -2,6 +2,10 @@ import { SENIORITY_LEVELS } from "./constants.js";
 import FOODS from "./data/foods.js";
 import KNOWLEDGE_ROADMAP from "./data/knowledgeMap.js";
 import STATE from "./state.js";
+export function saveState() {
+  STATE.num += 1;
+  STATE.save();
+}
 export function addHour(plus = 1) {
   STATE.DATE.hour += plus;
   newDay();
@@ -66,23 +70,20 @@ export function progressOnKnowledge(topic, progress) {
     STATE.ACTION_STUDY += 1;
   }
   advanceSeniority();
-  STATE.save();
 }
 
 export function expendMoney(value) {
   if (STATE.MONEY - value < 0) {
     return false;
   }
-  
+
   STATE.MONEY = parseFloat((STATE.MONEY - value).toFixed(2));
 
-  STATE.save();
   return true;
 }
 
 export function recoverHP(value) {
   STATE.HEALTH = Math.min(100, STATE.HEALTH + value);
-  STATE.save();
 }
 
 export function recoverHPBySleep() {
@@ -97,7 +98,7 @@ export function buyCoffee(n = 1) {
     FOODS.coffee.max,
     STATE.INVENTORY.coffee + n
   );
-  STATE.save();
+
   return true;
 }
 export function buyFoodIngredient(n = 1) {
@@ -108,6 +109,6 @@ export function buyFoodIngredient(n = 1) {
     FOODS.ingredient.max,
     STATE.INVENTORY.ingredients + n
   );
-  STATE.save();
+
   return true;
 }
