@@ -1,5 +1,5 @@
 import { TICK_HOUR } from "../constants.js";
-import { Deffered, definePropertyToChild } from "../utils.js";
+import { Deffered, definePropertyToChild, iterate } from "../utils.js";
 export function generateRectTexture(scene) {
   if (!scene.textures.list.hasOwnProperty("bar")) {
     let g = scene.make.graphics({ add: false });
@@ -59,15 +59,17 @@ export function ProgressBar(
     barBorder.destroy();
     container.destroy();
   };
-  this.setTimeout = (hours, callback) => {
+  this.setTimeout = (timeLoops, callback, type) => {
     var deffered = new Deffered();
+    /// 3 real seconds, 2 game minutes., 1 GAME HOURS
+    const delay = type === 3 ? 1000 : type === 2 ? TICK_HOUR / 60 : TICK_HOUR;
     let cicles = 0;
     let clock = scene.time.addEvent({
-      delay: TICK_HOUR,
-      repeat: hours,
+      delay,
+      repeat: timeLoops,
       callback: () => {
         cicles++;
-        let progress = (cicles / hours) * 100;
+        let progress = (cicles / timeLoops) * 100;
         this.setValue(progress);
         callback && callback(progress);
         if (progress >= 100) {
@@ -374,7 +376,7 @@ export class Button extends Phaser.GameObjects.Container {
         true
       );
     };
-  
+
     renderInteracive();
     this.on("pointerdown", onPointerDown, true);
     //scene.input.enableDebug(container, 0xff00ff);
@@ -564,7 +566,6 @@ export function typedMessage(scene, text, x, y, fontSize = 16) {
   var deferred = new Deffered();
   let parsedText = [].concat(text).map((t) => [...t]);
 
-  let totalChars = parsedText.join("\n").split(",").length;
   let message_text = new Array(parsedText.length).fill("");
   //  [ "...","...."]
   var bitmapText = scene.add.dynamicBitmapText(
@@ -606,4 +607,74 @@ export function typedMessage(scene, text, x, y, fontSize = 16) {
     },
     onComplete: (callback) => deferred.promise.then(callback),
   };
+}
+
+export class FullBar extends Phaser.GameObjects.Container {
+  constructor(
+    scene,
+    x,
+    y,
+    parts,
+    maxWidth,
+    height,
+    color = 0xffffff,
+    backgroundColor = 0x111111
+  ) {
+    super(scene, x, y, []);
+    this.parts = parts;
+    this.color = color;
+    this.offset = 5;
+    this.partSize = maxWidth / parts - this.offset;
+    this.backgroundColor = backgroundColor;
+    this.setSize(maxWidth, height);
+    this.background = this.scene.add
+      .image(0, 0, "bar")
+      .setDisplaySize(this.width, this.height)
+      .setOrigin(0, 0.5)
+      .setTintFill(this.backgroundColor);
+
+    this.pieceContainer = scene.add.container(0, 0, []);
+    this.add([this.background, this.pieceContainer]);
+  }
+  getValue() {
+    return this.pieceContainer.list.length;
+  }
+  setValue(n) {
+    let dif = n - this.getValue();
+    if (dif < 1) {
+      this.pieceContainer.list.forEach((bar, idx) => {
+        if (n > idx + 1) {
+          bar.destroy();
+        }
+      });
+    } else {
+      this.addPart(dif);
+    }
+  }
+  addPart(n = 1) {
+    iterate(n, () => {
+      let bar = this.scene.add
+        .image(0, 0, "bar")
+        .setDisplaySize(this.partSize, this.height)
+        .setOrigin(0, 0.5)
+        .setTintFill(this.color);
+      bar.isPiece = true;
+      this.pieceContainer.add(bar);
+    });
+    this.fit();
+  }
+  removePart(n = 1) {
+    iterate(n, (_i) => {
+      if (this.pieceContainer.list.length > 0) {
+        this.pieceContainer.list.pop().destroy();
+      }
+    });
+  }
+  fit() {
+    this.pieceContainer.list.forEach((bar, idx) => {
+      if (bar.isPiece) {
+        bar.x = this.partSize * idx + this.offset * idx;
+      }
+    });
+  }
 }

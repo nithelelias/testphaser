@@ -7,12 +7,12 @@ import JobRequirement from "./models/jobRequirement.js";
 import STATE from "./state.js";
 import { iterate, random } from "./utils.js";
 
-const SALARY_BASE = 10;
-const SALARY_PLUS_BASE = 3;
+const SALARY_BASE = 6;
+const SALARY_PLUS_BASE = 2;
 const MAX_POSIBLE_SENIORITY_LEVEL = SENIORITY_LEVELS.length - 1;
 const MAX_IDX_COMPANIES = COMPANIES.length - 1;
 const JobPool = [];
-
+var lastJobSeekDay = 0;
 function getDateNumber(date) {
   return date.day + date.month * 30 + date.year * 12 * 30;
 }
@@ -30,11 +30,11 @@ function addDaysToDate(date, days) {
 }
 function removeExpirateJobs() {
   let repeat = false;
+  let currentDateNumber = getDateNumber(STATE.DATE);
   while (repeat) {
     repeat = false;
     for (let i in JobPool) {
       let expirationDateNumber = getDateNumber(JobPool[i].expirationDate);
-      let currentDateNumber = getDateNumber(STATE.DATE);
 
       if (currentDateNumber > expirationDateNumber) {
         JobPool.splice(parseInt(i), 1);
@@ -43,6 +43,12 @@ function removeExpirateJobs() {
       }
     }
   }
+}
+export function isJobExpired(job) {
+  return getDateNumber(STATE.DATE) > getDateNumber(job.expirationDate);
+}
+export function getJobDaysDiff(job) {
+  return getDateNumber(job.expirationDate) - getDateNumber(STATE.DATE);
 }
 export function getJobPool() {
   return JobPool;
@@ -97,7 +103,7 @@ function addJobToPool(jobType) {
       month: STATE.DATE.month + 0,
       year: STATE.DATE.year,
     },
-    random(2, 15)
+    random(2, 10)
   );
   let seniorityChoose = SENIORITY_LEVELS[seniorityJobLevel];
   let requirements = getJobRandomRequirements(
@@ -123,6 +129,10 @@ function addJobToPool(jobType) {
 export function populateNewJobOfferts() {
   // ITERATE POOL AND REMOVE JOB PASSED
   removeExpirateJobs();
+  if (lastJobSeekDay === STATE.DATE.day) {
+    return;
+  }
+  lastJobSeekDay = STATE.DATE.day;
 
   // ADD NEW JOB OFFERS
   let total = random(3, 6);

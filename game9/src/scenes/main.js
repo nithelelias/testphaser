@@ -10,19 +10,14 @@ import {
   FullPanelWrapper,
   PanelInfo,
   ProgressBar,
+  typedMessage,
   UI_textAndBar,
 } from "../ui/ui.js";
-import { random, tweenOnPromise } from "../utils.js";
+import { random, tweenOnPromise, waitTimeout } from "../utils.js";
 import KNOWLEDGE_ROADMAP from "../data/knowledgeMap.js";
 import DayTimer from "../ui/daytimer.js";
 import Calendar from "../ui/calendar.js";
-import {
-  addHour,
-  canAdanceSeniority,
-   
-  getSeniority,
-} from "../context.js";
-import Sleep from "../actions/sleep.js";
+import { addHour, canAdanceSeniority, getSeniority } from "../context.js";
 import learn from "../actions/learn.js";
 import {
   getJobPool,
@@ -33,71 +28,31 @@ import JobOffert from "../ui/jobOffert.js";
 import { AnimFadeIn } from "../ui/transitions.js";
 import jobInterview from "../actions/jobInterview.js";
 import workOnJob from "../actions/workOnJob.js";
+import Player from "../player.js";
+import getPaidByJob from "../actions/getPaidByJob.js";
+import SOUNDS from "../sounds.js";
+import Kitchen from "../kitchen.js";
 
 export default class Main extends Phaser.Scene {
   constructor() {
     super("main");
     window.$main = this;
-  } 
+  }
   create() {
     this._initSounds();
     this._initPlayer();
     this._initUI();
     this.__everyTick();
-    let anim = new AnimFadeIn(this, () => {
-      this.initClock();
-      anim.destroy();
-    });
+
+    AnimFadeIn(this);
+
+    this._initClock();
+    this.updateInformation();
   }
 
   _initSounds() {
-    this.sounds = {
-      step: this.sound.add("step", { loop: false, volume: 0.2, rate: 2 }),
-      step2: this.sound.add("step", { loop: false, volume: 0.1 }),
-      typing: this.sound.add("typing", { loop: false, volume: 0.5 }),
-      tap: this.sound.add("tap", { loop: false, volume: 0.3, rate: 3 }),
-      click: this.sound.add("click", { loop: false, volume: 0.3, rate: 1 }),
-    };
-    // TYPING KEYS
-    {
-      this.sounds.typing.addMarker({ name: "key1", start: 2.3, duration: 0.2 });
-      this.sounds.typing.addMarker({ name: "key2", start: 2.5, duration: 0.1 });
-      this.sounds.typing.addMarker({ name: "key3", start: 2.6, duration: 0.1 });
-      this.sounds.typing.addMarker({ name: "key4", start: 2.7, duration: 0.1 });
-      this.sounds.typing.addMarker({ name: "key5", start: 2.8, duration: 0.1 });
-      this.sounds.typing.addMarker({ name: "key6", start: 2.9, duration: 0.1 });
-      this.sounds.typing.addMarker({ name: "key7", start: 3.0, duration: 0.1 });
-      this.sounds.typing.addMarker({ name: "key8", start: 3.1, duration: 0.1 });
-      this.sounds.typing.addMarker({ name: "key9", start: 3.2, duration: 0.1 });
-      this.sounds.typing.addMarker({
-        name: "key10",
-        start: 3.3,
-        duration: 0.1,
-      });
-      this.sounds.typing.addMarker({
-        name: "key11",
-        start: 3.4,
-        duration: 0.1,
-      });
-    }
-    //TAP
-    {
-      this.sounds.tap.addMarker({
-        name: "t1",
-        start: 0,
-        duration: 0.4,
-      });
-      this.sounds.tap.addMarker({
-        name: "t2",
-        start: 0.4,
-        duration: 0.3,
-      });
-      this.sounds.tap.addMarker({
-        name: "t3",
-        start: 0.7,
-        duration: 0.3,
-      });
-    }
+    this.sounds = SOUNDS;
+    this.sounds.melody1.play();
   }
 
   _initPlayer() {
@@ -108,71 +63,24 @@ export default class Main extends Phaser.Scene {
     const bed = this.add.image(200, 48, "bed", 0).setDisplaySize(128, 192);
     const sheet = this.add.image(200, 48, "bed", 1).setDisplaySize(128, 192);
     const pc = this.add.image(0, 0, "computer", 0).setDisplaySize(102, 102);
-    this.player = this.add.sprite(0, 20, "player", 1).setDisplaySize(128, 128);
-    this.player.hinge = async () => {
-      if (this.player.higing) {
-        return;
-      }
-      this.player.higing = true;
-      if (!this.player.hinge_dir) {
-        this.player.hinge_dir = 1;
-      }
-
-      this.player.setAngle(0);
-      await tweenOnPromise(this, {
-        targets: this.player,
-        angle: 12 * this.player.hinge_dir,
-        y: "-=5",
-        yoyo: true,
-        duration: 100,
-      });
-      this.player.higing = false;
-      this.player.hinge_dir *= -1;
-    };
-    this.player.goToBed = async () => {
-      if (this.player.walking) {
-        return;
-      }
-      this.menu.hide();
-      this.player.walking = true;
-      this.player.setFrame(2);
-      this.player.setFlipX(true);
-      await tweenOnPromise(this, {
-        targets: [pc, bed, sheet],
-        x: "-=200",
-        duration: 2200,
-        onUpdate: () => {
-          this.player.hinge();
-        },
-      });
-      await Sleep(this);
-      this.player.setFlipX(false);
-      await tweenOnPromise(this, {
-        targets: [pc, bed, sheet],
-        x: "+=200",
-        duration: 2200,
-        onUpdate: () => {
-          this.player.hinge();
-        },
-      });
-      this.player.setFrame(1);
-      this.player.walking = false;
-      this.menu.show();
-    };
-    this.player.onAct = (_callback) => {
-      this.player.__onAct = _callback;
-      return () => {
-        this.player.__onAct = null;
-      };
-    };
-    this;
+    const kitchen = new Kitchen(this, -200, -32);
+    this.player = new Player(this, 0, 20, [kitchen, pc, bed, sheet]);
+    const playerContainer = this.add.container(location.x, location.y, [
+      kitchen,
+      pc,
+      bed,
+      this.player,
+      sheet,
+    ]);
     let onPointerDown = () => {
       // SPEED UP
       this.input.once(
         "pointerup",
         () => {
           // SPEED DOWN
-
+          if (this.player.isBusy()) {
+            return;
+          }
           this.sounds.typing.play("key" + random(1, 9), 0.1);
           this.player.hinge();
           if (this.player.__onAct) {
@@ -183,12 +91,6 @@ export default class Main extends Phaser.Scene {
         true
       );
     };
-    const playerContainer = this.add.container(location.x, location.y, [
-      pc,
-      bed,
-      this.player,
-      sheet,
-    ]);
     playerContainer.setSize(this.scale.width * 0.5, 140);
     playerContainer.setInteractive();
     playerContainer.on("pointerdown", onPointerDown, true);
@@ -250,12 +152,13 @@ export default class Main extends Phaser.Scene {
     var minX = 16;
     var minY = 180;
     var maxY = this.scale.height - 32;
-
     var margin = 16;
 
-    const btnDormir = new Button(this, minX, minY, "Dormir", 20).onClick(() => {
-      this.player.goToBed();
-    });
+    const btnDormir = new Button(this, minX, minY, "Dormir", 20).onClick(
+      async () => {
+        this.__goToBed();
+      }
+    );
     const btneat = new Button(
       this,
       btnDormir.x + btnDormir.width / 2 + margin,
@@ -264,7 +167,10 @@ export default class Main extends Phaser.Scene {
     )
 
       .addIcon(this.add.sprite(0, 0, "icons", 27).setDisplaySize(32, 32))
-      .onClick(() => {});
+      .onClick(() => {
+        this.__goToKitchen();
+      });
+
     const btnrelax = new Button(
       this,
       btneat.x + btneat.width / 2 + margin,
@@ -279,7 +185,12 @@ export default class Main extends Phaser.Scene {
           .setDisplaySize(32, 32)
       )
       .onClick(() => {});
-
+    const btnExercise = new Button(
+      this,
+      btnrelax.x + btneat.width / 2 + margin,
+      minY,
+      "Entrenar"
+    ).onClick(() => {});
     //
     const btnlearn = new Button(this, minX + 50, maxY, "   Aprender", 20)
 
@@ -299,12 +210,15 @@ export default class Main extends Phaser.Scene {
         this.workPanel.show();
       });
 
+    const btnTodo = this._BtnTodo(this.scale.width - 40, btnExercise.y + 40);
     this.menu = this.add.container(0, 0, [
-      btnDormir.getContent(),
-      btneat.getContent(),
-      btnrelax.getContent(),
-      btnfindjob.getContent(),
-      btnlearn.getContent(),
+      btnDormir,
+      btneat,
+      btnrelax,
+      btnfindjob,
+      btnlearn,
+      btnExercise,
+      btnTodo,
     ]);
     this.menu.hide = function () {
       this.setVisible(false);
@@ -327,7 +241,7 @@ export default class Main extends Phaser.Scene {
       this,
       100,
       60,
-      "$0",
+      "$" + STATE.MONEY,
       130,
       32,
       0x11af11
@@ -367,29 +281,35 @@ export default class Main extends Phaser.Scene {
     let lastJobOfferList = [];
     this.workPanel.onShow(() => {
       // UPDATE VIEW
+
       lastJobOfferList.forEach((element) => {
         element.destroy();
       });
+
       if (STATE.ACTUAL_JOB) {
         let offerView = new JobOffert(this, 0, 0, STATE.ACTUAL_JOB, maxW);
-        // offerView.applyBtn.setVisible(false);
-        offerView.applyBtn.text.setText("Trabajar");
-        offerView.rateText.setText("Maestria: " + offerView, rate + "%");
-        offerView.onClick((job, mastery) => this._doJobWork(job, mastery));
+        offerView.makeThisAsWorking();
+        offerView.onClick(() => this._doActualWork());
         lastJobOfferList = [offerView];
-      } else {
-        populateNewJobOfferts();
-        const jobpool = getJobPool();
-        lastJobOfferList = [
-          ...jobpool.map((job) => {
-            let offerView = new JobOffert(this, 0, 0, job, maxW);
-            offerView.onClick((job, successRate) =>
-              this._onJobOfferApply(job, successRate)
-            );
-            return offerView;
-          }),
-        ];
+        template_page1.title.setVisible(false);
+        template_page1.subtitle.setVisible(false);
+        this.workPanel.bodycontent.setContent([offerView]);
+        return;
       }
+      template_page1.title.setVisible(true);
+      template_page1.subtitle.setVisible(true);
+      populateNewJobOfferts();
+      const jobpool = getJobPool();
+      lastJobOfferList = [
+        ...jobpool.map((job) => {
+          let offerView = new JobOffert(this, 0, 0, job, maxW);
+          offerView.onClick((job, successRate) =>
+            this._onJobOfferApply(job, successRate)
+          );
+          return offerView;
+        }),
+      ];
+
       this.workPanel.bodycontent.setContent([
         template_page1.title,
         template_page1.subtitle,
@@ -437,10 +357,7 @@ export default class Main extends Phaser.Scene {
             };
             let btn = new Button(this, 10, 0, topic.text)
               .onClick(() => {
-                this.learningPanel.hide();
-                learn(this, topic).then(() => {
-                  this.updateInformation();
-                });
+                this._doLearning(topic);
               })
               .setMaxWidth(maxWidth);
             btn.progress = new ProgressBar(
@@ -477,15 +394,11 @@ export default class Main extends Phaser.Scene {
     this._initPanelLearn();
     this._initPanelWork();
   }
-  _todo() {
-    var position = {
-      x: this.scale.width - 40,
-      y: 180,
-    };
+  _BtnTodo(x, y) {
     var todoText = this.add
       .bitmapText(
-        position.x / 2,
-        position.y + 50,
+        x / 2,
+        y + 50,
         "font1",
         TODO_LIST.map((t) => "* " + t),
         16
@@ -498,9 +411,7 @@ export default class Main extends Phaser.Scene {
       .sprite(0, 0, "icons", 10)
       .setDisplaySize(32, 32)
       .setTint(0x111);
-    const btn = new Button(this, position.x, position.y, "   ").addIcon(
-      btnIcon
-    );
+    const btn = new Button(this, x, y, "   ").addIcon(btnIcon);
     this.add.existing(btn);
     btn.onClick(() => {
       todoText.setVisible(!todoText.visible);
@@ -511,16 +422,34 @@ export default class Main extends Phaser.Scene {
       }
       // btn.text.setText(todoText.visible ? "X" : "?");
     });
+    return btn;
+  }
+  hideUI() {
+    let visible = false;
+    this.menu.hide();
+    this.dayClock.getContainer().setVisible(visible);
+    this.calendar.getContainer().setVisible(visible);
+    this.lifeBar.getContainer().setVisible(visible);
+    this.seniorityPanel.getContainer().setVisible(visible);
+    this.moneyPanel.getContainer().setVisible(visible);
+  }
+  showUI() {
+    let visible = true;
+    this.menu.show();
+    this.dayClock.getContainer().setVisible(visible);
+    this.calendar.getContainer().setVisible(visible);
+    this.lifeBar.getContainer().setVisible(visible);
+    this.seniorityPanel.getContainer().setVisible(visible);
+    this.moneyPanel.getContainer().setVisible(visible);
   }
   _initUI() {
-    this._todo();
     this._initMenuUI();
     this._initCalendar();
     this._initLifeBar();
     this._initInfoViews();
     this._initPanelViews();
   }
-  initClock() {
+  _initClock() {
     if (this.clock) {
       return;
     }
@@ -534,39 +463,109 @@ export default class Main extends Phaser.Scene {
   }
   _onJobOfferApply(job, successRate) {
     this.workPanel.hide();
+    this.menu.hide();
+
     jobInterview(this, job, successRate).then((success) => {
       STATE.ACTUAL_JOB = job;
       STATE.ACTUAL_JOB.progress = 0;
       STATE.save();
+
+      this.menu.show();
     });
     removeJobFromPool(job);
     // REMOVE JOB FROM POOL
   }
-  _doJobWork(job, mastery) {
+  _doActualWork() {
     this.workPanel.hide();
-    workOnJob(this, job, mastery).then((finished) => {
-      if (finished) {
-        // GET PAID!
+    this.menu.hide();
+    workOnJob(this, STATE.ACTUAL_JOB).then(
+      async ({ expired, finished, progress }) => {
+        if (expired) {
+          STATE.ACTUAL_JOB = null;
+        }
+        if (finished) {
+          // GET PAID!
+
+          this.clock.timeScale = 0;
+          STATE.MONEY += STATE.ACTUAL_JOB.salary;
+          await getPaidByJob(this, STATE.ACTUAL_JOB);
+          this.clock.timeScale = 1;
+
+          STATE.ACTUAL_JOB = null;
+        }
+        STATE.save();
+        this.menu.show();
       }
+    );
+  }
+  _doLearning(topic) {
+    this.learningPanel.hide();
+    this.menu.hide();
+    learn(this, topic).then(() => {
+      this.menu.show();
     });
   }
-  recoverHP() {
-    if (STATE.HEALTH < 100) {
-      STATE.HEALTH = Math.min(100, STATE.HEALTH + STATE.HEALT_RECOVER_RATE);
+  async __goToBed() {
+    if (!this.player.isBusy()) {
+      this.menu.hide();
+      await this.player.goToBed();
+      this.menu.show();
     }
-    this.lifeBar.setValue(STATE.HEALTH);
   }
+  async __goToKitchen() {
+    if (!this.player.isBusy()) {
+      this.menu.hide();
+      await this.player.goToKitchen();
+      await Kitchen.start();
+      await this.player.goToPcFromKitchen();
+      this.menu.show();
+    }
+  }
+  async printMessage(textMessage) {
+    var location = {
+      x: 20,
+      y: this.scale.height - 200,
+    };
+    let message1 = typedMessage(this, textMessage, location.x, location.y, 32);
+    message1.bitmapText.setMaxWidth(300);
+    await message1.promise;
+    await tweenOnPromise(this, {
+      targets: [message1.bitmapText],
+      duration: 1000,
+      alpha: 0,
+      delay: 1000,
+    });
+    message1.destroy();
+  }
+
   spendHP() {
-    STATE.HEALTH = Math.max(1, STATE.HEALTH - STATE.ACTION_COST);
+    STATE.HEALTH = Math.max(0, STATE.HEALTH - STATE.ACTION_COST);
     this.lifeBar.setValue(STATE.HEALTH);
   }
   updateInformation() {
-    console.log("UPDATE INFORMATION", getSeniority());
     this.seniorityPanel.text.setText(getSeniority());
+    this.moneyPanel.text.setText("$" + STATE.MONEY);
+    //
   }
+  async _validateLife() {
+    if (STATE.HEALTH < 1) {
+      // STOP EVERYTHING!
+      this.menu.hide();
+      if (!this.player.isFainted()) {
+        await this.player.faint();
+        this.menu.show();
+        STATE.save();
+      }
+    }
+    this.lifeBar.setValue(STATE.HEALTH);
+  }
+
   __everyTick() {
     addHour();
     this.calendar.update();
-    this.recoverHP();
+  }
+  update() {
+    this._validateLife();
+    this.updateInformation();
   }
 }

@@ -1,5 +1,5 @@
 import { COLORS, COLORS_SENIORITY, MONTHS } from "../constants.js";
-import { calcJobOfferSuccesProb } from "../jobOfferPool.js";
+import { calcJobOfferSuccesProb, getJobDaysDiff } from "../jobOfferPool.js";
 import Job from "../models/job.js";
 import { Button } from "./ui.js";
 const expirationTag = "expiration_date";
@@ -97,9 +97,12 @@ export default class JobOffert extends Phaser.GameObjects.Container {
           console.log("property not found");
         }
       } else if (tag === expirationTag) {
-        _element.setText(
-          job.expirationDate.day + "-" + MONTHS[job.expirationDate.month]
-        );
+        _element.setCenterAlign();
+        _element.setMaxWidth(scene.scale.width * 0.8);
+        _element.setText([
+          job.expirationDate.day + "-" + MONTHS[job.expirationDate.month],
+          "En " + getJobDaysDiff(job) + " DIAS ",
+        ]);
       } else if (tag === "success") {
         this.rateText = _element;
       }
@@ -140,6 +143,10 @@ export default class JobOffert extends Phaser.GameObjects.Container {
       color = COLORS.orange;
     }
     this.rateText.setTintFill(color);
+  }
+  makeThisAsWorking() {
+    this.applyBtn.text.setText("Trabajar");
+    this.rateText.setText("Velocidad de trabajo  " + this.rate + "%");
   }
   onClick(_callback) {
     this._onclick_callback = _callback;

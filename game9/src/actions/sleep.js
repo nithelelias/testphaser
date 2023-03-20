@@ -27,7 +27,7 @@ export default function Sleep(scene) {
   scene.time.timeScale = 8;
   progressBar
     .setTimeout(8, (progress) => {
-      scene.recoverHP();
+      scene.recoverHPBySleep();
     })
     .then(() => {
       titleBar.destroy();

@@ -1,9 +1,9 @@
 import { typedMessage } from "../ui/ui.js";
-import { random, tweenOnPromise, waitTimeout } from "../utils.js";
+import { random, tweenOnPromise } from "../utils.js";
 
 export default async function jobInterview(scene, job, successRate) {
   let accepted = successRate > random(0, 100);
-  scene.menu.hide();
+
   var width = 300;
   var centerX = scene.scale.width / 2 - width / 2;
   var startY = scene.scale.height / 2 - 64;
@@ -46,7 +46,6 @@ export default async function jobInterview(scene, job, successRate) {
   });
   message1.destroy();
   message2.destroy();
-  scene.menu.show();
 
   return accepted;
   //

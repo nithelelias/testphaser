@@ -1,7 +1,8 @@
 import { getKnowledgeLevel, progressOnKnowledge } from "../context.js";
+import GameBroadcast from "../GameBroadcast.js";
 import STATE from "../state.js";
 import { Button, ProgressBar, typedMessage } from "../ui/ui.js";
-import { Deffered } from "../utils.js";
+import { Deffered, tweenOnPromise } from "../utils.js";
 
 function actionStart(scene, topic, progressStart) {
   var deferred = new Deffered();
@@ -74,16 +75,25 @@ function actionStart(scene, topic, progressStart) {
     }
   });
 
-  const onended = () => {
+  var unbindFaint = scene.player.onFaint(() => {
+    onended();
+  });
+
+  const unbindAll = () => {
     unbind();
+    unbindFaint();
+
     titleBar.destroy();
     progressBar.destroy();
     cancelButton.destroy();
     helptext.destroy();
     tazaText.destroy();
     progressText.destroy();
-    deferred.resolve();
+  };
+  const onended = () => {
+    unbindAll();
     progressOnKnowledge(topic.text, progress);
+    deferred.resolve();
   };
 
   if (progress >= 100) {
@@ -94,7 +104,7 @@ function actionStart(scene, topic, progressStart) {
 }
 export default async function learn(scene, topic) {
   // add progress bar of day at top
-  scene.menu.hide();
+
   scene.time.timeScale = 2;
   let progress = getKnowledgeLevel(topic.text);
   if (progress < 100) {
@@ -103,13 +113,19 @@ export default async function learn(scene, topic) {
     let message1 = typedMessage(
       scene,
       ["Ya domine este tema!!"],
-      scene.scale.width / 2,
+      0,
       scene.scale.height / 2 + 12,
       32
     );
     await message1.promise;
+    await tweenOnPromise(scene, {
+      targets: [message1.bitmapText],
+      duration: 1000,
+      alpha: 0,
+      delay: 1000,
+    });
+    message1.destroy();
   }
 
-  scene.menu.show();
   scene.time.timeScale = 1;
 }

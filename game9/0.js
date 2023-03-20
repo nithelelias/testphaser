@@ -1,4 +1,4 @@
-import { Intro } from "./src/scenes/intro.js";
+ import { Intro } from "./src/scenes/intro.js";
 import Main from "./src/scenes/main.js";
 
 const config = {
@@ -10,7 +10,7 @@ const config = {
   scale: {
     mode: Phaser.Scale.FIT,
   },
-  scene: [ Intro,Main],
+  scene: [Intro, Main],
   // --  doesnt work...initialScene: "main",
 };
 

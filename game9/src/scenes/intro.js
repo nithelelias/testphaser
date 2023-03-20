@@ -1,5 +1,6 @@
 import { COLORS } from "../constants.js";
 import preload from "../preload.js";
+import SOUNDS, { initSounds } from "../sounds.js";
 import STATE from "../state.js";
 import { generateRectTexture, HurryText } from "../ui/ui.js";
 import { random, tweenOnPromise } from "../utils.js";
@@ -16,22 +17,8 @@ export class Intro extends Phaser.Scene {
     generateRectTexture(this);
     var w = this.game.scale.width;
     var h = this.game.scale.height;
-    this.sounds = {
-      step: this.sound.add("step", { loop: false, volume: 0.2, rate: 2 }),
-      step2: this.sound.add("step", { loop: false, volume: 0.1 }),
-      typing: this.sound.add("typing", { loop: false, volume: 0.06 }),
-    };
-
-    this.sounds.typing.addMarker({ name: "key1", start: 2.3, duration: 0.2 });
-    this.sounds.typing.addMarker({ name: "key2", start: 2.5, duration: 0.1 });
-    this.sounds.typing.addMarker({ name: "key3", start: 2.6, duration: 0.1 });
-    this.sounds.typing.addMarker({ name: "key4", start: 2.7, duration: 0.1 });
-    this.sounds.typing.addMarker({ name: "key5", start: 2.8, duration: 0.1 });
-    this.sounds.typing.addMarker({ name: "key6", start: 2.9, duration: 0.1 });
-    this.sounds.typing.addMarker({ name: "key7", start: 3.0, duration: 0.1 });
-    this.sounds.typing.addMarker({ name: "key8", start: 3.1, duration: 0.1 });
-    this.sounds.typing.addMarker({ name: "key9", start: 3.2, duration: 0.1 });
-
+    initSounds.call(this)
+    this.sounds=SOUNDS;
     ///////
     var title = this.add
       .bitmapText(w / 2, 100, "font1", ["The", "Developer"], 64)

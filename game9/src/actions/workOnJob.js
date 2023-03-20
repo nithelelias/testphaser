@@ -1,21 +1,46 @@
-import STATE from "../state.js";
-import { ProgressBar } from "../ui/ui.js";
-import { Deffered } from "../utils.js";
+import { MONTHS } from "../constants.js";
+import { calcJobOfferSuccesProb, isJobExpired } from "../jobOfferPool.js";
+import { Button, ProgressBar, typedMessage } from "../ui/ui.js";
+import { Deffered, tweenOnPromise } from "../utils.js";
 
-export default function workOnJob(scene, job, mastery) {
-  scene.menu.hide();
+async function jobExpired(scene, job) {
+  const width = 300;
+  const centerX = 12;
+  const startY = 202;
+  let message1 = typedMessage(
+    scene,
+    ["El trabajo HA EXPIRADO!!"],
+    centerX,
+    startY,
+    48
+  );
+  message1.bitmapText.setMaxWidth(width);
+
+  await message1.promise;
+
+  await tweenOnPromise(scene, {
+    targets: [message1.bitmapText],
+    duration: 1000,
+    alpha: 0,
+    delay: 1000,
+  });
+
+  message1.destroy();
+
+  return { expired: true, finished: false };
+}
+
+function doJob(scene, job) {
   scene.time.timeScale = 2;
-  if (STATE.ACTUAL_JOB) {
-    return Promise.resolve();
-  }
-  var width = 300;
-  var centerX = scene.scale.width / 2;
-  var startY = scene.scale.height / 2 + 12;
-  // CALCULAR
 
-  let tick_value = Math.max(0.01, 1 / mastery);
+  const mastery = calcJobOfferSuccesProb(job);
+  const width = 300;
+  const centerX = scene.scale.width / 2;
+  const startY = scene.scale.height / 2 + 12;
 
-  let progress = STATE.ACTUAL_JOB.progress;
+  const tick_value = Math.max(0.01, mastery / 200);
+
+  let progress = Math.min(100, job.progress);
   var deferred = new Deffered();
   var progressBar = new ProgressBar(
     scene,
@@ -26,7 +51,7 @@ export default function workOnJob(scene, job, mastery) {
   );
   progressBar.setValue(progress);
   var progressText = scene.add
-    .bitmapText(centerX, startY - 32, "font1", [progress + "%"], 32)
+    .bitmapText(centerX, startY - 32, "font1", [parseInt(progress) + "%"], 32)
     .setCenterAlign()
     .setTint(0xfff1a1)
     .setOrigin(0.5, 1);
@@ -35,14 +60,25 @@ export default function workOnJob(scene, job, mastery) {
       centerX,
       startY - 12,
       "font1",
-      ["Taza de progreso: " + 1 + "/" + mastery],
+      ["Taza de progreso: " + tick_value],
       16
     )
     .setCenterAlign()
     .setTint(0xfff1a1)
     .setOrigin(0.5, 1);
   var titleBar = scene.add
-    .bitmapText(centerX, startY - 150, "font1", ["ESTUDIANDO", topic.text], 16)
+    .bitmapText(
+      centerX,
+      startY - 150,
+      "font1",
+      [
+        "TRABAJANDO",
+        job.jobTitle,
+        "Fecha Limite:",
+        job.expirationDate.day + "-" + MONTHS[job.expirationDate.month],
+      ],
+      16
+    )
     .setCenterAlign()
     .setMaxWidth(width)
     .setOrigin(0.5, 1);
@@ -61,38 +97,54 @@ export default function workOnJob(scene, job, mastery) {
       centerX,
       scene.scale.height - 12,
       "font1",
-      [
-        progress < 100
-          ? "CLICK RAPIDO PARA ESTUDIAR"
-          : "YA NO TENGO NADA MAS QUE APRENDER",
-      ],
+      [progress < 100 ? "CLICK RAPIDO PARA TRABAJAR" : "TRABAJO TERMINADO"],
       16
     )
     .setOrigin(0.5, 1);
-  //console.log("topic_cost ", topic_cost, "tick_value", tick_value);
-  if (progress < 100) {
-    var unbind = scene.player.onAct(() => {
-      progress += tick_value;
-      progressBar.setValue(progress);
-      progressText.setText([parseInt(progress) + "%"]);
-      if (progress >= 100) {
-        unbind();
-        onended();
-      }
-    });
-  }
-  const onended = () => {
+
+  var unbind = scene.player.onAct(() => {
+    progress += tick_value;
+    progressBar.setValue(progress);
+    progressText.setText([parseInt(progress) + "%"]);
+    if (progress >= 100) {
+      onended();
+    }
+  });
+
+  var unbindFaint = scene.player.onFaint(() => {
+    onended();
+  });
+
+  const unbindAll = () => {
+    unbindFaint();
+    unbind();
     titleBar.destroy();
     progressBar.destroy();
     cancelButton.destroy();
     helptext.destroy();
     tazaText.destroy();
     progressText.destroy();
-    deferred.resolve();
-    scene.menu.show();
-    scene.time.timeScale = 1;
-    progressOnKnowledge(topic.text, progress);
-  };
 
+    scene.time.timeScale = 1;
+    job.progress = progress;
+  };
+  const onended = () => {
+    unbindAll();
+
+    deferred.resolve({ expired: false, finished: progress >= 100, progress });
+  };
   return deferred.promise;
+}
+
+export default function workOnJob(scene, job) {
+  if (!job) {
+    return Promise.resolve({ expired: false, finished: false });
+  }
+
+  // IS JOB EXPIRED?
+  if (isJobExpired(job)) {
+    return jobExpired(scene, job);
+  } else {
+    return doJob(scene, job);
+  }
 }
