@@ -44,6 +44,7 @@
       <input type="file" accept=".json" id="upload" />
       <button onClick="gamestart()">Iniciar</button>
     </div>
+    <a id="downloadAnchorElem"></a>
     <script src="../phaser.min.js"></script>
 
     <script>
@@ -174,8 +175,17 @@
           }
         }
 
-        console.log(matrix);
+        downloadJSON(matrix);
         return matrix;
+      }
+      function downloadJSON(json) {
+        var dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(json));
+        var dlAnchorElem = document.getElementById("downloadAnchorElem");
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "scene.json");
+        dlAnchorElem.click();
       }
       function create() {
         scaleGame.call(this);
