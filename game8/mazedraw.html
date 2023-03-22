@@ -9,7 +9,8 @@
     <style>
       body {
         margin: 0px;
-        background-color: #111;
+        background-color: #111; /*#bf0d6c*/
+        color: white;
       }
       label {
         color: white;
@@ -49,17 +50,24 @@
       const uploadInput = document.getElementById("upload");
       uploadInput.onchange = uploadData;
       var data = [];
+      var parentElement = document.querySelector(".game__wrapper");
       const config = {
         type: Phaser.WEBGL,
 
-        parent: document.querySelector(".game__wrapper"),
+        width: parentElement.offsetWidth,
+        height: parentElement.offsetHeight,
         pixelArt: true,
+        parent: parentElement,
         transparent: true,
 
         scale: {
           mode: Phaser.Scale.RESIZE,
-
-          zoom: 1, // Size of game canvas = game size * zoom
+        },
+        physics: {
+          default: "arcade",
+          arcade: {
+            debug: true,
+          },
         },
         scene: {
           preload,
@@ -67,7 +75,7 @@
         },
       };
       var tileSize = 32;
-      var frame_size = 16;
+      var frame_size = 128;
       var empty = 3;
       var currentFrame = 0;
       var mazeConfig = {
@@ -129,8 +137,8 @@
       function preload() {
         this.load.image("tiles", ["assets/tiles/maptile.png"]);
         this.load.spritesheet("maptiles", "assets/tiles/maptile.png", {
-          frameWidth: 16,
-          frameHeight: 16,
+          frameWidth: frame_size,
+          frameHeight: frame_size,
         });
         this.load.tilemapCSV("map", "assets/grid.csv");
       }
@@ -171,14 +179,14 @@
       }
       function create() {
         scaleGame.call(this);
-        var piece_scale = 3;
+        var piece_scale = 0.5;
         var piece_scale_frame_size = frame_size * piece_scale;
         var tile_selected = this.add
           .sprite(this.scale.width / 2 + 100, 0, "maptiles", 0)
           .setScale(piece_scale)
           .setOrigin(0);
         var tiles_img_control = this.add
-          .image(this.scale.width - (piece_scale + 1) * 64, 0, "tiles")
+          .image(this.scale.width / 2 + 300, 0, "tiles")
           .setScale(piece_scale)
           .setOrigin(0)
           .setInteractive()
