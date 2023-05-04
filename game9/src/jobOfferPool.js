@@ -88,15 +88,9 @@ function calcJobSalary(job) {
     job.salary += parseInt((req.knowledge_level / 100) * SALARY_PLUS_BASE);
   });
 }
-function addJobToPool(jobType) {
+function addJobToPool(jobType, seniorityJobLevel) {
   let newjob = new Job();
   let companyName = COMPANIES[random(0, MAX_IDX_COMPANIES)];
-  let seniorityJobLevel = STATE.tutorial
-    ? jobType.level
-    : random(
-        jobType.level,
-        Math.min(MAX_POSIBLE_SENIORITY_LEVEL, STATE.SENIORITY + 1)
-      );
 
   // FROM CURRENT DATE
   let expirationDate = addDaysToDate(
@@ -133,11 +127,14 @@ function addJobToPool(jobType) {
 export function populateNewJobOfferts() {
   // ITERATE POOL AND REMOVE JOB PASSED
   if (STATE.tutorial) {
-    addJobToPool({
-      type: "Asistente de Tutor de computacion",
-      requireKnowledge: [],
-      level: 0,
-    });
+    addJobToPool(
+      {
+        type: "Asistente de Tutor de computacion",
+        requireKnowledge: [],
+        level: 0,
+      },
+      0
+    );
     return;
   }
   removeExpirateJobs();
@@ -146,21 +143,22 @@ export function populateNewJobOfferts() {
   }
   lastJobSeekDay = STATE.DATE.day;
 
-  // ADD NEW JOB OFFERS
-  let total = STATE.tutorial
-    ? 1
-    : Math.max(1, random(STATE.SENIORITY, STATE.SENIORITY * 2));
+  // ADD NEW JOB OFFERS FROM minor level to ur current level.
 
-  let posibleJobList = JOBTYPES.filter((jobtype) => {
-    return jobtype.level <= STATE.SENIORITY;
-  });
-  const maxrndIdx = posibleJobList.length - 1;
+  for (let i = STATE.SENIORITY; i >= 0; i--) {
+    let levelrequired = i;
+    let posibleJobList = JOBTYPES.filter((jobtype) => {
+      return jobtype.level <= i;
+    });
 
-  iterate(total, (i) => {
-    let rnd = random(0, maxrndIdx);
-    let jobType = posibleJobList[rnd];
-    addJobToPool(jobType);
-  });
+    let total = random(1, 3);
+    while (total > 0) {
+      let rnd = random(0, posibleJobList.length - 1);
+      let jobType = posibleJobList[rnd];
+      addJobToPool(jobType, levelrequired);
+      total--;
+    }
+  }
 }
 
 export function calcJobOfferSuccesProb(job) {

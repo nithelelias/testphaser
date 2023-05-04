@@ -1,7 +1,8 @@
 import { MONTHS } from "../constants.js";
 import { calcJobOfferSuccesProb, isJobExpired } from "../jobOfferPool.js";
+import STATE from "../state.js";
 import { Button, ProgressBar, typedMessage } from "../ui/ui.js";
-import { Deffered, tweenOnPromise } from "../utils.js";
+import { Deffered, iterate, tweenOnPromise } from "../utils.js";
 
 async function jobExpired(scene, job) {
   const width = 300;
@@ -65,7 +66,8 @@ function doJob(scene, job) {
     )
     .setCenterAlign()
     .setTint(0xfff1a1)
-    .setOrigin(0.5, 1);
+    .setOrigin(0.5, 1)
+    .setVisible(false);
   var titleBar = scene.add
     .bitmapText(
       centerX,
@@ -109,7 +111,9 @@ function doJob(scene, job) {
       onended();
     }
   };
-  var unbind = scene.player.onAct(advance);
+  var unbind = scene.player.onAct(() => {
+    iterate(STATE.WORKING.activeLevel, advance);
+  });
 
   var unbindFaint = scene.player.onFaint(() => {
     onended();
@@ -120,7 +124,7 @@ function doJob(scene, job) {
       loop: true,
       callback: () => {
         scene.player.doTyping();
-        advance();
+        iterate(STATE.WORKING.passiveLevel, advance);
       },
     });
     return () => timeEvent.destroy();

@@ -66,9 +66,7 @@ export function getKnowledgeLevel(topic) {
 }
 export function progressOnKnowledge(topic, progress) {
   STATE.KNOWLEDGE[topic] = Math.min(100, progress);
-  if (STATE.KNOWLEDGE[topic] === 100) {
-    STATE.ACTION_STUDY += 1;
-  }
+
   advanceSeniority();
 }
 
@@ -83,11 +81,11 @@ export function expendMoney(value) {
 }
 
 export function recoverHP(value) {
-  STATE.HEALTH = Math.min(100, STATE.HEALTH + value);
+  STATE.HEALTH = Math.min(STATE.MAX_HEALTH, STATE.HEALTH + value);
 }
 
 export function recoverHPBySleep() {
-  recoverHP(STATE.HEALT_RECOVER_RATE);
+  recoverHP(STATE.HEALT_RECOVER_RATE.sleep);
 }
 
 export function buyCoffee(n = 1) {
@@ -110,5 +108,47 @@ export function buyFoodIngredient(n = 1) {
     STATE.INVENTORY.ingredients + n
   );
 
+  return true;
+}
+export function spendHP(cost) {
+  STATE.HEALTH = Math.max(0, STATE.HEALTH - cost);
+}
+
+export function buySkill(skill) {
+  console.log("BUY SKILL", skill.cost);
+  if (!expendMoney(skill.cost)) {
+    return false;
+  }
+  // STORE THE SKILL
+  if (!STATE.SKILLS.hasOwnProperty(skill.name)) {
+    STATE.SKILLS[skill.name] = 0;
+  }
+  STATE.SKILLS[skill.name] += 1;
+  switch (skill.name) {
+    case "active learning":
+      STATE.LEARNING.activeLevel += 2;
+      break;
+    case "passive learning":
+      STATE.LEARNING.passiveLevel += 1;
+      break;
+    case "active working":
+      STATE.WORKING.activeLevel += 2;
+      break;
+    case "passive working":
+      STATE.WORKING.passiveLevel += 1;
+      break;
+    case "total life":
+      STATE.MAX_HEALTH += 10;
+      break;
+    case "sleep recovery":
+      STATE.HEALT_RECOVER_RATE.sleep += 5;
+      break;
+    case "meal recovery":
+      STATE.HEALT_RECOVER_RATE.meal += 2;
+      break;
+    case "coffy recovery":
+      STATE.HEALT_RECOVER_RATE.coffee += 2;
+      break;
+  }
   return true;
 }

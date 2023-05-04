@@ -294,7 +294,7 @@ export default class Kitchen extends Phaser.GameObjects.Container {
         this.scene.scale.width / 2,
         titleText.y + titleText.height / 2 + 12,
         "font1",
-        ["Se usaran todos los ingredientes","Que tomes del regrigerador"],
+        ["Se usaran todos los ingredientes", "Que tomes del regrigerador"],
         16
       )
       .setTint(0xffffff)
@@ -335,7 +335,9 @@ export default class Kitchen extends Phaser.GameObjects.Container {
         this.fridge_ingredients * FOODS.ingredient.preparation_time;
       var consume_duration = FOODS.meal.consume_time;
       var recovery =
-        FOODS.meal.recover + this.fridge_ingredients * FOODS.ingredient.recover;
+        FOODS.meal.recover +
+        this.fridge_ingredients * FOODS.ingredient.recover +
+        STATE.HEALT_RECOVER_RATE.meal;
 
       // UPDATE INGREDIENTS FROM INVENTORY
       STATE.INVENTORY.ingredients = Math.max(
@@ -349,9 +351,11 @@ export default class Kitchen extends Phaser.GameObjects.Container {
       this.ingredientText.update();
       this.doAction("Cocinando", preparation_duration)
         .then(() => {
+          SOUNDS.eating.play();
           return this.doAction("Comiendo", consume_duration);
         })
         .then(() => {
+          SOUNDS.eating.stop();
           container.setVisible(true);
           recoverHP(recovery);
         });

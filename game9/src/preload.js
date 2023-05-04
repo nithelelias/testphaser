@@ -47,4 +47,5 @@ export default function preload() {
     "./assets/audio/coffee_preparation.mp3"
   );
   this.load.audio("coffee_pour", "./assets/audio/coffee_pour.mp3");
+  this.load.audio("eating", "./assets/audio/eating.mp3");
 }

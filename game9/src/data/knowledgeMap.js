@@ -1,5 +1,3 @@
-import JOBTYPES from "./jobtypes.js";
-
 const KNOWLEDGE_ROADMAP = {
   aprendiz: ["computacion", "sistemas operativos", "algoritmos"],
   junior: [
@@ -37,7 +35,7 @@ const KNOWLEDGE_ROADMAP = {
     "SQL-LITE",
     "noSQL",
     "Java",
-    "Python", 
+    "Python",
   ],
   senior: [
     "Control de Versionamiento pull request",
@@ -53,10 +51,9 @@ const KNOWLEDGE_ROADMAP = {
     "Habilidades de liderazgo y gestión de equipo",
     "Metodologia agil Kanban",
     "Metodologia agil SCRUM",
-    "Diseño avanzado: Accesibilidad",  
+    "Diseño avanzado: Accesibilidad",
     "Machine Learning IA",
     "criptografía",
-
   ],
   master: [
     "Investigación y desarrollo de nuevas tecnologías y herramientas",

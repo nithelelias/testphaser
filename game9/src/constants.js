@@ -45,11 +45,8 @@ export const TODO_LIST = [
   "Buscar empleo (OK)",
   "Pasar entrevista (OK)",
   "Hacer el trabajo hasta tiempo limite (dias)(horas)(mes)",
-  "Sistema de notificaciones diarias",
-  "Sistema de hambre!",
-  "Sistema de sueño!",
-  "comprar comida",
-  "dormir",
+  "Sistema de notificaciones diarias", 
+  "Sistema de sueño??", 
 ];
 export const SENIORITY_LEVELS = [
   "aprendiz",

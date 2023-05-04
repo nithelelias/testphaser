@@ -7,29 +7,25 @@ import {
 import STATE from "../state.js";
 import {
   Button,
+  ButtonSkill,
   ButtonWithProgress,
   FullPanelWrapper,
   PanelInfo,
-  ProgressBar,
   typedMessage,
   UI_textAndBar,
 } from "../ui/ui.js";
-import {
-  Deffered,
-  random,
-  shakeObject,
-  tweenOnPromise,
-  waitTimeout,
-} from "../utils.js";
+import { Deffered, shakeObject, tweenOnPromise } from "../utils.js";
 import KNOWLEDGE_ROADMAP from "../data/knowledgeMap.js";
 import DayTimer from "../ui/daytimer.js";
 import Calendar from "../ui/calendar.js";
 import {
   addHour,
+  buySkill,
   canAdanceSeniority,
   getKnowledgeLevel,
   getSeniority,
   saveState,
+  spendHP,
 } from "../context.js";
 import learn from "../actions/learn.js";
 import {
@@ -46,6 +42,7 @@ import getPaidByJob from "../actions/getPaidByJob.js";
 import SOUNDS from "../sounds.js";
 import Kitchen from "../kitchen.js";
 import GameBroadcast from "../GameBroadcast.js";
+import Skill from "../models/skill.js";
 
 export default class Main extends Phaser.Scene {
   constructor() {
@@ -70,19 +67,16 @@ export default class Main extends Phaser.Scene {
       return;
     }
 
-    this.clock.timeScale = 0;
+    this.clock.timeScale = 0.5;
     this.player.setBusy(true);
     this.player.setFrame(0);
     this.menu.hide();
-    await this.printMessage(["HOLA MUNDO!!"]);
-    await this.printMessage(["Ayudame, no se nada sobre ser un DEVELOPER"]);
+    await this.printMessageUntilClick(["HOLA MUNDO!!"]);
+    await this.printMessageUntilClick([
+      "Ayudame, no se nada sobre ser un DEVELOPER",
+    ]);
     this.menu.show();
-    /*
-     btnDormir,
-      btnEat,
-      btnfindjob,
-      btnlearn,
-      btnTodo,*/
+
     this.menu.list.forEach((btn) => {
       btn.setVisible(false);
     });
@@ -96,18 +90,23 @@ export default class Main extends Phaser.Scene {
     this.player.setBusy(false);
     this.player.setFrame(1);
     await this.printMessage(["Elije algo que aprender"]);
-    this.menu.list[3].setVisible(true);
-    shakeObject(this.menu.list[3], 100, 0.1);
+    this.menu.btnLearn.setVisible(true);
+    shakeObject(this.menu.btnLearn, 100, 0.1);
     await deferred.promise;
-    this.menu.list[3].setVisible(false);
+    this.menu.btnLearn.setVisible(false);
     this.player.setBusy(true);
     this.player.setFrame(0);
-    await this.printMessage(["Gracias!", "siento que subi de nivel!!"]);
+    await this.printMessageUntilClick([
+      "Gracias!",
+      "siento que subi de nivel!!",
+    ]);
     if (startHealt === STATE.HEALTH) {
-      await this.printMessage(["Aunque siento que pude esforzarme mas!!"]);
+      await this.printMessageUntilClick([
+        "Aunque siento que pude esforzarme mas!!",
+      ]);
     }
     await this.printMessage("RECUERDA!");
-    await this.printMessage([
+    await this.printMessageUntilClick([
       "cuando CLICK entonces ESFUERZO",
       "si ESFUERZO entonces VIDA-1",
     ]);
@@ -115,32 +114,34 @@ export default class Main extends Phaser.Scene {
     this.player.setBusy(false);
     this.player.setFrame(1);
     await this.printMessage(["Veamos si encuentro trabajo!"]);
-    this.menu.list[2].setVisible(true);
-    shakeObject(this.menu.list[2], 100, 0.1);
+    this.menu.btnWork.setVisible(true);
+    shakeObject(this.menu.btnWork, 100, 0.1);
     deferred = new Deffered();
     await deferred.promise;
-    this.menu.list[2].setVisible(false);
+    this.menu.btnWork.setVisible(false);
     this.player.setBusy(true);
     this.player.setFrame(0);
     this.player.hinge();
     await this.printMessage(["Wow!!", "A la primera ! "]);
-    this.clock.timeScale = 1;
+
     this.player.setBusy(false);
     this.player.setFrame(1);
     deferred = new Deffered();
     await this.printMessage(["Ahora vamos a trabajar "]);
-    this.menu.list[2].setVisible(true);
-    shakeObject(this.menu.list[2], 100, 0.1);
+    this.menu.btnWork.setVisible(true);
+    shakeObject(this.menu.btnWork, 100, 0.1);
     await deferred.promise;
     this.menu.hide();
     this.menu.list.forEach((btn) => {
       btn.setVisible(true);
     });
-    await this.printMessage(["el dia aveces no alcanza"]);
-    await this.printMessage(["No se te olvide comer y dormir"]);
+    await this.printMessageUntilClick(["el dia aveces no alcanza"]);
+    await this.printMessageUntilClick(["No se te olvide comer y dormir"]);
 
     this.menu.show();
     this._continueTutorial = () => {};
+    // SAVE THE CURRENT STATE
+    this.clock.timeScale = 1;
     STATE.tutorial = false;
     saveState();
   }
@@ -174,8 +175,9 @@ export default class Main extends Phaser.Scene {
         () => {
           // SPEED DOWN
           this.player.doTyping();
+          GameBroadcast.emit("playerclick", true);
           if (this.player.__onAct) {
-            this.spendHP();
+            this._doSpendHP();
             this.player.__onAct();
           }
         },
@@ -268,7 +270,9 @@ export default class Main extends Phaser.Scene {
         backgroundColor: COLORS.red_darker,
       }
     );
-
+    this.lifeBar.update = () => {
+      this.lifeBar.setValue((STATE.HEALTH / STATE.MAX_HEALTH) * 100);
+    };
     {
       let backgroundBar = this.lifeBar.getContainer().list[0];
       let backgroundBarShadow = this.lifeBar.getContainer().list[1];
@@ -317,24 +321,40 @@ export default class Main extends Phaser.Scene {
       });
 
     //
-    const btnlearn = new Button(this, minX + 50, maxY, "   Aprender", 20)
-
+    const cellWidth = (this.scale.width - margin * 3) / 3;
+    const btnLearn = new Button(this, margin, maxY, "   Aprender", 16)
       .addIcon(this.add.sprite(0, 0, "icons", 2).setDisplaySize(32, 32))
       .onClick(() => {
         this.learningPanel.show();
       });
 
-    const btnfindjob = new Button(
+    const btnWork = new Button(
       this,
-      btnlearn.x + btnlearn.width / 2 + margin,
+      cellWidth + margin,
       maxY,
-      "    Trabajos"
+      "    Trabajos",
+      16
     )
       .addIcon(this.add.sprite(0, 0, "icons", 3).setDisplaySize(32, 32))
       .onClick(() => {
         this.workPanel.show();
       });
-
+    const btnSkill = new Button(
+      this,
+      cellWidth * 2 + margin * 2,
+      maxY,
+      "    Habilidad",
+      16
+    )
+      .addIcon(
+        this.add
+          .sprite(0, 0, "icons", 38)
+          .setTintFill(COLORS.blue)
+          .setDisplaySize(32, 32)
+      )
+      .onClick(() => {
+        this.skillPanel.show();
+      });
     const btnSave = new Button(this, this.scale.width - 40, 180, "   ")
       .addIcon(
         this.add
@@ -349,23 +369,27 @@ export default class Main extends Phaser.Scene {
     this.menu = this.add.container(0, 0, [
       btnDormir,
       btnEat,
-      btnfindjob,
-      btnlearn,
+      btnWork,
+      btnLearn,
       btnTodo,
       btnSave,
+      btnSkill,
     ]);
     this.menu.hide = function () {
       this.setVisible(false);
     };
+
     this.menu.show = function () {
       this.setVisible(true);
-      btnfindjob.text.setText(
-        STATE.ACTUAL_JOB ? "    Trabajar" : "    Trabajos"
-      );
-      btnfindjob.icon.setTintFill(
+      btnWork.text.setText(STATE.ACTUAL_JOB ? "    Trabajar" : "    Trabajos");
+      btnWork.icon.setTintFill(
         STATE.ACTUAL_JOB ? COLORS.green_real : COLORS.brown
       );
     };
+    this.menu.btnWork = btnWork;
+    this.menu.btnLearn = btnLearn;
+    this.menu.btnSkill = btnSkill;
+    this.menu.show();
   }
   _initInfoViews() {
     this.seniorityPanel = new PanelInfo(
@@ -389,6 +413,7 @@ export default class Main extends Phaser.Scene {
     this.moneyPanel.text.setDropShadow(0, 2, 0x111111, 1);
   }
   _initPanelWork() {
+    populateNewJobOfferts();
     const maxW = this.scale.width * 0.8;
     //
     const addTitle = (_text) => {
@@ -438,7 +463,6 @@ export default class Main extends Phaser.Scene {
       }
       template_page1.title.setVisible(true);
       template_page1.subtitle.setVisible(true);
-      populateNewJobOfferts();
       const jobpool = getJobPool();
       lastJobOfferList = [
         ...jobpool.map((job) => {
@@ -533,9 +557,53 @@ export default class Main extends Phaser.Scene {
       this.learningPanel.bodycontent.setContent(learningList);
     });
   }
+  _initPanelSkills() {
+    const maxWidth = 250;
+    const maxLevel = 12;
+    let skillBtnList = Object.keys(STATE.SKILLS).map((skill_name, idx) => {
+      const btn = new ButtonSkill(
+        this,
+        0,
+        0,
+        new Skill(0, skill_name, 0),
+        maxWidth
+      );
+
+      btn.onClick((skill) => {
+        if (!this._doBuySkill(skill)) {
+          this.skillPanel.hide();
+        } else {
+          updateSkillList();
+        }
+      });
+      return btn;
+    });
+
+    const updateSkillList = () => {
+      skillBtnList.forEach((skillBtn) => {
+        if (skillBtn.skill.level >= maxLevel) {
+          skillBtn.setAsMaxLevel();
+          return;
+        }
+        skillBtn.skill.level = STATE.SKILLS[skillBtn.skill.name] + 1;
+        skillBtn.skill.cost = Math.pow(2, skillBtn.skill.level);
+        skillBtn.update();
+        if (skillBtn.skill.level > maxLevel) {
+          skillBtn.setAsMaxLevel();
+        }
+      });
+    };
+    this.skillPanel = new FullPanelWrapper(this, skillBtnList);
+    this.skillPanel.hide();
+    this.skillPanel.onShow(() => {
+      updateSkillList();
+      // this.skillPanel.bodycontent.setContent(skillBtnList);
+    });
+  }
   _initPanelViews() {
     this._initPanelLearn();
     this._initPanelWork();
+    this._initPanelSkills();
   }
   _BtnTodo(x, y) {
     var todoText = this.add
@@ -643,9 +711,7 @@ export default class Main extends Phaser.Scene {
 
           STATE.ACTUAL_JOB = null;
         }
-        if (STATE.tutorial) {
-          this._continueTutorial();
-        }
+        this._validateTutorial();
         this.menu.show();
       }
     );
@@ -655,10 +721,29 @@ export default class Main extends Phaser.Scene {
     this.menu.hide();
     learn(this, topic).then(() => {
       this.menu.show();
-      if (STATE.tutorial) {
-        this._continueTutorial();
-      }
+      this._validateTutorial();
     });
+  }
+  _doSpendHP() {
+    spendHP(STATE.ACTION_COST);
+    this.lifeBar.update();
+  }
+  _doBuySkill(skill) {
+    if (!buySkill(skill)) {
+      this.menu.hide();
+      this.printMessage("No tienes suficiente dinero").then(() => {
+        this.menu.show();
+      });
+
+      return false;
+    }
+    return true;
+  }
+
+  _validateTutorial() {
+    if (!this.player.isFainted() && STATE.tutorial) {
+      this._continueTutorial();
+    }
   }
   async __goToBed() {
     if (!this.player.isBusy()) {
@@ -676,27 +761,50 @@ export default class Main extends Phaser.Scene {
       this.menu.show();
     }
   }
-  async printMessage(textMessage) {
+  async printMessage(textMessage, doDestroy = true) {
     var location = {
       x: 20,
       y: this.scale.height - 200,
     };
     let message1 = typedMessage(this, textMessage, location.x, location.y, 32);
     message1.bitmapText.setMaxWidth(300);
+    message1.doEnd = async () => {
+      await tweenOnPromise(this, {
+        targets: [message1.bitmapText],
+        duration: 1000,
+        alpha: 0,
+        delay: 1000,
+      });
+      message1.destroy();
+    };
     await message1.promise;
-    await tweenOnPromise(this, {
-      targets: [message1.bitmapText],
-      duration: 1000,
-      alpha: 0,
-      delay: 1000,
-    });
-    message1.destroy();
+
+    if (doDestroy) {
+      await message1.doEnd();
+    }
+    return message1;
+  }
+  async printMessageUntilClick(textMessage) {
+    var deferred = new Deffered();
+    let message = await this.printMessage(textMessage, false);
+    var click = () => {
+      this.input.once(
+        "pointerup",
+        () => {
+          SOUNDS.click.play();
+          this.input.removeListener("pointerdown", click);
+          message.doEnd().then(() => {
+            deferred.resolve();
+          });
+        },
+        true
+      );
+    };
+    this.input.on("pointerdown", click, true);
+
+    await deferred.promise;
   }
 
-  spendHP() {
-    STATE.HEALTH = Math.max(0, STATE.HEALTH - STATE.ACTION_COST);
-    this.lifeBar.setValue(STATE.HEALTH);
-  }
   updateInformation() {
     this.seniorityPanel.text.setText(getSeniority());
     this.moneyPanel.text.setText("$" + STATE.MONEY);
@@ -709,19 +817,29 @@ export default class Main extends Phaser.Scene {
       if (!this.player.isFainted()) {
         await this.player.faint();
         this.menu.show();
+        this._validateTutorial();
       }
     }
-    this.lifeBar.setValue(STATE.HEALTH);
+    this.lifeBar.update();
   }
 
   __everyTick() {
+    let tempday = STATE.DATE.day + 0;
     addHour();
     GameBroadcast.emit("hour", {
       hour: STATE.DATE.hour,
     });
+    if (tempday !== STATE.DATE.day) {
+      // DAY PASS
+      GameBroadcast.emit("day", {
+        day: STATE.DATE.day,
+      });
+      populateNewJobOfferts();
+    }
     this.calendar.update();
     this.sunLight.update();
   }
+
   update() {
     this._validateLife();
     this.updateInformation();

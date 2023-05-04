@@ -148,7 +148,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
     await waitTimeout(1000);
 
     await this.scene.printMessage([
-      "Te pasaste!",
+      "Te desmayaste!",
       "tu salud ha empeorado debes recuperarte...",
     ]);
 

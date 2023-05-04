@@ -1,8 +1,7 @@
 import { getKnowledgeLevel, progressOnKnowledge } from "../context.js";
-import GameBroadcast from "../GameBroadcast.js";
 import STATE from "../state.js";
 import { Button, ProgressBar, typedMessage } from "../ui/ui.js";
-import { Deffered, tweenOnPromise } from "../utils.js";
+import { Deffered, iterate, tweenOnPromise } from "../utils.js";
 
 function actionStart(scene, topic, progressStart) {
   var deferred = new Deffered();
@@ -13,7 +12,6 @@ function actionStart(scene, topic, progressStart) {
 
   let advance_value = parseFloat((1 / (topic_cost * 10)).toFixed(2));
   let progress = progressStart;
-  console.log("topic_cost", topic_cost, "advance_value", advance_value);
   var progressBar = new ProgressBar(
     scene,
     scene.scale.width / 2 - width / 2,
@@ -37,7 +35,8 @@ function actionStart(scene, topic, progressStart) {
     )
     .setCenterAlign()
     .setTint(0xfff1a1)
-    .setOrigin(0.5, 1);
+    .setOrigin(0.5, 1)
+    .setVisible(false);
   var titleBar = scene.add
     .bitmapText(centerX, startY - 150, "font1", ["ESTUDIANDO", topic.text], 16)
     .setCenterAlign()
@@ -75,7 +74,10 @@ function actionStart(scene, topic, progressStart) {
       onended();
     }
   };
-  var unbind = scene.player.onAct(advance);
+
+  var unbind = scene.player.onAct(() => {
+    iterate(STATE.LEARNING.activeLevel, advance);
+  });
 
   var unbinIdleAdvance = (() => {
     const timeEvent = scene.time.addEvent({
@@ -83,7 +85,7 @@ function actionStart(scene, topic, progressStart) {
       loop: true,
       callback: () => {
         scene.player.doTyping();
-        advance();
+        iterate(STATE.LEARNING.passiveLevel, advance);
       },
     });
     return () => timeEvent.destroy();

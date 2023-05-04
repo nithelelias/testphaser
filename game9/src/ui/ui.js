@@ -1,4 +1,4 @@
-import { TICK_HOUR } from "../constants.js";
+import { COLORS, TICK_HOUR } from "../constants.js";
 import { Deffered, definePropertyToChild, iterate } from "../utils.js";
 export function generateRectTexture(scene) {
   if (!scene.textures.list.hasOwnProperty("bar")) {
@@ -310,6 +310,7 @@ export class Button extends Phaser.GameObjects.Container {
     scene.add.existing(this);
     this.isButton = true;
     this.icon = null;
+    this.disabled = false;
     var padding = 10;
     var callback_onCLick = null;
     this.text = scene.add
@@ -332,7 +333,7 @@ export class Button extends Phaser.GameObjects.Container {
 
     const renderInteracive = () => {
       background.setDisplaySize(
-        this.text.width + padding,
+        Math.max(this.width, this.text.width) + padding,
         this.text.height + padding
       );
       backgroundShadow.setDisplaySize(
@@ -364,7 +365,16 @@ export class Button extends Phaser.GameObjects.Container {
       renderInteracive();
       return this;
     };
+    this.setWidth = (width) => {
+      this.text.setMaxWidth(width);
+      this.setSize(width, this.text.displayHeight);
+      renderInteracive();
+      return this;
+    };
     let onPointerDown = () => {
+      if (this.disabled) {
+        return;
+      }
       // SPEED UP
       this.y += 3;
       backgroundShadow.y -= 3;
@@ -388,6 +398,10 @@ export class Button extends Phaser.GameObjects.Container {
     renderInteracive();
     this.on("pointerdown", onPointerDown, true);
     //scene.input.enableDebug(container, 0xff00ff);
+  }
+  setDisable(state = true) {
+    this.text.setAlpha(state ? 0.7 : 1);
+    this.disabled = state;
   }
 }
 
@@ -707,5 +721,115 @@ export class ButtonWithProgress extends Button {
     this.progress.setMaxWidth(this.displayWidth);
     this.progress.x = -this.displayWidth / 2;
     this.progress.y = this.displayHeight / 2;
+  }
+}
+
+export class ButtonSkill extends Phaser.GameObjects.Container {
+  constructor(scene, x, y, skill, width = 200) {
+    super(scene, x, y, []);
+    scene.add.existing(this);
+
+    let margin = 10;
+    this.skill = skill;
+    this.levelText = scene.add
+      .bitmapText(margin, 0, "font1", "LEVEL " + skill.level, 16)
+      .setTint(COLORS.blue)
+      .setMaxWidth(width * 0.25)
+      .setDropShadow(1, 1)
+      .setCenterAlign()
+      .setOrigin(0, 0.5);
+
+    this.costText = scene.add
+      .bitmapText(
+        width - margin,
+        -2,
+        "font1",
+        "$" + skill.cost,
+        skill.cost.toString().length < 4 ? 32 : 9
+      )
+      .setTint(COLORS.green)
+      .setDropShadow(1, 1)
+      .setCenterAlign()
+      .setOrigin(1, 0.5);
+
+    this.titleText = scene.add
+      .bitmapText(width * 0.25 + margin, 0, "font1", skill.name, 16)
+      .setTint(0x111)
+      .setMaxWidth(width * 0.5)
+      .setDropShadow(1, 1)
+      .setOrigin(0, 0.5);
+
+    this.layerText = scene.add.container(0, 0, [
+      this.levelText,
+      this.titleText,
+      this.costText,
+    ]);
+
+    this.layerText.x = -width / 2;
+
+    this.setSize(
+      width,
+      Math.max(
+        this.titleText.height,
+        this.costText.height,
+        this.levelText.height
+      ) + 20
+    );
+    this.setInteractive();
+
+    const background = scene.add
+      .image(this.layerText.x, 0, "rect")
+      .setOrigin(0, 0.5)
+      .setTintFill(0xf1f1f1)
+      .setDisplaySize(this.width, this.height);
+
+    const backgroundShadow = scene.add
+      .image(this.layerText.x, background.displayHeight * 0.4, "rect")
+      .setOrigin(0, 0.5)
+      .setTintFill(0x808080)
+      .setDisplaySize(this.width, background.displayHeight / 2);
+
+    this.add([backgroundShadow, background, this.layerText]);
+    this.setSize(width, this.height + 10); // MARGIN BOTTOM
+    //
+    let onPointerDown = () => {
+      if (this.disabled) {
+        return;
+      }
+      // SPEED UP
+      this.y += 3;
+      backgroundShadow.y -= 3;
+      scene.input.once(
+        "pointerup",
+        (p, g) => {
+          // SPEED DOWN
+          this.y -= 3;
+          backgroundShadow.y += 3;
+          if (g.length > 0 && g[0] === this) {
+            scene.sounds.click.play();
+            this.__click_handler && this.__click_handler(this.skill);
+          }
+        },
+        true
+      );
+    };
+
+    this.on("pointerdown", onPointerDown, true);
+  }
+  update() {
+    this.costText.setText("$" + this.skill.cost);
+    this.levelText.setText(["Level", this.skill.level]);
+  }
+  onClick(_onclicked) {
+    this.__click_handler = _onclicked;
+  }
+  setDisable(_disable) {
+    this.disabled = _disable;
+    this.layerText.setAlpha(_disable ? 0.6 : 1);
+  }
+  setAsMaxLevel() {
+    this.titleText.setMaxWidth(this.width * 0.75);
+    this.costText.setVisible(false);
+    this.setDisable(true);
   }
 }

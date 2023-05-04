@@ -5,6 +5,7 @@ export function initSounds() {
   SOUNDS.step2 = this.sound.add("step", { loop: false, volume: 0.1 });
   SOUNDS.typing = this.sound.add("typing", { loop: false, volume: 0.5 });
   SOUNDS.tap = this.sound.add("tap", { loop: false, volume: 0.3, rate: 3 });
+
   SOUNDS.click = this.sound.add("click", {
     loop: false,
     volume: 0.3,
@@ -69,6 +70,11 @@ export function initSounds() {
   SOUNDS.coffee_pour = this.sound.add("coffee_pour", {
     loop: false,
     volume: 0.2,
+  });
+  SOUNDS.eating = this.sound.add("eating", {
+    loop: false,
+    volume: 0.3,
+    rate: 2,
   });
 }
 export default SOUNDS;

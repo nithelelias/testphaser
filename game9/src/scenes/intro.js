@@ -11,14 +11,14 @@ export class Intro extends Phaser.Scene {
     window.$intro = this;
   }
   preload() {
-    preload.call(this)
+    preload.call(this);
   }
   create() {
     generateRectTexture(this);
     var w = this.game.scale.width;
     var h = this.game.scale.height;
-    initSounds.call(this)
-    this.sounds=SOUNDS;
+    initSounds.call(this);
+    this.sounds = SOUNDS;
     ///////
     var title = this.add
       .bitmapText(w / 2, 100, "font1", ["The", "Developer"], 64)

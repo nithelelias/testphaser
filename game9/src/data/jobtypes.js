@@ -15,6 +15,11 @@ const JOBTYPES = [
     level: 0,
   },
   {
+    type: "Asistente Tecnologico",
+    requireKnowledge: [],
+    level: 0,
+  },
+  {
     type: "Full-Stack",
     requireKnowledge: [
       "HTML",

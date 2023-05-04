@@ -99,10 +99,8 @@ function create() {
   );
   console.log(this.children.list);
   // this.input.on('pointermove', function (pointer) {
-
   //     light.x = pointer.x;
   //     light.y = pointer.y;
-
   // });
   light = this.lights.addLight(0, 0, 200).setScrollFactor(0.0); 
   this.lights.enable().setAmbientColor(0x555555);
