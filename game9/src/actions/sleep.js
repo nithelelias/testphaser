@@ -1,6 +1,5 @@
-import { TICK_HOUR } from "../constants.js";
-import { recoverHPBySleep } from "../context.js";
-import { ProgressBar } from "../ui/ui.js";
+import { isPlayerFullHP, recoverHPBySleep } from "../context.js";
+import { Button } from "../ui/ui.js";
 import { Deffered } from "../utils.js";
 
 export default function Sleep(scene) {
@@ -18,24 +17,45 @@ export default function Sleep(scene) {
       return data;
     })
     .setOrigin(0.5, 1);
-  var progressBar = new ProgressBar(
-    scene,
-    scene.scale.width / 2 - 64,
-    startY + 64,
-    128,
-    12
-  );
+  var wakeUp = scene.add
+    .dynamicBitmapText(
+      scene.scale.width / 2,
+      startY - 64,
+      "font1",
+      ["Deberia despertar..."],
+      14
+    )
+    .setVisible(false)
+    .setOrigin(0.5, 1);
+  // SPEED TIME
   scene.time.timeScale = 8;
-  progressBar
-    .setTimeout(8, (progress) => {
-       recoverHPBySleep();
-    })
-    .then(() => {
-      titleBar.destroy();
-      progressBar.destroy();
-      deferred.resolve();
-      scene.time.timeScale = 1;
-    });
+  const timeEvent = scene.time.addEvent({
+    delay: 1200,
+    loop: true,
+    callback: () => {
+      recoverHPBySleep();
+      if (isPlayerFullHP()) {
+        wakeUp.setVisible(true);
+      }
+    },
+  });
+  // END BUTTON
+  const endButton = new Button(
+    scene,
+    scene.scale.width / 2,
+    scene.scale.height - 64,
+    " Despertar ",
+    32
+  );
+  endButton.x -= endButton.width / 2;
+  endButton.onClick(() => {
+    timeEvent.destroy();
+    titleBar.destroy();
+    wakeUp.destroy();
+    deferred.resolve();
+    endButton.destroy();
+    scene.time.timeScale = 1;
+  });
 
   return deferred.promise;
 }

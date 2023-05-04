@@ -9,7 +9,7 @@ var SENIORITY = 0;
 var MONEY = 0;
 var ACTION_COST = 0.2;
 var ACTUAL_JOB = null;
-var tutorial = false;
+var tutorial = true;
 const DATE = {
   day: 1,
   month: 1,

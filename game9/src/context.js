@@ -87,7 +87,9 @@ export function recoverHP(value) {
 export function recoverHPBySleep() {
   recoverHP(STATE.HEALT_RECOVER_RATE.sleep);
 }
-
+export function isPlayerFullHP() {
+  return STATE.HEALTH >= STATE.MAX_HEALTH;
+}
 export function buyCoffee(n = 1) {
   if (!expendMoney(FOODS.coffee.cost * n)) {
     return false;

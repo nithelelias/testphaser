@@ -86,12 +86,16 @@ export default class Kitchen extends Phaser.GameObjects.Container {
   }
   setUnbindCurrentAction(callback) {
     this.currentActions.push(callback);
+    this.helpText.setVisible(false);
   }
   clearCurrentAction() {
     if (this.currentActions.length === 0) {
       return false;
     }
     let unbindFunction = this.currentActions.pop();
+    if (this.currentActions.length === 0) {
+      this.helpText.setVisible(true);
+    }
     unbindFunction();
     return true;
   }
@@ -108,6 +112,8 @@ export default class Kitchen extends Phaser.GameObjects.Container {
       " Terminar ",
       32
     );
+    // HELP TEXT
+    this.showHelpKitchenText();
     const ingredientText = this.scene.add.container(0, endButton.y - 64, [
       this.scene.add
         .bitmapText(20, 0, "font1", "Ingredientes: 0", 32)
@@ -147,6 +153,7 @@ export default class Kitchen extends Phaser.GameObjects.Container {
     // init listeners
     const onEnd = () => {
       endButton.destroy();
+      this.helpText.destroy();
       ingredientText.destroy();
       deferred.resolve();
       this.fridge_ingredients = 0;
@@ -184,6 +191,31 @@ export default class Kitchen extends Phaser.GameObjects.Container {
       this.useSink(128 + this.sink.x);
     });
     return deferred.promise;
+  }
+  showHelpKitchenText() {
+    let text = this.scene.add
+      .bitmapText(
+        20,
+        this.scene.scale.height / 2,
+        "font1",
+        [
+          "Estas en la cocina",
+          "click en :",
+          "* CAFETERA: Servirte Cafe",
+          "* NEVERA: Sacar ingredientes",
+          "* GRIFO: tomar agua del grifo",
+          "* GRIFO: lavar platos en el grifo",
+          "* ESTUFA: Cocinar con los ingredientes",
+        ],
+        16
+      )
+      .setTint(0xffffff)
+      .setDropShadow(1, 1)
+      .setOrigin(0, 0.5)
+      .setMaxWidth(this.scene.scale.width - 64);
+
+    text.y -= parseInt(text.height);
+    this.helpText = text;
   }
   useCoffeMachine(x) {
     if (this.busy) {
