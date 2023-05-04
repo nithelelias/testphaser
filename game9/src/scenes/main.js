@@ -609,7 +609,7 @@ export default class Main extends Phaser.Scene {
     var todoText = this.add
       .bitmapText(
         x / 2,
-        y + 50,
+        y - 50,
         "font1",
         TODO_LIST.map((t) => "* " + t),
         16
