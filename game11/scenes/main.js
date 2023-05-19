@@ -6,6 +6,7 @@ import generateRectTextures from "../src/generateTextures.js";
 import Pallete from "../src/pallete.js";
 import ActionMenu from "../src/actionMenu.js";
 import InformationBar from "../src/informationBar.js";
+import Human from "../src/human.js";
 var currentInstance = null;
 export default class Main extends Phaser.Scene {
   constructor() {
@@ -26,14 +27,16 @@ export default class Main extends Phaser.Scene {
   initWorld() {
     this.world = new Layer(this);
     this.cursor = new Cursor(this);
-    this.actionMenu=new ActionMenu(this)
-    this.informationBar=new InformationBar(this)
+    this.actionMenu = new ActionMenu(this);
+    this.informationBar = new InformationBar(this);
     this.pallete = new Pallete(this, {
       onFrameSelected: (frame) => {
         this.cursor.startDrawFrame(frame);
       },
     });
     this.__initWorldInteractions();
+
+    this.human = new Human(this,200,200);
   }
   static getWorld() {
     return currentInstance.world;
