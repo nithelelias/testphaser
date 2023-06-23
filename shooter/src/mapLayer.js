@@ -1,9 +1,10 @@
+import { map_maxColumns, map_maxRows } from "./constants.js";
 import RESOURCES from "./resources.js";
 
-const gridSize = 64,
-  maxColumns = 100, // REALLY HIGH NUMBER
-  maxRows = 100, // REALLY HIGH NUMBER
-  trueSpriteSize = 16;
+const gridSize = 16,
+  maxColumns = map_maxColumns, // REALLY HIGH NUMBER
+  maxRows = map_maxRows; // REALLY HIGH NUMBER
+
 var currentInstance = null;
 
 export default class MapLayer {
@@ -22,7 +23,12 @@ export default class MapLayer {
       frameSize,
       frameSize
     );
-    this.layers = [map.createBlankLayer("layer1", tileset).setOrigin(0)];
+    this.layers = [
+      map
+        .createBlankLayer("layer1", tileset)
+        .setOrigin(0)
+        .setCollisionByProperty({ collides: true }),
+    ];
     this.walkableframes = [];
     currentInstance = this;
   }
@@ -50,17 +56,33 @@ export default class MapLayer {
       }
     }
   }
+  putTileAt(frame, col, row) {
+    this.layers[0].putTileAt(frame, col, row);
+  }
+  getTileAtWorldXY(x, y) {
+    return this.layers.map((layer) => layer.getTileAtWorldXY(x, y));
+  }
   renderData(matrixList, walkableframes) {
     //
     this.walkableframes = walkableframes;
+    let unwalkableFramesDic = {};
     this.clearLayers();
     matrixList.forEach((data, idx) => {
       const layer = this.layers[idx];
       data.forEach((columnArray, row) => {
         columnArray.forEach((frame, col) => {
+          if (!walkableframes.includes(frame)) {
+            unwalkableFramesDic[frame] = frame;
+          }
           layer.putTileAt(frame, col, row);
         });
       });
     });
+
+    let unwalkableFrames = Object.keys(unwalkableFramesDic).map((num) =>
+      parseInt(num)
+    );
+
+    this.layers.forEach((layer) => layer.setCollision(unwalkableFrames, true));
   }
 }

@@ -1,18 +1,38 @@
+import { dungeon_roomCols, dungeon_roomRows } from "./constants.js";
 import iterate from "./iterate.js";
 import random from "./random.js";
-import RESOURCES from "./resources.js";
-const roomCols = 13,
-  roomRows = 9;
+const roomCols = dungeon_roomCols,
+  roomRows = dungeon_roomRows;
+const half = {
+  row: parseInt(roomRows / 2) + 1,
+  col: parseInt(roomCols / 2) + 1,
+};
+const odds = {
+  row: roomRows % 2 !== 0,
+  col: roomCols % 2 !== 0,
+};
 const DEFAULT_DUNGEON_FRAMES = {
-  floor: RESOURCES.walkableframes,
+  floor: [0],
+  door: {
+    close: 0,
+    open: 0,
+  },
   walls: [
     [18, 19, 20],
     [67, 68, 69],
     [116, 117, 118],
   ],
 };
+var seed = [];
+
+function doRandom(min, max) {
+  //return useSeed.shift();
+  let rnd = random(min, max);
+  seed.push(rnd);
+  return rnd;
+}
 function randomOfList(list) {
-  return list[random(0, list.length - 1)];
+  return list[doRandom(0, list.length - 1)];
 }
 function getWallFrameByPosition(col, row, cols, rows, wallFrames) {
   let limitCol = col == 0 || col === cols - 1;
@@ -79,9 +99,9 @@ function generateStructure(maxRooms = 5) {
   const map = [];
   var pointers = [];
   var countRoom = 0;
-  iterate(0, rows, (row) => {
+  iterate(rows, (row) => {
     map.push([]);
-    iterate(0, cols, () => {
+    iterate(cols, () => {
       map[row].push(0);
     });
   });
@@ -112,17 +132,17 @@ function generateStructure(maxRooms = 5) {
       if (countRoom >= maxRooms) {
         return;
       }
-      if (random(0, 10) > 8) {
+      if (doRandom(0, 10) > 8) {
         addRoom(col + dir[0], row + dir[1]);
       }
     });
   };
 
-  addRoom(random(0, cols - 1), random(0, rows - 1));
+  addRoom(doRandom(0, cols - 1), doRandom(0, rows - 1));
   let limitBreak = 100;
   while (countRoom < maxRooms && limitBreak > 0) {
     // PICK RANDOM ROOM
-    let pointer = pointers[random(0, pointers.length - 1)];
+    let pointer = pointers[doRandom(0, pointers.length - 1)];
     addCloseRoom(pointer[0], pointer[1]);
     limitBreak--;
   }
@@ -167,20 +187,20 @@ function drawRoomOnStructure(structure, dungeonFRAMES) {
 
   let data = [];
   const getRandomEmpty = () => {
-    return  dungeonFRAMES.empty[random(0, dungeonFRAMES.empty.length - 1)];
+    return dungeonFRAMES.empty[doRandom(0, dungeonFRAMES.empty.length - 1)];
   };
   // FILL data with empty
-  iterate(0, rows, (row) => {
+  iterate(rows, (row) => {
     data.push([]);
-    iterate(0, cols, () => {
+    iterate(cols, () => {
       data[row].push(getRandomEmpty());
     });
   });
   const validateConnection = (_row, _col, [dirRow, dirCol]) => {
     let frame = getFrameAtData(data, _row + dirRow, _col + dirCol);
     if (frame != null && !dungeonFRAMES.empty.includes(frame)) {
-      data[_row + dirRow][_col + dirCol] = dungeonFRAMES.floor[0];
-      data[_row][_col] = dungeonFRAMES.floor[0];
+      data[_row + dirRow][_col + dirCol] = dungeonFRAMES.door.close;
+      data[_row][_col] = dungeonFRAMES.door.close;
     }
   };
   const putRoomAt = (fromCol, fromRow) => {
@@ -212,7 +232,7 @@ function drawRoomOnStructure(structure, dungeonFRAMES) {
       }
     });
   });
-   
+
   return data;
 }
 export function dungeonGenerator(
@@ -220,7 +240,7 @@ export function dungeonGenerator(
   dungeonFRAMES = DEFAULT_DUNGEON_FRAMES
 ) {
   let totalRooms = Array.isArray(numberOfRooms)
-    ? random(numberOfRooms[0], numberOfRooms[1])
+    ? doRandom(numberOfRooms[0], numberOfRooms[1])
     : numberOfRooms;
   let map = generateStructure(totalRooms);
   const data = drawRoomOnStructure(map, dungeonFRAMES);
@@ -231,13 +251,63 @@ export function dungeonGenerator(
     });
   });
   const getRoom = (roomNumber) => {
+    if(!roomNumber){
+      return null
+    }
+    const minusOneIfOdd = {
+      col: odds.col ? -1 : 0,
+      row: odds.row ? -1 : 0,
+    };
     let position = dicRooms[Math.max(0, Math.min(totalRooms, roomNumber))];
+    let initRow = position.row * roomRows,
+      initCol = position.col * roomCols;
+    let row = initRow + half.row,
+      col = initCol + half.col;
+
+    let roomIdx = {
+      row: [row - half.row, row + half.row + minusOneIfOdd.row],
+      col: [col - half.col, col + half.col + minusOneIfOdd.col],
+    };
+    const roomData = data
+      .slice(roomIdx.row[0], roomIdx.row[1])
+      .map((columns) => columns.slice(roomIdx.col[0], roomIdx.col[1]));
+    const doors = {
+      top: null,
+      bottom: null,
+      left: null,
+      right: null,
+    };
+
+    roomData.forEach((rows, rowIdx) => {
+      rows.forEach((frame, colIdx) => {
+        if (frame == dungeonFRAMES.door.close) {
+          let at = "top";
+          if (rowIdx === roomRows + minusOneIfOdd.row) {
+            at = "bottom";
+          }
+          if (colIdx === roomCols + minusOneIfOdd.col) {
+            at = "right";
+          }
+          if (colIdx === 0) {
+            at = "left";
+          }
+          doors[at] = {
+            row: roomIdx.row[0] + rowIdx,
+            col: roomIdx.col[0] + colIdx,
+          };
+        }
+      });
+    });
 
     // RETURN ROOM CENTER
     return {
       roomNumber,
-      row: position.row * roomRows + parseInt(roomRows / 2),
-      col: position.col * roomCols + parseInt(roomCols / 2),
+      data: roomData,
+      row,
+      col,
+      doors,
+      initCol,
+      initRow,
       position,
     };
   };
@@ -253,6 +323,7 @@ export function dungeonGenerator(
     getLastRoom,
     rows: map.length,
     cols: map[0].length,
+    //seed,
     roomSize: {
       width: roomCols,
       height: roomRows,
