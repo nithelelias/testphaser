@@ -20,6 +20,9 @@ export default class Main extends Phaser.Scene {
   }
 
   create() {
+    this.bulletGroup = this.physics.add.group({
+      runChildUpdate: true,
+    });
     this.stage = this.physics.add.group({
       runChildUpdate: true,
     });
@@ -48,10 +51,6 @@ export default class Main extends Phaser.Scene {
       this.stage,
       this.mapLayer.layers[0],
       (entity, layer, e) => {
-        if (entity.isBullet) {
-          entity.hit(null);
-          return;
-        }
         if (entity.isPlayer) {
           this.playerHitWall(layer);
           return;
@@ -60,17 +59,24 @@ export default class Main extends Phaser.Scene {
       null,
       this
     );
+    this.physics.add.collider(
+      this.bulletGroup,
+      this.mapLayer.layers[0],
+      (entity, layer, e) => {
+        entity.hit(null);
+        return;
+      },
+      null,
+      this
+    );
+    this.physics.add.collider(this.stage, this.stage);
     this.physics.add.overlap(
       this.stage,
-      this.stage,
-
-      (entity1, entity2) => {
-        if (entity1 === entity2) {
-          return;
-        }
-        if (entity1.isBullet || entity2.isBullet) {
-          entity1.hit(entity2);
-          entity2.hit(entity1);
+      this.bulletGroup,
+      (entity, bullet) => { 
+        if (bullet.owner !== entity) {
+          entity.hit(bullet);
+          bullet.hit(entity);
         }
       },
       null,
@@ -96,23 +102,30 @@ export default class Main extends Phaser.Scene {
       this.player,
       this.itemGroup,
       (player, item) => {
-        item.pickUp()
+        item.pickUp();
       },
       null,
       this
     );
   }
-  addToStage(elements, is_static = false) {
+  addToStage(_elements, is_static = false) {
+    let elements = [].concat(_elements);
     if (is_static) {
-      this.staticGroup.add(elements);
+      this.staticGroup.add(...elements);
       return;
     }
-    this.stage.add(elements);
+    elements.forEach((element) => {
+      if (element.isBullet) {
+        this.bulletGroup.add(element);
+        return;
+      }
+      this.stage.add(element);
+    });
   }
   addItem(x, y, dataItem) {
     const item = Item.create(this, x, y, dataItem);
     this.itemGroup.add(item);
-    console.log(item);
+
     return item;
   }
   getDungeonRoomPosition(roomNumber) {

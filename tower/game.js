@@ -1,3 +1,5 @@
+import Boot from "./scenes/boot.js";
+import Hud from "./scenes/hud.js";
 import Main from "./scenes/main.js";
 
 const game = new Phaser.Game({
@@ -6,7 +8,7 @@ const game = new Phaser.Game({
   parent: document.getElementById("canvasWrapper"),
   width: 720,
   height: 480,
-  scene: [Main],
+  scene: [Boot,Main,Hud],
   physics: {
     default: "arcade",
     arcade: {

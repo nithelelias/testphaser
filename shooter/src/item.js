@@ -1,5 +1,4 @@
-import Main from "../scenes/main.js";
-import Deffered from "./deferred.js";
+import jumpDropAwayAnimation from "./animations/jumpDropAwayAnimation.js";
 import MapLayer from "./mapLayer.js";
 import PoolAliveManager from "./poolAliveManager.js";
 import RESOURCES from "./resources.js";
@@ -41,28 +40,12 @@ export default class Item extends Phaser.GameObjects.Container {
     return item;
   }
   jumpTo(x, y) {
-    var deferred = new Deffered();
-    let difX=(x-this.x)/2;
-    const tween = this.scene.tweens.chain({
-      targets: this,
-      tweens: [
-        {
-          x: { value: x-difX, ease: "Sine.in" },
-          y: { value: y-gridSize*2, ease: "power1" },
-          duration: 200,
-        },
-        {
-          x: { value: x, ease: "Sine.out" },
-          y: { value: y, ease: "Cubic.out" },
-          duration: 200,
-        },
-      ],
+    this.body.setEnable(false);
+    let { promise } = jumpDropAwayAnimation(this.scene, this, x, y);
 
-      onComplete: () => {
-        deferred.resolve();
-      },
+    promise.then(() => {
+      this.body.setEnable(true);
     });
-    return { ...deferred.promise, tween };
   }
   remove() {
     this.__alive = false;
@@ -71,6 +54,9 @@ export default class Item extends Phaser.GameObjects.Container {
     this.body.setVelocity(0, 0);
   }
   pickUp() {
+    if (!this.__alive) {
+      return;
+    }
     this.itemData.pickUpEvent();
     this.remove();
   }

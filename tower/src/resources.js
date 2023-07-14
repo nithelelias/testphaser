@@ -5,35 +5,57 @@ const RESOURCES = {
   frames: {
     empty: 0,
     cursor: 715,
+    cancel: 677,
+    shovel: 287,
+    pickaxe: 288,
+    hoe: 289,
     lock: 712,
-    tower: 933,
     human: 25,
+    coin_pile: 237,
+    coin: 188,
+    bread: 390,
+    pointer: 527,
+    potion: 669,
+    spawner: 1077,
+    skull: 577,
+    heart: 529,
+    weapons: {
+      sword: 432,
+    },
+    buildings: {
+      hq: 985,
+      house: 986,
+      tower: 933,
+      crops: 306,
+      wall: 843,
+    },
     bullet: {
       normal: 568,
       vertical: 567,
       fire: 505,
     },
-    spawner: 1077,
-    wall: {
-      normal: 885,
-      normal2: 886,
-      bricks: 843,
-    },
-    pointer: 527,
-    potion: 669,
+
     button: {
       idle: 760,
       press: 761,
     },
-    resources: {
-      rock: [103, 606],
-      wood: [49, 50, 51, 52, 53, 54, 55],
-      metal: [103, 606],
-      gold: [103, 606],
+    resource_icons: {
+      gold: 188,
+      food: 390,
+      population: 828,
     },
-
+    attack_icons: {
+      damage: 328,
+      distance: 1058,
+      ticks: 629,
+    },
     mobs: {
       scorpion: 269,
+    },
+    squares: {
+      thin1: 626,
+      empty1: 440,
+      fill1: 783,
     },
   },
   chars: {

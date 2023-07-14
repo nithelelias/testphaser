@@ -16,6 +16,7 @@ const BULLET_OPTIONS = {
 export default class Bullet extends Phaser.GameObjects.Sprite {
   static BULLET_OPTIONS = BULLET_OPTIONS;
   isBullet = true;
+  owner = null;
   constructor(scene, x, y) {
     super(scene, x, y, RESOURCES.name, RESOURCES.frames.bullet.normal);
 
@@ -134,6 +135,9 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
 
     return bullet;
   }
+  setOwner(entity) {
+    this.owner = entity;
+  }
   setLifeSpan(_life) {
     this.lifespan = _life;
   }
@@ -145,15 +149,19 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
     this.targetPosition = _target;
   }
   explode() {
+    if (!this.__alive) {
+      return;
+    }
+    this.owner = null;
     this.lifespan = 0;
     this.__alive = false;
     this.setVisible(false);
-   
+
     if (this.lockat) {
       this.lockat.setVisible(false);
     }
     this.body.setEnable(false);
-    this.body.setVelocity(0, 0);   
+    this.body.setVelocity(0, 0);
   }
   __moveUpdate(t, delta) {
     if (this.type === STATES.aimto) {

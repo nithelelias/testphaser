@@ -18,7 +18,6 @@ export default function hitAnimationFn(target) {
                 repeat: 1,
                 onUpdate: function (tween) {
                     const value = (tween.getValue());
-
                     const colorObject = Phaser.Display.Color.Interpolate.ColorWithColor(fromColor, toColor, 100, value);
                     const color = Phaser.Display.Color.GetColor(colorObject.r, colorObject.g, colorObject.b);
                     // --  console.log(value,color,"=>",colorObject,fromColor,toColor)

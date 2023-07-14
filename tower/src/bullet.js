@@ -7,10 +7,12 @@ const STATES = {
   normal: "normal",
   aimto: "aimto",
 };
-const BULLET_OPTIONS = {
+export const BULLET_OPTIONS = {
   frame: RESOURCES.frames.bullet.normal,
   angle: -180,
   tint: 0xffffff,
+  maxDistance: GRIDSIZE * 6,
+  vel: 0.2,
 };
 export default class Bullet extends Phaser.GameObjects.Sprite {
   static BULLET_OPTIONS = BULLET_OPTIONS;
@@ -24,21 +26,14 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
     this.lifespan = 100;
     this.velocity = [0, 0];
   }
-  static shot(
-    scene,
-    from,
-    targetPosition,
-    bulletOptions = BULLET_OPTIONS,
-    maxDistance = GRIDSIZE * 2,
-    vel = 0.2
-  ) {
+  static shot(scene, from, targetPosition, bulletOptions = BULLET_OPTIONS) {
     const { x, y } = from;
     const bullet = poolManager.create(scene, Bullet);
     bullet.type = STATES.normal;
     bullet.setPosition(from.x, from.y);
     bullet.setTarget(targetPosition);
     bullet.setScale(0.5); //?
-    bullet.setLifeSpan(maxDistance);
+    bullet.setLifeSpan(bulletOptions.maxDistance);
     bullet.setVisible(true);
 
     let angle = Phaser.Math.Angle.Between(
@@ -47,8 +42,8 @@ export default class Bullet extends Phaser.GameObjects.Sprite {
       targetPosition.x,
       targetPosition.y
     );
-    let velX = Math.cos(angle) * vel;
-    let velY = Math.sin(angle) * vel;
+    let velX = Math.cos(angle) * bulletOptions.vel;
+    let velY = Math.sin(angle) * bulletOptions.vel;
     bullet.__initAngle = angle;
 
     bullet.setFrame(bulletOptions.frame);

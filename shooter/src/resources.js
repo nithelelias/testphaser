@@ -9,6 +9,8 @@ const RESOURCES = {
       open: 303,
     },
     cursor: 715,
+    coin: 188,
+    coin_pile:237,
     lock: 712,
     tower: 933,
     human: 25,
@@ -19,15 +21,17 @@ const RESOURCES = {
     key_red: 572,
     key_blue: 573,
     bullet_box: 485,
-    faces:{
-      face1:514,
-      face2:515,
-      face3:516,
-      face4:517,
-      face5:518,
+    faces: {
+      face1: 514,
+      face2: 515,
+      face3: 516,
+      face4: 517,
+      face5: 518,
     },
     gun: {
-      normal: 478,
+      normal: 218,
+      fire:478,
+      
     },
     bullet: {
       normal: 568,

@@ -11,8 +11,7 @@ export default function preload() {
 
   this.load.audio("step", "./assets/audio/step.mp3");
   this.load.audio("typing", "./assets/audio/typing.mp3");
-
-  this.load.bitmapFont("font1", "assets/fonts/gem.png", "assets/fonts/gem.xml");
+ 
   this.load.spritesheet("icons", "assets/images/icons.png", {
     frameWidth: 16,
     frameHeight: 16,

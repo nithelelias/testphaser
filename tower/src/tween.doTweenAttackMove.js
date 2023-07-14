@@ -9,8 +9,6 @@ export default function (
   hold = 200
 ) {
   return new Promise((resolve) => {
-    var called = false;
-
     let tween = gameObject.scene.add.tween({
       targets: gameObject,
       x: "+=" + dir.x * vel,

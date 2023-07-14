@@ -1,12 +1,9 @@
-import Main from "../../scenes/main.js";
-import jumpDropItemAnimation from "../animations/jumpDropItemAnimation.js";
-import MapLayer from "../mapLayer.js";
-import random from "../random.js";
+
+import jumpDropItemAnimation from "../animations/jumpDropItemAnimation.js"; 
+import dropItemsAt from "../dropItemsAt.js";
 
 import RESOURCES from "../resources.js";
 
-const gridSize = MapLayer.getGridSize();
-const getRndJmp = () => random(gridSize, gridSize * 3) * [1, -1][random(0, 1)];
 export default class Chest extends Phaser.GameObjects.Container {
   isChest = true;
   is_open = false;
@@ -30,16 +27,7 @@ export default class Chest extends Phaser.GameObjects.Container {
     this.is_open = false;
     this.sprite.setFrame(RESOURCES.frames.chest.close);
   }
-  __dropItems() {
-    if (this.is_open) {
-      return;
-    }
 
-    this.loot.forEach((dataItem) => {
-      let item = Main.current.addItem(this.x, this.y, dataItem);
-      item.jumpTo(this.x + getRndJmp(), this.y + getRndJmp());
-    });
-  }
   open() {
     if (this.is_open) {
       return;
@@ -47,7 +35,7 @@ export default class Chest extends Phaser.GameObjects.Container {
 
     this.sprite.setFrame(RESOURCES.frames.chest.open);
 
-    this.__dropItems();
+    dropItemsAt(this.x, this.y, this.loot);
     this.callbackOnOpen();
     this.is_open = true;
     return jumpDropItemAnimation(this.sprite);

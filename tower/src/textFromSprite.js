@@ -1,3 +1,13 @@
+function findFramesOn(texto) {
+  const regex = /:frame\((.*?)\)/g;
+  let match;
+  let resultados = [];
+
+  while ((match = regex.exec(texto)) !== null) {
+    resultados.push(match);
+  }
+  return resultados;
+}
 export default class TextFromSprite extends Phaser.GameObjects.Container {
   constructor(
     scene,
@@ -12,6 +22,7 @@ export default class TextFromSprite extends Phaser.GameObjects.Container {
     this.text = text;
     this.configs = configs;
     this.resourceMap = resourceMap;
+    this.__onUpdate = () => null;
     this.__renderText();
   }
   setText(_text) {
@@ -23,6 +34,9 @@ export default class TextFromSprite extends Phaser.GameObjects.Container {
       entity.setTintFill(_color);
       this.configs.color = _color;
     });
+  }
+  onUpdate(__callback) {
+    this.__onUpdate = __callback;
   }
   __clear() {
     //or. use a group...nah
@@ -49,6 +63,15 @@ export default class TextFromSprite extends Phaser.GameObjects.Container {
 
     while (_text.length > 0) {
       let line = _text.shift();
+      let replacedElements = [];
+      let foundframes = findFramesOn(line);
+      if (foundframes.length > 0) {
+        foundframes.forEach((match) => {
+          line = line.replace(match[0], "*");
+          replacedElements.push(parseInt(match[1]));
+        });        
+      }
+
       if (maxH < y + lineHeight) {
         maxH = y + lineHeight;
       }
@@ -56,17 +79,16 @@ export default class TextFromSprite extends Phaser.GameObjects.Container {
         if (maxW < x + spacing) {
           maxW = x + spacing;
         }
-        let char = scene.add.image(
-          x,
-          y,
-          this.resourceMap.name,
-          this.resourceMap.chars[character]
-        );
+        let frame =
+          character === "*"
+            ? replacedElements.shift()
+            : this.resourceMap.chars[character];
+        let char = scene.add.image(x, y, this.resourceMap.name, frame);
+        char.data_character = { frame, character };
         char.setOrigin(0);
         char.setTintFill(color);
         char.setDisplaySize(fontSize, fontSize);
         x += spacing;
-
         return char;
       });
       x = 0;
@@ -76,5 +98,6 @@ export default class TextFromSprite extends Phaser.GameObjects.Container {
     }
 
     this.setSize(maxW, maxH);
+    this.__onUpdate(this.list);
   }
 }

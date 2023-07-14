@@ -16,11 +16,8 @@ export function getCloseEntityPosibleFromList(from, list) {
   return found;
 }
 function getValueOfTarget(_entity) {
-  if (_entity.iamTower) {
-    return 0;
-  }
-  if (_entity.iamWall) {
-    return 50;
+  if (_entity.build_value) {
+    return _entity.build_value;
   }
 
   return 100;

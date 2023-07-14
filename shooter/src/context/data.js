@@ -4,10 +4,11 @@ const STORE = {
   data: {
     keys: 0,
     lives: 1,
+    gold: 0,
     room: 0,
     bullets: {
       max: 12,
-      total: 4,
+      total: Infinity,
     },
   },
 };
@@ -15,6 +16,7 @@ const STORE = {
 export function initDataStore(_game) {
   game = _game;
 }
+window.$store = STORE;
 
 export function setData(_data) {
   // UPDATE DATA
@@ -81,3 +83,19 @@ export function updateRoomNumber(roomNumber) {
 export function onRoomChange(callback) {
   game.events.on(DATACHANGE_EVENT + "-room", callback);
 }
+///
+export function getGold() {
+  return STORE.data.gold;
+}
+
+export function addGold(value = 1) {
+  setData({ gold: STORE.data.gold + value });
+  game.events.emit(DATACHANGE_EVENT + "-gold", STORE.data.gold);
+}
+export function removeGold(value = 1) {
+  addGold(-Math.abs(value));
+}
+export function onGoldChange(callback) {
+  game.events.on(DATACHANGE_EVENT + "-gold", callback);
+}
+///

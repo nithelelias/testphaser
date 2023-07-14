@@ -40,6 +40,9 @@ export default class BulletView extends Phaser.GameObjects.Container {
   }
   updateBulletCount() {
     let bullets = getBullets();
+    if (bullets.total === Infinity) {
+      return this.text.setText(`x--`);
+    }
     let total = bullets.total.toString().padStart(2, "0");
     //let max = bullets.max.toString().padStart(2, "0");
     this.text.setText(`x${total}`);

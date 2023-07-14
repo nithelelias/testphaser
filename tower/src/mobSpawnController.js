@@ -4,14 +4,32 @@ import getTileFromRowCol from "./getTileFromRowCol.js";
 import iterate from "./iterate.js";
 import MobSpawner from "./mobSpawner.js";
 import random from "./random.js";
+import TickManager from "./tickManager.js";
 
 export default class MobSpawnController {
   constructor(scene) {
     this.scene = scene;
+    this.spawners = [];
+    let tickCount = 0;
+    let spawnTimeDelay = 30;
+    TickManager.onTick(() => {
+      tickCount++;
+
+      this.addMoreMobsToSpawn();
+
+      // EVERY 60 TICKS 
+      if (tickCount >= spawnTimeDelay) {
+        spawnTimeDelay = 60;
+        this.createSpawns(1);
+        tickCount = 0;
+      }
+    });
+    this.createSpawns(1);
   }
   getSpawners(totalSpawns = 1) {
     let center = [22, 15];
-    let max = [center[0] * 2 - 2, center[1] * 2 - 2];
+    let min = 4;
+    let max = [center[0] * 2 - min, center[1] * 2 - min];
 
     const spawnerList = [];
 
@@ -19,14 +37,14 @@ export default class MobSpawnController {
     const getRnd = () => {
       switch (random(1, 4)) {
         case 1:
-          return { col: 1, row: random(1, max[1]) };
+          return { col: min, row: random(min, max[1]) };
 
         case 2:
-          return { col: max[0], row: random(1, max[1]) };
+          return { col: max[0], row: random(min, max[1]) };
         case 3:
-          return { col: random(1, max[0]), row: 1 };
+          return { col: random(min, max[0]), row: min };
         case 4:
-          return { col: random(1, max[0]), row: max[1] };
+          return { col: random(min, max[0]), row: max[1] };
       }
     };
     const getRndPosition = () => {
@@ -45,45 +63,17 @@ export default class MobSpawnController {
       spawnerList.push(spawner);
     });
 
-    return {
-      list: spawnerList,
-      clear: () => {
-        spawnerList.forEach((spawner) => {
-          spawner.kill();
-        });
-      },
-    };
+    return spawnerList;
   }
-  initSpawns(totalSpawns = 1, iterationCount = 1, delay = 500) {
-    const deferred = new Deffered();
-
-    let count = 0;
-    let spawners = this.getSpawners(totalSpawns);
-    const doSpawns = () => {
-      spawners.list.forEach((position) => {
-        this.spawnMob(position.x, position.y);
-      });
-    };
-    // EVERY TIME SPAWN
-    let timerEvent = this.scene.time.addEvent({
-      delay,
-      loop: true,
-      callback: () => {
-        count++;
-        if (count <= iterationCount) {
-          doSpawns();
-        } else {
-          timerEvent.destroy();
-          deferred.resolve();
-          spawners.clear();
-        }
-      },
+  addMoreMobsToSpawn() {
+    this.spawners.forEach((spawner) => {
+      spawner.tickToAddMore( );
     });
-
-    return deferred.promise;
   }
-  spawnMob(x, y) {
-    let enemy = Enemy.spawn(this.scene, x, y);
-    this.scene.groupEnemy.add(enemy);
+  createSpawns(totalSpawns = 1) {
+    let spawners = this.getSpawners(totalSpawns);
+    this.spawners = this.spawners.concat(spawners);
+
+    return spawners;
   }
 }

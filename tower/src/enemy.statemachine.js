@@ -32,8 +32,10 @@ export default function enemyStateMachine({
     getClosestTarget();
     if (this.getTarget()) {
       machine.setState("chase");
+      machine.chase()
     } else {
       machine.setState("free");
+      machine.free()
     }
   };
   machine.free = () => {

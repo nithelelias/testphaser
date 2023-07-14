@@ -14,16 +14,7 @@ export default class Player extends Phaser.GameObjects.Container {
     super(scene, 0, 0, []);
     const sprite_size = PLAYER_SIZE / 2;
     this.speed = Phaser.Math.GetSpeed(500, 0.004);
-    this.head = scene.add.container(0, -sprite_size * 0.4, [
-      scene.add
-        .image(0, 0, "rect")
-        .setTintFill(0x111)
-        .setDisplaySize(sprite_size - 2, sprite_size - 2),
-      scene.add
-        .sprite(0, 0, RESOURCES.name, RESOURCES.frames.faces.face1)
-        .setOrigin(0.5)
-        .setDisplaySize(sprite_size, sprite_size),
-    ]);
+  
     this.sprite = scene.add
       .sprite(0, 0, RESOURCES.name, RESOURCES.frames.human)
       .setOrigin(0.5)
@@ -34,7 +25,7 @@ export default class Player extends Phaser.GameObjects.Container {
       .setOrigin(0.5)
       .setDisplaySize(sprite_size, sprite_size);
 
-    this.add([this.sprite, this.head, this.weapon]);
+    this.add([this.sprite,  this.weapon]);
     this.setSize(this.sprite.displayWidth, this.sprite.displayHeight);
 
     this.swingAnim = new WalkSwingAnim(this.sprite);
@@ -42,7 +33,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this.hitAnimation = hitAnimationFn(this.sprite);
 
     var lastFired = 0,
-      delayShoot = 100;
+      delayShoot = 1000;
     playerWeaponBehavior.call(this, {
       onShoot: () => {
         let time = main.time.now;
@@ -66,7 +57,7 @@ export default class Player extends Phaser.GameObjects.Container {
           y: start.y + Math.sin(angle) * maxDistance,
         };
         let bullet = Bullet.shot(scene, start, finalTarget);
-        bullet.fromPlayer = true;
+        bullet.setOwner(this)
         this.scene.addToStage(bullet);
       },
     });
