@@ -7,7 +7,7 @@ export default class Intro extends Phaser.Scene {
   }
   create() {
     let text = this.add
-      .text(this.scale.width / 2, this.scale.height / 2, "SALTADOR DALI")
+      .text(this.scale.width / 2, this.scale.height / 2, "SALTADOR DALI V1")
       .setOrigin(0.5);
 
     const btn = new Button(
