@@ -1,0 +1,19 @@
+body {
+  margin: 0px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  display: flex;
+}
+
+canvas {
+  /* position: fixed; */
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  box-sizing: border-box;
+  border: solid blue;
+  align-self: center;
+}
+ 
