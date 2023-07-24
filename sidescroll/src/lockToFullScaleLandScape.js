@@ -1,3 +1,5 @@
+import { toggleFullScreen } from "./requestFullScreen.js";
+
 const lockToLandScape = () => {
   return screen.orientation
     .lock("landscape")
@@ -10,7 +12,8 @@ const lockToLandScape = () => {
 };
 export default function lockToFullScaleLandScape() {
   return new Promise((resolve, reject) => {
-    document.documentElement.requestFullscreen();
+    //document.documentElement.requestFullscreen();
+    toggleFullScreen()
     setTimeout(() => {
       lockToLandScape().then(resolve, reject);
     }, 100);

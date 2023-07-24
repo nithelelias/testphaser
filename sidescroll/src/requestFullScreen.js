@@ -24,12 +24,3 @@ export function toggleFullScreen() {
     cancelFullScreen.call(doc);
   }
 }
-export default function requestFullscreen(elem) {
-  try {
-    toggleFullScreen();
-  } catch (error) {
-    alert(
-      `Error attempting to enable fullscreen mode: ${err.message} (${err.name})`
-    );
-  }
-}
