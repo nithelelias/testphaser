@@ -7,7 +7,7 @@ export default class Intro extends Phaser.Scene {
   }
   create() {
     let text = this.add
-      .text(this.scale.width / 2, this.scale.height / 2, "SALTADOR DALI V1.2")
+      .text(this.scale.width / 2, this.scale.height / 2, "SALTADOR DALI V1.3")
       .setOrigin(0.5);
 
     const btn = new Button(
@@ -17,7 +17,7 @@ export default class Intro extends Phaser.Scene {
       "CLICK PARA INICIAR",
       {
         onClick: () => {
-          lockToFullScaleLandScape().then((response) => {
+          lockToFullScaleLandScape(this).then((response) => {
             console.log(response);
             this.scene.start("main");
           });

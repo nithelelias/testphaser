@@ -160,7 +160,7 @@ export default class Main extends Phaser.Scene {
           this.scale.stopFullscreen();
         } else {
           button.setFrame(1);
-          lockToFullScaleLandScape();
+          lockToFullScaleLandScape(this);
         }
       },
       this
