@@ -13,7 +13,9 @@ const lockToLandScape = () => {
 export default function lockToFullScaleLandScape(scene) {
   return new Promise((resolve, reject) => {
     //document.documentElement.requestFullscreen();
-    scene.scale.startFullScreen();
+    if (scene.scale.isFullscreen) {
+      scene.scale.startFullScreen();
+    }
     setTimeout(() => {
       lockToLandScape().then(resolve, reject);
     }, 100);
