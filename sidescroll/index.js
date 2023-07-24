@@ -4,6 +4,7 @@ import Main from "./scenes/main.js";
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
+  parent: document.querySelector("#game"),
   pixelArt: true,
   width: 720,
   height: 320,
@@ -16,7 +17,7 @@ const game = new Phaser.Game({
     },
   },
   scale: {
-    mode: Phaser.Scale.FIT,
+    /* mode: Phaser.Scale.CENTER_BOTH, */
   },
 });
 window.game = game;

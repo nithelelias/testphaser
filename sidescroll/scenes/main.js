@@ -1,4 +1,5 @@
 import lockToFullScaleLandScape from "../src/lockToFullScaleLandScape.js";
+import { toggleFullScreen } from "../src/requestFullScreen.js";
 
 export default class Main extends Phaser.Scene {
   constructor() {
@@ -59,18 +60,21 @@ export default class Main extends Phaser.Scene {
     {
       const bottom = center.y * 1.8;
       const right = this.scale.width;
-      var lastPlatform = this.addPlatForm(player.x + 50, bottom, 100, 30);
-      var i = 10;
+      var firstPlatform = this.addPlatForm(player.x + 50, bottom, 100, 30);
+      var lastPlatform = firstPlatform;
+      var i = 8;
       while (i > 0) {
-        lastPlatform = this.addPlatForm(
+        let newplatform = this.addPlatForm(
           lastPlatform.x + 100,
           Phaser.Math.Between(bottom, bottom - player.jumpMax),
           Phaser.Math.Between(30, 100),
-          30
+          30,
+          lastPlatform
         );
+        lastPlatform = newplatform;
         i--;
       }
-
+      firstPlatform.setLastPlatform(lastPlatform);
       /* this.time.addEvent({
         delay: 10,
         loop: true,
@@ -103,7 +107,7 @@ export default class Main extends Phaser.Scene {
     });
     this.fsbutton();
   }
-  addPlatForm(x, y, width, height) {
+  addPlatForm(x, y, width, height, _lastplatform) {
     const platform = this.platforms
       .create(x, y, "ground")
       .setDisplaySize(width, height);
@@ -117,25 +121,26 @@ export default class Main extends Phaser.Scene {
     platform.body.checkCollision.down = false;
     platform.body.checkCollision.right = false;
     platform.body.velocity.x = -50 * this.level;
+    platform.lastplatform = _lastplatform;
     // Automatically kill the pipe when it's no longer visible
-    const getLatPlatForm = () => {
-      return this.platforms.children.entries.sort(
-        (entry1, entry2) => entry2.x - entry1.x
-      )[0];
+    platform.setLastPlatform = (lastPlatform) => {
+      platform.lastplatform = lastPlatform;
     };
-
     const onLevelUp = () => {
-
       platform.body.velocity.x = -50 + -10 * this.level;
     };
     this.events.on("levelUp", onLevelUp);
 
     platform.update = () => {
-      if (platform.x < -width) {
-        let lastplatform = getLatPlatForm();
-        platform.x = lastplatform.x + 200;
+      if (!platform.lastplatform) {
+        console.log("no last platform", platform.id);
+        return;
+      }
+      if (platform.x < -platform.displayWidth / 2) {
+        platform.x =
+          platform.lastplatform.x + platform.lastplatform.displayWidth + 100;
         if (platform.id === 5) {
-          console.log("LEVEL UP")
+          console.log("LEVEL UP");
           this.addLevel();
         }
       }
@@ -160,7 +165,8 @@ export default class Main extends Phaser.Scene {
           this.scale.stopFullscreen();
         } else {
           button.setFrame(1);
-          lockToFullScaleLandScape(this);
+          //toggleFullScreen(true)
+          this.scale.startFullscreen();
         }
       },
       this
@@ -179,22 +185,8 @@ export default class Main extends Phaser.Scene {
   unBlurFx() {
     this.cameras.main.resetPostPipeline();
   }
-  checkOrientation() {
-    const orientation = screen.orientation.type;
 
-    if (orientation !== Phaser.Scale.LANDSCAPE) {
-      this.blurFx();
-      this.scene.pause();
-      this.scene.sendToBack();
-      this.scene.run("lockportrait");
-      this.scene.get("lockportrait").scene.setActive(true);
-      this.scene.get("lockportrait").onEnd(() => {
-        this.unBlurFx();
-      });
-    }
-  }
   update(t, d) {
-    this.checkOrientation();
     this.player.body.velocityX = 100 - this.player.x;
     if (this.player.jumping) {
       if (this.player.jumpvel > 1) {

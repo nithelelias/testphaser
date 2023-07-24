@@ -1,4 +1,5 @@
 import Button from "../src/button.js";
+import checkLandScape from "../src/checkLandScape.js";
 import lockToFullScaleLandScape from "../src/lockToFullScaleLandScape.js";
 
 export default class Intro extends Phaser.Scene {
@@ -17,12 +18,13 @@ export default class Intro extends Phaser.Scene {
       "CLICK PARA INICIAR",
       {
         onClick: () => {
-          lockToFullScaleLandScape(this).then((response) => {
-            console.log(response);
-            this.scene.start("main");
-          });
+          this.scene.start("main");
         },
       }
     );
+    checkLandScape(this.game, () => {
+      console.log(innerWidth, innerHeight);
+      this.scale.setGameSize(innerWidth, innerHeight);
+    });
   }
 }

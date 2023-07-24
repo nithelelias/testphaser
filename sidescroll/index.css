@@ -1,10 +1,14 @@
 body {
   margin: 0px;
   background-color: #f1f1f1;
+}
+#game {
   cursor: pointer;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #1c1c1c;
 }
-
 canvas {
   /* position: fixed; */
   top: 0px;
@@ -16,4 +20,3 @@ canvas {
   border: solid blue;
   align-self: center;
 }
- 

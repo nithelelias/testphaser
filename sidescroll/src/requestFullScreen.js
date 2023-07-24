@@ -1,4 +1,4 @@
-export function toggleFullScreen() {
+export function toggleFullScreen(active = null) {
   var doc = window.document;
   var docEl = doc.documentElement;
 
@@ -13,12 +13,14 @@ export function toggleFullScreen() {
     doc.webkitExitFullscreen ||
     doc.msExitFullscreen;
 
-  if (
-    !doc.fullscreenElement &&
-    !doc.mozFullScreenElement &&
-    !doc.webkitFullscreenElement &&
-    !doc.msFullscreenElement
-  ) {
+  if (active === null) {
+    active =
+      !doc.fullscreenElement &&
+      !doc.mozFullScreenElement &&
+      !doc.webkitFullscreenElement &&
+      !doc.msFullscreenElement;
+  }
+  if (!active) {
     requestFullScreen.call(docEl);
   } else {
     cancelFullScreen.call(doc);
