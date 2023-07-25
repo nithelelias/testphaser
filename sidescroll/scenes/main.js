@@ -203,7 +203,7 @@ export default class Main extends Phaser.Scene {
       }
     }
     if (this.player.y > this.scale.height + 10) {
-      this.player.y = 100;
+      this.player.y = 10;
     }
   }
 }
