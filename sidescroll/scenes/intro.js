@@ -23,8 +23,11 @@ export default class Intro extends Phaser.Scene {
       }
     );
     checkLandScape(this.game, () => {
-      console.log(innerWidth, innerHeight);
-      this.scale.setGameSize(innerWidth, innerHeight);
+      text.setPosition(this.scale.width / 2, this.scale.height / 2);
+      btn.setPosition(this.scale.width / 2, text.y + text.height + 12);
+      setTimeout(() => {
+        window.scrollTo(0, -100);
+      }, 100);
     });
   }
 }

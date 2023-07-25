@@ -17,7 +17,7 @@ const game = new Phaser.Game({
     },
   },
   scale: {
-    /* mode: Phaser.Scale.CENTER_BOTH, */
+     mode: Phaser.Scale.FIT,  
   },
 });
 window.game = game;
