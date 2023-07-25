@@ -1,5 +1,4 @@
-import lockToFullScaleLandScape from "../src/lockToFullScaleLandScape.js";
-import { toggleFullScreen } from "../src/requestFullScreen.js";
+import isMobile from "../src/isMobile.js";
 
 export default class Main extends Phaser.Scene {
   constructor() {
@@ -43,6 +42,10 @@ export default class Main extends Phaser.Scene {
     this.platforms = platforms;
 
     const player = this.physics.add.sprite(100, center.y - 50, "dude", 5);
+    player.doJump = () => {
+      player.jumpvel = player.jumpMax + 0;
+      player.jumping = true;
+    };
     this.player = player;
     player.jumpMax = 200;
     player.is_touching_down = false;
@@ -93,18 +96,30 @@ export default class Main extends Phaser.Scene {
     this.physics.add.collider(player, platforms);
 
     //  Input Events
-    this.cursors = this.input.keyboard.createCursorKeys();
-
-    this.input.on("pointerdown", (e, g) => {
-      if (g.length > 0 || !player.body.touching.down) {
-        return;
-      }
-      player.jumpvel = player.jumpMax + 0;
-      player.jumping = true;
-    });
-    this.input.on("pointerup", () => {
-      player.jumping = false;
-    });
+    if (isMobile()) {
+      console.log("MOBILE")
+      this.cursors = this.input.keyboard.createCursorKeys();
+      this.input.on("pointerdown", (e, g) => {
+        if (g.length > 0 || !player.body.touching.down) {
+          return;
+        }
+        player.doJump();
+      });
+      this.input.on("pointerup", () => {
+        player.jumping = false;
+      });
+    } else {
+      console.log("PC")
+      var spaceBar = this.input.keyboard.addKey(
+        Phaser.Input.Keyboard.KeyCodes.SPACE
+      );
+      spaceBar.on("down", () => {
+        player.doJump();
+      });
+      spaceBar.on("up", () => {
+        player.jumping = false;
+      });
+    }
     this.fsbutton();
   }
   addPlatForm(x, y, width, height, _lastplatform) {
