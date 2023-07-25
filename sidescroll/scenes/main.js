@@ -43,6 +43,9 @@ export default class Main extends Phaser.Scene {
 
     const player = this.physics.add.sprite(100, center.y - 50, "dude", 5);
     player.doJump = () => {
+      if (!player.body.touching.down) {
+        return;
+      }
       player.jumpvel = player.jumpMax + 0;
       player.jumping = true;
     };
@@ -97,10 +100,10 @@ export default class Main extends Phaser.Scene {
 
     //  Input Events
     if (isMobile()) {
-      console.log("MOBILE")
+      console.log("MOBILE");
       this.cursors = this.input.keyboard.createCursorKeys();
       this.input.on("pointerdown", (e, g) => {
-        if (g.length > 0 || !player.body.touching.down) {
+        if (g.length > 0) {
           return;
         }
         player.doJump();
@@ -109,7 +112,7 @@ export default class Main extends Phaser.Scene {
         player.jumping = false;
       });
     } else {
-      console.log("PC")
+      console.log("PC");
       var spaceBar = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.SPACE
       );
