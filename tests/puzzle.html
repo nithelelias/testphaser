@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <canvas id="miCanvas"></canvas>
+    <script>
+      var canvas = document.getElementById("miCanvas");
+      var ctx = canvas.getContext("2d");
+
+      // Tamaño de la pieza de rompecabezas
+      const anchoPieza = 100;
+      const altoPieza = 100;
+
+      // Dibuja la pieza de rompecabezas
+      function dibujarPieza(
+        ladoSuperior,
+        ladoDerecho,
+        ladoInferior,
+        ladoIzquierdo
+      ) {
+        ctx.beginPath();
+
+        // Lado superior
+        if (ladoSuperior === "vacío") {
+          ctx.moveTo(0, 0);
+        } else if (ladoSuperior === "hueco") {
+          ctx.moveTo(anchoPieza / 2, 0);
+        } else if (ladoSuperior === "cabeza") {
+          ctx.moveTo(anchoPieza / 4, 0);
+          ctx.bezierCurveTo(
+            0,
+            0,
+            0,
+            altoPieza / 2,
+            anchoPieza / 4,
+            altoPieza / 2
+          );
+        }
+
+        // Lado derecho
+        if (ladoDerecho === "vacío") {
+          ctx.lineTo(anchoPieza, altoPieza / 2);
+        } else if (ladoDerecho === "hueco") {
+          ctx.lineTo(anchoPieza, altoPieza / 2);
+        } else if (ladoDerecho === "cabeza") {
+          ctx.lineTo(anchoPieza, altoPieza / 4);
+          ctx.bezierCurveTo(
+            anchoPieza,
+            0,
+            anchoPieza / 2,
+            0,
+            anchoPieza / 2,
+            altoPieza / 4
+          );
+        }
+
+        // Lado inferior
+        if (ladoInferior === "vacío") {
+          ctx.lineTo(anchoPieza / 2, altoPieza);
+        } else if (ladoInferior === "hueco") {
+          ctx.lineTo(anchoPieza / 2, altoPieza);
+        } else if (ladoInferior === "cabeza") {
+          ctx.lineTo((anchoPieza * 3) / 4, altoPieza);
+          ctx.bezierCurveTo(
+            anchoPieza,
+            altoPieza,
+            anchoPieza,
+            altoPieza / 2,
+            (anchoPieza * 3) / 4,
+            altoPieza / 2
+          );
+        }
+
+        // Lado izquierdo
+        if (ladoIzquierdo === "vacío") {
+          ctx.lineTo(0, altoPieza / 2);
+        } else if (ladoIzquierdo === "hueco") {
+          ctx.lineTo(0, altoPieza / 2);
+        } else if (ladoIzquierdo === "cabeza") {
+          ctx.lineTo(0, (altoPieza * 3) / 4);
+          ctx.bezierCurveTo(
+            0,
+            altoPieza,
+            anchoPieza / 2,
+            altoPieza,
+            anchoPieza / 2,
+            (altoPieza * 3) / 4
+          );
+        }
+
+        // Estilo y color
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "black";
+
+        // Dibujar la forma
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // Llama a la función para dibujar la pieza de rompecabezas
+      dibujarPieza("cabeza", "vacío", "hueco", "cabeza");
+    </script>
+  </body>
+</html>
