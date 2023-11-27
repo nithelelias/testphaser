@@ -6,7 +6,7 @@ export default class Main extends Phaser.Scene {
       key: "main",
       physics: {
         matter: {
-          debug: true,
+          //debug: true,
           gravity: { y: 3 },
         },
       },
