@@ -37,6 +37,7 @@ export default class Main extends Phaser.Scene {
   createMusicBg() {
     const img_size = 16;
     const music = this.sound.add("music");
+    music.setVolume(.3)
     music.play();
     const toggleSound = () => {
       if (music.isPlaying) {
