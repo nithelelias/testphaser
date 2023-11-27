@@ -6,6 +6,7 @@ export default class Boot extends Phaser.Scene {
   preload() {
     this.load.audio("pop", "./assets/audios/pop.mp3");
     this.load.audio("drop", "./assets/audios/drop.mp3");
+    this.load.audio("music", "./assets/audios/music.mp3");
     this.load.script("webfont", "./assets/webfont.js");
     this.load.atlas(
       "bubbles",
@@ -13,6 +14,8 @@ export default class Boot extends Phaser.Scene {
       "./assets/particles/bubbles.json"
     );
     this.load.image("star", "./assets/star3.png");
+    this.load.image("sound-muted","./assets/sound-muted.png")
+    this.load.image("sound-playing","./assets/sound-playing.png")
     this.load.atlasXML("animals", "assets/round.png", "assets/round.xml");
     let element = document.createElement("style");
     document.head.appendChild(element);

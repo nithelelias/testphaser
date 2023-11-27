@@ -27,20 +27,99 @@ export default class Main extends Phaser.Scene {
     this.createNextPointInfo();
     this.createScore();
     this.createGameBounds();
-
-    this.createNew(this.scale.width / 2);
+    this.createMusicBg();
+    //
     this.initPointerListener();
+    this.createIntro().then(() => {
+      this.createNew(this.scale.width / 2);
+    });
+  }
+  createMusicBg() {
+    const img_size = 16;
+    const music = this.sound.add("music");
+    music.play();
+    const toggleSound = () => {
+      if (music.isPlaying) {
+        music.stop();
+        control.setTexture("sound-muted");
+      } else {
+        music.play();
+        control.setTexture("sound-playing");
+      }
+    };
+    const control = this.add.image(
+      this.scale.width - img_size,
+      this.scale.height - img_size,
+      "sound-playing"
+    );
+    const rate = img_size / control.width;
+    control.setDisplaySize(rate * control.width, rate * control.height);
+    control.setInteractive();
+    control.on("pointerdown", (event) => {
+      toggleSound();
+    });
   }
   createParticleEmitter() {
-    this.emitter = this.add.particles(0, 0, "bubbles", {
-      frame: ["elec1", "elec2", "elec3", "silverbubble"],
-      angle: { start: 0, end: 360, steps: 32 },
-      lifespan:  200,
-      speed: 300,
-      quantity: 32,
-      scale: { start: 0.5, end: 0 },
-      emitting: false,
-    }).setDepth(1000)
+    this.emitter = this.add
+      .particles(0, 0, "bubbles", {
+        frame: ["elec1", "elec2", "elec3", "silverbubble"],
+        angle: { start: 0, end: 360, steps: 32 },
+        lifespan: 200,
+        speed: 300,
+        quantity: 32,
+        scale: { start: 0.5, end: 0 },
+        emitting: false,
+      })
+      .setDepth(1000);
+  }
+  createIntro() {
+    const img_size = 32;
+    const promises = [];
+    const createCircAnim = (idx, x, y) => {
+      const image = this.add
+        .image(x, y, "animals", animals[idx] + ".png")
+        .setOrigin(0, 0.5);
+
+      let rate = img_size / image.width;
+      image.setDisplaySize(rate * image.width, rate * image.height);
+      image.setAlpha(0);
+      this.tweens.add({
+        targets: image,
+        alpha: 1,
+        delay: idx * 100,
+        duration: 300,
+      });
+      promises.push(
+        new Promise((resolve) => {
+          this.tweens.add({
+            targets: image,
+            y: "-=90",
+            ease: "sine.inOut",
+            yoyo: true,
+            delay: idx * 100,
+            duration: 600,
+            onComplete: resolve,
+          });
+        })
+      );
+      return image;
+    };
+    const container = this.add.container(16, this.scale.height / 2, []);
+
+    for (let i = 0; i < 11; i++) {
+      container.add(createCircAnim(i, i * img_size + 8 * i, 0));
+    }
+    return Promise.all(promises).then(() => {
+      return new Promise((resolve) => {
+        this.tweens.add({
+          targets: container,
+          y: 16,
+          ease: "sine.inOut",
+          duration: 600,
+          onComplete: resolve,
+        });
+      });
+    });
   }
   getSound(soundName) {
     if (this.sound.get(soundName)) {
@@ -87,8 +166,8 @@ export default class Main extends Phaser.Scene {
       this.current.x = pointer.x;
       this.pointer.x = pointer.x;
     });
-    this.input.on("pointerdown", () => {
-      if (!this.current) {
+    this.input.on("pointerdown", (pointer, gameobject) => {
+      if (!this.current || gameobject.length > 0) {
         return;
       }
       this.input.once("pointerup", (pointer) => {
@@ -126,7 +205,9 @@ export default class Main extends Phaser.Scene {
     const image = this.add
       .image(0, 0, "animals", animals[this.nextPointRnd - 1] + ".png")
       .setOrigin(0, 0.5);
-    image.setDisplaySize(img_size, img_size);
+
+    let rate = img_size / image.width;
+    image.setDisplaySize(rate * image.width, rate * image.height);
     const text = this.add
       .text(image.x + image.displayWidth + 8, 0, "next", {
         fontFamily: "main-font",
@@ -135,7 +216,7 @@ export default class Main extends Phaser.Scene {
       })
       .setShadow(2, 2, "#333333", 2, false, true)
       .setOrigin(0, 0.5);
-    const container = this.add.container(this.scale.width - 100, 40, [
+    const container = this.add.container(this.scale.width - 100, 60, [
       bg,
       image,
       text,
@@ -146,7 +227,7 @@ export default class Main extends Phaser.Scene {
   }
   createScore() {
     const text = this.add
-      .text(this.scale.width / 2, 20, "0", {
+      .text(this.scale.width / 2, 40, "0", {
         fontFamily: "main-font",
         fontSize: 48,
         color: COLORS.text,
@@ -209,9 +290,10 @@ export default class Main extends Phaser.Scene {
   }
   createNew(x) {
     const rndpoints = this.nextPointRnd;
-    const circle = this.createCirc(x, 100, rndpoints);
+    const circle = this.createCirc(x, 120, rndpoints);
     circle.setIgnoreGravity(true);
     circle.body.velocity.y = 0;
+
     circle.body.onCollideCallback = (event) => {
       if (circle.body.velocity.y > 4) {
         this.playOnce("drop");
@@ -225,12 +307,11 @@ export default class Main extends Phaser.Scene {
     const radius = 16 + 16 * points;
     let circle = this.matter.add
       .sprite(x, y, "animals", animals[points - 1] + ".png")
-      .setFriction(1)
+      .setFriction(0.1)
       .setBounce(0.5, 0.1);
 
-    let rateX = radius / circle.width;
-    let rateY = radius / circle.height;
-    circle.setDisplaySize(rateX * circle.width, rateY * circle.height);
+    let rate = radius / circle.width;
+    circle.setDisplaySize(rate * circle.width, rate * circle.height);
     circle.setCircle(radius / 2);
     /*  circle.setExistingBody(
         Matter.Matter.Bodies.circle(circle.x, circle.y, radius / 2)

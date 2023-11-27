@@ -22,25 +22,24 @@ export const switchRndPallette = (n) => {
   COLORS.text = pallettePicked[3];
 };
 export const animals = [
-  "chick",
-  "chicken",
-  "duck",
-  "frog",
-  "dog",
-  "parrot",
-  "owl",
-  "cow",
-  "bear",
-  "gorilla",
-  "crocodile",
-  "panda",
-  "elephant",
+  "chick", //2
+  "chicken", //4
+  "duck", //8
+  "parrot", //16
+  "frog", //32
+  "owl", //64
+  "dog", //128
+  "monkey", //256
+  "gorilla", //512
+  "bear", //1024
+  "panda", //2048
 
+  "crocodile",
+  "elephant",
   "giraffe",
   "goat",
   "hippo",
   "horse",
-  "monkey",
   "moose",
   "narwhal",
 ];
