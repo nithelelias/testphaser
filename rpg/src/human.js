@@ -1,6 +1,35 @@
 import RESOURCES from "./resources.js";
 import tweenPromise from "./tweenPromise.js";
-import WalkSwingAnim from "./walkSwingAnim.js";
+import walkJumpAnim from "./animation/walkJumpAnim.js";
+
+function EntitiMoveLock(entity) {
+  var locked = false;
+  const moveAnim = new walkJumpAnim(
+    entity.sprite,
+    entity.sprite.y,
+    entity.sprite.displayHeight * 0.4
+  );
+
+  const move = async (coords) => {
+    if (locked) {
+      return locked;
+    }
+    locked = true;
+    //moveAnim.play();
+    await tweenPromise(entity.scene, {
+      targets: [entity],
+      x: coords.x,
+      y: coords.y,
+      ease: "QuintEaseInOut",
+      duration: 100,
+    });
+    locked = false;
+  };
+
+  return {
+    move,
+  };
+}
 
 export default class Human extends Phaser.GameObjects.Container {
   constructor(scene, size = 64) {
@@ -19,17 +48,10 @@ export default class Human extends Phaser.GameObjects.Container {
     this.add([this.backEmpty, this.sprite]);
     this.size = size;
     scene.add.existing(this);
-    this.swingAnim = new WalkSwingAnim(this.sprite);
+    this.moveManager=new EntitiMoveLock(this)
   }
 
   async doWalkAnim(coords) {
-    this.swingAnim.play();
-    await tweenPromise(this.scene, {
-      targets: [this],
-      x: coords.x,
-      y: coords.y,
-      ease: "QuintEaseIn",
-      duration: 100,
-    });
+    return this.moveManager.move(coords)
   }
 }

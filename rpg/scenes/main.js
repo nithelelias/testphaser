@@ -24,18 +24,18 @@ export default class Main extends Phaser.Scene {
       frameSize: RESOURCES.trueSpriteSize,
     });
     const framesDataMap = RESOURCES.maps.crypt;
-    let dungeon = dungeonGenerator([8, 12], framesDataMap);
+    let dungeon = dungeonGenerator([8, 12], {rows:3,cols:3},framesDataMap);
     this.dungeon = dungeon;
-    // -console.log(data);
+    // console.table(dungeon.data);
     this.mapLayer.renderData([dungeon.data], framesDataMap.floor);
-    this.addStuffsToDungeonMap();
+   // this.addStuffsToDungeonMap();
 
     this.party = [new Human(this, this.mapLayer.getGridSize())];
     this.putPartyAtRoom(1);
     movementOnDungeon.call(this, 1);
     // FOLLOW PLAYER
     this.cameras.main.startFollow(this.party[0]);
-    this.cameras.main.setZoom(2);
+    this.cameras.main.setZoom(1.5);
     //
   }
   addStuffsToDungeonMap() {
@@ -78,7 +78,7 @@ export default class Main extends Phaser.Scene {
       };
       return coords;
     };
-    
+
     //   chests -> items, cloth armor, weapon etc
     getRandomRoomNumberToStuff(3, "chests", (roomNumber) => {
       const coords = getRandomPosiblePositionAtRoom(roomNumber);

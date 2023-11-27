@@ -1,7 +1,7 @@
 import iterate from "./iterate.js";
 import random from "./random.js";
 import RESOURCES from "./resources.js";
-const roomCols = 13,
+var roomCols = 13,
   roomRows = 9;
 const DEFAULT_DUNGEON_FRAMES = {
   floor: RESOURCES.walkableframes,
@@ -216,9 +216,11 @@ function drawRoomOnStructure(structure, dungeonFRAMES) {
   return data;
 }
 export function dungeonGenerator(
-  numberOfRooms,
+  numberOfRooms,roomSizes={cols:16,rows:9},
   dungeonFRAMES = DEFAULT_DUNGEON_FRAMES
 ) {
+  roomCols=roomSizes.cols;
+  roomRows=roomSizes.rows;
   let totalRooms = Array.isArray(numberOfRooms)
     ? random(numberOfRooms[0], numberOfRooms[1])
     : numberOfRooms;

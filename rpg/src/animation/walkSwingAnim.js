@@ -1,4 +1,4 @@
-import tweenPromise from "./tweenPromise.js";
+import tweenPromise from "../tweenPromise.js";
 
 export default function WalkSwingAnim(elem) {
   let lastDirSwing = 1;
