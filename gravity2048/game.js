@@ -2,13 +2,14 @@ import { COLORS } from "./constants.js";
 import Boot from "./scenes/boot.js";
 import Main from "./scenes/main.js";
 import Test from "./scenes/test.js";
-
+let parent = document.querySelector("#gameWrapper");
+parent.style.backgroundColor = COLORS.secundary;
 const config = {
   type: Phaser.AUTO,
   width: 460,
   height: 720,
   backgroundColor: COLORS.primary,
-  parent: "gameWrapper",
+  parent: parent,
 
   scale: {
     mode: Phaser.Scale.FIT,

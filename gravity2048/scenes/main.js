@@ -1,4 +1,4 @@
-import { COLORS, animals } from "../constants.js";
+import { COLORS, animals, shapes } from "../constants.js";
 
 export default class Main extends Phaser.Scene {
   constructor() {
@@ -6,7 +6,7 @@ export default class Main extends Phaser.Scene {
       key: "main",
       physics: {
         matter: {
-          //debug: true,
+        // debug: true,
           gravity: { y: 3 },
         },
       },
@@ -30,9 +30,8 @@ export default class Main extends Phaser.Scene {
     this.createMusicBg();
     //
     this.initPointerListener();
-    this.createIntro().then(() => {
-      this.createNew(this.scale.width / 2);
-    });
+    this.createIntro().then(() => {});
+    this.createNew(this.scale.width / 2);
   }
   createMusicBg() {
     const img_size = 16;
@@ -288,8 +287,8 @@ export default class Main extends Phaser.Scene {
       x: objectA.x + (objectB.x - objectA.x) / 2,
       y: objectA.y + (objectB.y - objectA.y) / 2,
     };
-    this.createCirc(mid.x, mid.y, objectA.points + 1);
-
+    let newcir = this.createCirc(mid.x, mid.y, objectA.points + 1);
+    newcir.dropped = true;
     this.matter.world.remove(objectA.body);
     this.matter.world.remove(objectB.body);
     objectA.eat();
@@ -315,18 +314,25 @@ export default class Main extends Phaser.Scene {
     this.__updateNextInfo();
   }
   createCirc(x, y, points = 1) {
+    const picked = animals[points - 1];
     const radius = 16 + 16 * points;
-    let circle = this.matter.add
-      .sprite(x, y, "animals", animals[points - 1] + ".png")
-      .setFriction(0.1)
-      .setBounce(0.5, 0.1);
+    const configs = {};
+
+    let circle = this.matter.add.sprite(x, y, "animals", picked + ".png");
 
     let rate = radius / circle.width;
+
     circle.setDisplaySize(rate * circle.width, rate * circle.height);
     circle.setCircle(radius / 2);
-    /*  circle.setExistingBody(
-        Matter.Matter.Bodies.circle(circle.x, circle.y, radius / 2)
-      ); */
+
+    if (shapes.hasOwnProperty(picked)) {
+      configs.shape = shapes[picked];
+      circle.setBody(shapes[picked]);
+    } else {
+      configs.shape = shapes.default;
+    }
+
+    circle.setFriction(0.1).setBounce(0.5, 0.1);
 
     circle.radius = radius / 2;
     circle.points = points;
@@ -350,9 +356,11 @@ export default class Main extends Phaser.Scene {
     for (let i in this.collisionPool) {
       for (let j in this.collisionPool[i]) {
         let current = this.collisionPool[i][j];
-        for (let k in this.collisionPool[i]) {
-          if (k !== j) {
-            this.validateCollision(current, this.collisionPool[i][k]);
+        if (current.dropped) {
+          for (let k in this.collisionPool[i]) {
+            if (k !== j && this.collisionPool[i][k].dropped) {
+              this.validateCollision(current, this.collisionPool[i][k]);
+            }
           }
         }
       }
