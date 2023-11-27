@@ -261,7 +261,7 @@ export default class Main extends Phaser.Scene {
       .setOrigin(0);
   }
   validateCollision(bodyA, bodyB) {
-    if (!(bodyA && bodyB)) {
+    if (!(bodyA && bodyB && bodyA.scene && bodyB.scene)) {
       return;
     }
     let dist = Phaser.Math.Distance.BetweenPoints(
