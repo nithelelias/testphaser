@@ -180,11 +180,12 @@ export default class Main extends Phaser.Scene {
         this.pointer.x = pointer.x;
         this.addScore(this.current.points);
         this.current.setIgnoreGravity(false);
-        this.tweens.add({
+        this.current.setAngle(Phaser.Math.RND.between(-45, 45));
+        /* this.tweens.add({
           targets: this.current,
           angle: Phaser.Math.RND.between(-45, 45),
           duration: 300,
-        });
+        }); */
         this.current = null;
         setTimeout(() => {
           this.createNew(pointer.x);
@@ -292,7 +293,7 @@ export default class Main extends Phaser.Scene {
     objectB.eat();
     this.playNew("pop");
     this.addScore(objectA.points);
-    //this.emitter.emitParticleAt(mid.x, mid.y);
+    this.emitter.emitParticleAt(mid.x, mid.y);
     return true;
   }
   createNew(x) {
