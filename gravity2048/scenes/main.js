@@ -37,8 +37,8 @@ export default class Main extends Phaser.Scene {
   createMusicBg() {
     const img_size = 16;
     const music = this.sound.add("music");
-    music.setVolume(.3)
-    music.loop=true
+    music.setVolume(0.3);
+    music.loop = true;
     music.play();
     const toggleSound = () => {
       if (music.isPlaying) {
@@ -241,7 +241,12 @@ export default class Main extends Phaser.Scene {
     };
   }
   createGameBounds() {
-    this.matter.world.setBounds(30, 0, 400, this.scale.height - 60);
+    this.matter.world.setBounds(
+      10,
+      0,
+      this.scale.width - 20,
+      this.scale.height - 60
+    );
 
     this.add
       .rectangle(
@@ -287,7 +292,7 @@ export default class Main extends Phaser.Scene {
     objectB.eat();
     this.playNew("pop");
     this.addScore(objectA.points);
-    this.emitter.emitParticleAt(mid.x, mid.y);
+    //this.emitter.emitParticleAt(mid.x, mid.y);
     return true;
   }
   createNew(x) {
