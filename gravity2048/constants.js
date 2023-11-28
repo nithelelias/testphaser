@@ -7,7 +7,7 @@ export const pallettes = {
   4: ["#e07a5f", "#3d405b", "#f4f1de", "#fed766"],
 };
 export const COLORS = {
-  red:0xff0000,
+  red: 0xff0000,
   primary: pallettes[1][0],
   secundary: pallettes[1][1],
   accent: pallettes[1][2],
@@ -39,9 +39,16 @@ export const animals = [
   "elephant",
   "giraffe",
   "goat",
+
   "hippo",
+  "rabbit",
+  "rhino",
+  "sloth",
   "horse",
   "moose",
+  "snake",
+  "walrus",
+  "zebra",
   "narwhal",
 ];
 export const shapes = {
