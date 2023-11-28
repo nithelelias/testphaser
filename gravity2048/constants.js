@@ -29,12 +29,12 @@ export const animals = [
   "parrot", //16
   "frog", //32
   "owl", //64
-  "dog", //128
+  "pig", //128
   "monkey", //256
   "gorilla", //512
   "bear", //1024
   "panda", //2048
-
+  "dog",
   "crocodile",
   "elephant",
   "giraffe",
