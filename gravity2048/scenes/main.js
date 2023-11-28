@@ -182,7 +182,7 @@ export default class Main extends Phaser.Scene {
         total += this.collisionPool[i].length;
       }
     }
-    let max = 2 + parseInt(total / 4);
+    let max = 2 + parseInt(total / 8);
     return Phaser.Math.RND.between(1, max);
   }
   initPointerListener() {
