@@ -63,7 +63,7 @@ export default class Main extends Phaser.Scene {
       }
     };
     const control = this.add.image(
-      this.scale.width - img_size,
+      32,
       this.scale.height - img_size,
       "sound-playing"
     );
