@@ -7,7 +7,7 @@ parent.style.backgroundColor = COLORS.secundary;
 const config = {
   type: Phaser.AUTO,
   width: 460,
-  height: 720,
+  height: window.innerHeight,
   backgroundColor: COLORS.primary,
   parent: parent,
 

@@ -6,13 +6,14 @@ export default class Main extends Phaser.Scene {
       key: "main",
       physics: {
         matter: {
-        // debug: true,
+          // debug: true,
           gravity: { y: 3 },
         },
       },
     });
   }
-
+  START_Y = 180;
+  __unbind_listener = () => null;
   __onScoreChange = () => null;
   __updateNextInfo = () => null;
 
@@ -28,17 +29,30 @@ export default class Main extends Phaser.Scene {
     this.createScore();
     this.createGameBounds();
     this.createMusicBg();
+
     //
     this.initPointerListener();
-    this.createIntro().then(() => {});
-    this.createNew(this.scale.width / 2);
+    this.createIntro().then(() => {
+      this.createNew(this.scale.width / 2);
+    });
+
+    this.matter.world.on("collisionstart", (_event, objectA, objectB) => {
+      if (objectA.gameObject && objectB.gameObject) {
+        //this.validateCollision(objectA.gameObject, objectB.gameObject);
+        this.evaluateCollisionPool();
+      } else {
+        this.playNew("drop");
+      }
+    });
   }
   createMusicBg() {
     const img_size = 16;
-    const music = this.sound.add("music");
-    music.setVolume(0.3);
+    const music = this.sound.get("music") || this.sound.add("music");
+    music.setVolume(0.5);
     music.loop = true;
-    music.play();
+    if (!music.isPlaying) {
+      music.play();
+    }
     const toggleSound = () => {
       if (music.isPlaying) {
         music.stop();
@@ -114,7 +128,7 @@ export default class Main extends Phaser.Scene {
       return new Promise((resolve) => {
         this.tweens.add({
           targets: container,
-          y: 16,
+          y: 32,
           ease: "sine.inOut",
           duration: 600,
           onComplete: resolve,
@@ -129,12 +143,24 @@ export default class Main extends Phaser.Scene {
     return this.sound.add(soundName);
   }
   playNew(soundName) {
-    let audio = this.sound.add(soundName);
+    let audio;
+    let pool = this.sound.sounds.filter((_audio) => _audio.key === soundName);
+    if (pool.length < 3) {
+      audio = this.sound.add(soundName);
+    } else {
+      for (let i in pool) {
+        if (!pool[i].isPlaying) {
+          audio = pool[i];
+          break;
+        }
+      }
+      if (!audio) {
+        audio = pool[0];
+        audio.stop()
+      }
+    }
+
     audio.play();
-    setTimeout(() => {
-      audio.stop();
-      audio.destroy();
-    }, audio.duration * 1000);
     return audio;
   }
   playOnce(soundName) {
@@ -160,14 +186,14 @@ export default class Main extends Phaser.Scene {
     return Phaser.Math.RND.between(1, max);
   }
   initPointerListener() {
-    this.input.on("pointermove", (pointer) => {
+    const on_pointermove = (pointer) => {
       if (!this.current || this.current.dropped) {
         return;
       }
       this.current.x = pointer.x;
       this.pointer.x = pointer.x;
-    });
-    this.input.on("pointerdown", (pointer, gameobject) => {
+    };
+    const on_pointerdown = (pointer, gameobject) => {
       if (!this.current || gameobject.length > 0) {
         return;
       }
@@ -190,7 +216,13 @@ export default class Main extends Phaser.Scene {
           this.createNew(pointer.x);
         }, 700);
       });
-    });
+    };
+    this.input.on("pointermove", on_pointermove);
+    this.input.on("pointerdown", on_pointerdown);
+    this.__unbind_listener = () => {
+      this.input.off("pointermove", on_pointermove);
+      this.input.off("pointerdown", on_pointerdown);
+    };
   }
   createNextPointInfo() {
     const img_size = 32;
@@ -218,7 +250,7 @@ export default class Main extends Phaser.Scene {
       })
       .setShadow(2, 2, "#333333", 2, false, true)
       .setOrigin(0, 0.5);
-    const container = this.add.container(this.scale.width - 100, 60, [
+    const container = this.add.container(this.scale.width - 100, 100, [
       bg,
       image,
       text,
@@ -229,7 +261,7 @@ export default class Main extends Phaser.Scene {
   }
   createScore() {
     const text = this.add
-      .text(this.scale.width / 2, 40, "0", {
+      .text(this.scale.width / 2, 60, "0", {
         fontFamily: "main-font",
         fontSize: 48,
         color: COLORS.text,
@@ -258,6 +290,17 @@ export default class Main extends Phaser.Scene {
         1
       )
       .setOrigin(0);
+
+    this.add
+      .rectangle(
+        0,
+        this.START_Y,
+        this.scale.width,
+        3,
+        Number(COLORS.secundary.replace("#", "0x")),
+        1
+      )
+      .setOrigin(0);
   }
   validateCollision(bodyA, bodyB) {
     if (!(bodyA && bodyB && bodyA.scene && bodyB.scene)) {
@@ -271,10 +314,15 @@ export default class Main extends Phaser.Scene {
     dist -= bodyA.radius;
     dist -= bodyB.radius;
     if (dist > 8) {
-      return;
+      return false;
     }
-
-    this.validateMerge(bodyA, bodyB);
+    if (bodyA.dropped && bodyB.dropped) {
+      if (this.validateMerge(bodyA, bodyB)) {
+        this.playNew("pop");
+      } else {
+        //this.playNew("drop");
+      }
+    }
   }
   validateMerge(objectA, objectB) {
     if (!objectA.points || !objectB.points) {
@@ -293,25 +341,29 @@ export default class Main extends Phaser.Scene {
     this.matter.world.remove(objectB.body);
     objectA.eat();
     objectB.eat();
-    this.playNew("pop");
     this.addScore(objectA.points);
     this.emitter.emitParticleAt(mid.x, mid.y);
+
     return true;
   }
   createNew(x) {
     const rndpoints = this.nextPointRnd;
-    const circle = this.createCirc(x, 120, rndpoints);
+    const circle = this.createCirc(x, this.START_Y, rndpoints);
     circle.setIgnoreGravity(true);
     circle.body.velocity.y = 0;
-
+    let firstDrop = true;
     circle.body.onCollideCallback = (event) => {
-      if (circle.body.velocity.y > 4) {
+      //if (circle.body.velocity.y > 4) {
+
+      if (firstDrop) {
+        firstDrop = false;
         this.playOnce("drop");
       }
     };
     this.current = circle;
     this.nextPointRnd = this.getRandPoint();
     this.__updateNextInfo();
+    this.validateGameEnd();
   }
   createCirc(x, y, points = 1) {
     const picked = animals[points - 1];
@@ -352,18 +404,129 @@ export default class Main extends Phaser.Scene {
     this.collisionPool[points].push(circle);
     return circle;
   }
-  update() {
+
+  endGame() {
+    this.__unbind_listener();
+    let maxPoints = localStorage.getItem("max-points") || 0;
+    const container = this.add.container(0, 0, [
+      this.add
+        .rectangle(
+          0,
+          0,
+          this.scale.width,
+          this.scale.height,
+          COLORS.accent,
+          0.8
+        )
+        .setOrigin(0),
+    ]);
+    container.setDepth(1000);
+    let title = this.add
+      .text(this.scale.width / 2, this.scale.height / 2 - 100, "GAME OVER", {
+        fontFamily: "main-font",
+        fontSize: 64,
+        color: COLORS.text,
+      })
+      .setShadow(2, 2, "#333333", 2, false, true)
+      .setOrigin(0.5);
+
+    let points = this.add
+      .text(
+        this.scale.width / 2,
+        title.y + title.height + 32,
+        ["TOTAL POINTS", this.points],
+        {
+          fontFamily: "main-font",
+          fontSize: 24,
+          align: "center",
+          color: COLORS.text,
+        }
+      )
+      .setShadow(2, 2, "#333333", 2, false, true)
+      .setOrigin(0.5);
+    let maxScoreTxt = this.add
+      .text(
+        this.scale.width / 2,
+        points.y + points.height + 16,
+        ["Max Score: " + maxPoints],
+        {
+          fontFamily: "main-font",
+          fontSize: 16,
+          align: "center",
+          color: "#FFFFFF",
+        }
+      )
+      .setShadow(2, 2, "#333333", 2, false, true)
+      .setOrigin(0.5);
+
+    let button = this.add.container(
+      this.scale.width / 2,
+      this.scale.height - 230,
+      [
+        this.add.rectangle(
+          0,
+          0,
+          100,
+          30,
+          Number(COLORS.secundary.replace("#", "0x")),
+          0.1
+        ),
+        this.add
+          .text(0, 0, ["Play again"], {
+            fontFamily: "main-font",
+            fontSize: 22,
+            align: "center",
+            color: COLORS.text,
+          })
+          .setShadow(2, 2, "#333333", 2, false, true)
+          .setOrigin(0.5),
+      ]
+    );
+    button.list[0].setDisplaySize(
+      button.list[1].width + 8,
+      button.list[1].height + 8
+    );
+    button.setSize(button.list[1].width, button.list[1].height);
+    button.setInteractive();
+    button.on("pointerdown", () => {
+      button.list[1].setScale(0.8);
+      this.input.once("pointerup", () => {
+        button.list[1].setScale(1);
+      });
+      button.once("pointerup", () => {
+        this.resetGame();
+      });
+    });
+    container.add([title, points, maxScoreTxt, button]);
+    localStorage.setItem("max-points", Math.max(maxPoints, this.points));
+  }
+  resetGame() {
+    //this.sound.stopAll();
+    this.scene.restart();
+  }
+  evaluateCollisionPool() {
     for (let i in this.collisionPool) {
       for (let j in this.collisionPool[i]) {
         let current = this.collisionPool[i][j];
-        if (current.dropped) {
-          for (let k in this.collisionPool[i]) {
-            if (k !== j && this.collisionPool[i][k].dropped) {
-              this.validateCollision(current, this.collisionPool[i][k]);
-            }
+
+        for (let k in this.collisionPool[i]) {
+          if (k !== j && this.collisionPool[i][k].dropped) {
+            this.validateCollision(current, this.collisionPool[i][k]);
           }
         }
       }
     }
   }
+  validateGameEnd() {
+    for (let i in this.collisionPool) {
+      for (let j in this.collisionPool[i]) {
+        let current = this.collisionPool[i][j];
+        if (current.dropped && current.y < this.START_Y) {
+          this.endGame();
+          return;
+        }
+      }
+    }
+  }
+  update() {}
 }

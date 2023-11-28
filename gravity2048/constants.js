@@ -7,6 +7,7 @@ export const pallettes = {
   4: ["#e07a5f", "#3d405b", "#f4f1de", "#fed766"],
 };
 export const COLORS = {
+  red:0xff0000,
   primary: pallettes[1][0],
   secundary: pallettes[1][1],
   accent: pallettes[1][2],
@@ -132,7 +133,7 @@ export const shapes = {
         circle: {
           x: 48,
           y: 58,
-          radius: 48,
+          radius: 46,
         },
       },
     ],
