@@ -156,7 +156,7 @@ export default class Main extends Phaser.Scene {
       }
       if (!audio) {
         audio = pool[0];
-        audio.stop()
+        audio.stop();
       }
     }
 
@@ -408,6 +408,10 @@ export default class Main extends Phaser.Scene {
   endGame() {
     this.__unbind_listener();
     let maxPoints = localStorage.getItem("max-points") || 0;
+    let oldMaxPoints = maxPoints + 0;
+    let newRecord = this.points > maxPoints;
+    maxPoints = Math.max(maxPoints, this.points);
+    localStorage.setItem("max-points", maxPoints);
     const container = this.add.container(0, 0, [
       this.add
         .rectangle(
@@ -430,7 +434,7 @@ export default class Main extends Phaser.Scene {
       .setShadow(2, 2, "#333333", 2, false, true)
       .setOrigin(0.5);
 
-    let points = this.add
+    let pointsText = this.add
       .text(
         this.scale.width / 2,
         title.y + title.height + 32,
@@ -444,11 +448,28 @@ export default class Main extends Phaser.Scene {
       )
       .setShadow(2, 2, "#333333", 2, false, true)
       .setOrigin(0.5);
+    let newRecordText = this.add
+      .text(
+        this.scale.width / 2,
+        pointsText.y + pointsText.height + 16,
+        newRecord ? ["¡¡NEW RECORD!!"] : [""],
+        {
+          fontFamily: "main-font",
+          fontSize: 20,
+          align: "center",
+          color: COLORS.secundary,
+        }
+      )
+      .setShadow(2, 2, "#333333", 2, false, true)
+      .setOrigin(0.5);
+
     let maxScoreTxt = this.add
       .text(
         this.scale.width / 2,
-        points.y + points.height + 16,
-        ["Max Score: " + maxPoints],
+        newRecordText.y + newRecordText.height + 16,
+        newRecord
+          ? ["new  Best: " + oldMaxPoints + " -> " + maxPoints]
+          : ["Personal Best: " + maxPoints],
         {
           fontFamily: "main-font",
           fontSize: 16,
@@ -497,8 +518,7 @@ export default class Main extends Phaser.Scene {
         this.resetGame();
       });
     });
-    container.add([title, points, maxScoreTxt, button]);
-    localStorage.setItem("max-points", Math.max(maxPoints, this.points));
+    container.add([title, pointsText, newRecordText, maxScoreTxt, button]);
   }
   resetGame() {
     //this.sound.stopAll();
@@ -521,7 +541,7 @@ export default class Main extends Phaser.Scene {
     for (let i in this.collisionPool) {
       for (let j in this.collisionPool[i]) {
         let current = this.collisionPool[i][j];
-        if (current.dropped && current.y < this.START_Y) {
+        if (current.dropped && current.y + current.points < this.START_Y) {
           this.endGame();
           return;
         }
