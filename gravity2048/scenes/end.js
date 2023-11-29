@@ -18,7 +18,7 @@ const isMobile = () => {
 const getanimalByPoints = (max_points) => {
   let idx = max_points;
 
-  let animal = animals[Math.min(idx,animals.length-1)];
+  let animal = animals[Math.min(idx, animals.length - 1)];
   return animal;
 };
 const newicon = (x, y, texture, frame, size = 32) => {
@@ -183,10 +183,10 @@ export default class End extends Phaser.Scene {
     const container = this.add.container(0, 0, [loader]);
 
     //container.add(this.obtainTestRanking());
-    this.requestRankingToServerSide(container).then(()=>{
+    this.requestRankingToServerSide(container).then(() => {
       container.remove(loader);
       loader.destroy();
-    })
+    });
     return container;
   }
   requestRankingToServerSide(container) {
@@ -211,7 +211,7 @@ export default class End extends Phaser.Scene {
       if (ranking.length > 5) {
         ranking.splice(5);
       }
-      
+
       const table = this.createRankingTable(ranking);
       container.add(table);
     });
@@ -375,7 +375,7 @@ export default class End extends Phaser.Scene {
   createInputListener(textEntry, onEnd, onTypeStart) {
     textEntry.setText("");
 
-    if (true || isMobile()) {
+    if (isMobile()) {
       let input = document.createElement("input");
       input.classList.add("fixed-hidden");
       document.body.appendChild(input);
