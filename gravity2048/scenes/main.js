@@ -12,7 +12,7 @@ export default class Main extends Phaser.Scene {
       },
     });
   }
-  START_Y = 180;
+  START_Y = 220;
   __unbind_listener = () => null;
   __onScoreChange = () => null;
   __updateNextInfo = () => null;
@@ -74,8 +74,8 @@ export default class Main extends Phaser.Scene {
     }
 
     const control = this.createUIButton(
-      32,
-      this.scale.height - 32,
+     this.scale.width- 32,
+       32,
       "sound-playing",
       () => {
         if (music.isPlaying) {
@@ -98,7 +98,7 @@ export default class Main extends Phaser.Scene {
     control.update();
   }
   createReloadButton() {
-    this.createUIButton(76, this.scale.height - 32, "replay", () => {
+    this.createUIButton(this.scale.width-92,  32, "replay", () => {
       this.endGame();
     });
   }
@@ -156,7 +156,7 @@ export default class Main extends Phaser.Scene {
       return new Promise((resolve) => {
         this.tweens.add({
           targets: container,
-          y: 32,
+          y: 64,
           ease: "sine.inOut",
           duration: 600,
           onComplete: resolve,
@@ -278,7 +278,7 @@ export default class Main extends Phaser.Scene {
       })
       .setShadow(2, 2, "#333333", 2, false, true)
       .setOrigin(0, 0.5);
-    const container = this.add.container(this.scale.width - 100, 100, [
+    const container = this.add.container(this.scale.width - 100, 120, [
       bg,
       image,
       text,
@@ -289,7 +289,7 @@ export default class Main extends Phaser.Scene {
   }
   createScore() {
     const text = this.add
-      .text(this.scale.width / 2, 60, "0", {
+      .text(this.scale.width / 2, 100, "0", {
         fontFamily: "main-font",
         fontSize: 48,
         color: COLORS.text,

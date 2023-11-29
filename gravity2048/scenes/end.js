@@ -182,7 +182,15 @@ export default class End extends Phaser.Scene {
     const loader = this.createLoadingContainer();
     const container = this.add.container(0, 0, [loader]);
 
-    getRanking().then((response) => {
+    //container.add(this.obtainTestRanking());
+    this.requestRankingToServerSide(container).then(()=>{
+      container.remove(loader);
+      loader.destroy();
+    })
+    return container;
+  }
+  requestRankingToServerSide(container) {
+    return getRanking().then((response) => {
       if (!response) {
         return;
       }
@@ -203,13 +211,10 @@ export default class End extends Phaser.Scene {
       if (ranking.length > 5) {
         ranking.splice(5);
       }
-      container.remove(loader);
-      loader.destroy();
+      
       const table = this.createRankingTable(ranking);
       container.add(table);
     });
-
-    return container;
   }
   createLoadingContainer() {
     const icon = newicon(this.scale.width / 2, 32, "crown", null, 128);
@@ -227,7 +232,7 @@ export default class End extends Phaser.Scene {
     ]);
     return loader;
   }
-  obtainRanking() {
+  obtainTestRanking() {
     const rankin = [
       {
         username: "prueba 1",
@@ -259,7 +264,7 @@ export default class End extends Phaser.Scene {
       },
     ];
 
-    this.createRankingTable(rankin);
+    return this.createRankingTable(rankin);
   }
 
   createRankingTable(rankingList) {
@@ -279,7 +284,7 @@ export default class End extends Phaser.Scene {
     const createRow = (rank, username, points, max, input) => {
       let wrapper = this.add.container(0, 0, []);
       let usernameTxt = newtext(0, 0, input ? "_   " : username);
-      usernameTxt.setSize(100, 32);
+      usernameTxt.setSize(70, 32);
       let row = this.add.container(0, 0, [
         newtext(0, 0, rank),
         newicon(0, 0, "animals", getanimalByPoints(max) + ".png"),
@@ -320,16 +325,11 @@ export default class End extends Phaser.Scene {
         setTimeout(() => {
           wrapper.parentContainer.bringToTop(wrapper);
         }, 10);
-        let label = newtext(
-          this.scale.width / 2,
-          this.scale.height / 2 + 206,
-          "Save  your   name",
-          42,
-          "center"
-        );
-
+        let label = newtext(0, 18, "Save  your   name", 10, "center");
+        label.setColor(COLORS.white);
         label.setOrigin(0.5);
         label.setDepth(1001);
+        wrapper.add(label);
         this.createInputListener(
           usernameTxt,
           () => {
@@ -342,7 +342,6 @@ export default class End extends Phaser.Scene {
             this.storeToServerSide(usernameTxt.text);
           },
           () => {
-            label.setFontSize(32);
             label.setText(["press   enter   to   save"]);
           }
         );
@@ -376,10 +375,29 @@ export default class End extends Phaser.Scene {
   createInputListener(textEntry, onEnd, onTypeStart) {
     textEntry.setText("");
 
-    if (isMobile()) {
-      let name=prompt("Ingrese su nombre", "");
-      textEntry.setText(name)
-      onEnd()
+    if (true || isMobile()) {
+      let input = document.createElement("input");
+      input.classList.add("fixed-hidden");
+      document.body.appendChild(input);
+      let interval = setInterval(() => {
+        input.focus();
+        textEntry.setText(input.value.substring(0, 20));
+      }, 100);
+
+      input.onkeydown = (e) => {
+        if (e.code === "Enter") {
+          onEnd();
+          clearInterval(interval);
+          input.remove();
+          return true;
+        }
+        if (!/^([A-Za-z]|\d)+$/.test(e.key)) {
+          return false;
+        }
+
+        onTypeStart();
+      };
+
       return;
     }
     const unbind = () => {

@@ -7,8 +7,8 @@ export const pallettes = {
   4: ["#e07a5f", "#3d405b", "#f4f1de", "#fed766"],
 };
 export const COLORS = {
-  red: 0xff0000,
-  white: 0xffffff,
+  red: "#ff0000",
+  white: "#ffffff",
   primary: pallettes[1][0],
   secundary: pallettes[1][1],
   accent: pallettes[1][2],

@@ -14,7 +14,13 @@ body {
   background-color: #fff;
   box-sizing: border-box;
 }
-
+.fixed-hidden{
+  position: fixed;
+  top:0;
+  left: 0;
+  opacity: 0;
+  z-index: 100;
+}
 @font-face {
   font-family: "alter-font";
   src: url("assets/fonts/bebas.ttf") format("truetype");
