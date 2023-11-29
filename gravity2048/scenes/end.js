@@ -1,5 +1,20 @@
 import { COLORS, animals } from "../constants.js";
 import { getRanking, storeScore } from "../storage.js";
+const isMobile = () => {
+  if (
+    navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
 const getanimalByPoints = (max_points) => {
   let idx = max_points;
 
@@ -360,6 +375,13 @@ export default class End extends Phaser.Scene {
   }
   createInputListener(textEntry, onEnd, onTypeStart) {
     textEntry.setText("");
+
+    if (isMobile()) {
+      let name=prompt("Ingrese su nombre", "");
+      textEntry.setText(name)
+      onEnd()
+      return;
+    }
     const unbind = () => {
       this.input.keyboard.off("keydown", onKeyDown);
       onEnd();
