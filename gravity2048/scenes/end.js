@@ -86,11 +86,7 @@ export default class End extends Phaser.Scene {
       .text(
         this.scale.width / 2,
         pointsText.y + pointsText.height + 16,
-        rank === 1
-          ? ["¡¡YOU ARE THE KING!!!"]
-          : newRecord
-          ? ["¡¡NEW PERSONAL RECORD!!"]
-          : [""],
+        newRecord ? ["¡¡NEW PERSONAL RECORD!!"] : [""],
         {
           fontFamily: "main-font",
           fontSize: 20,
