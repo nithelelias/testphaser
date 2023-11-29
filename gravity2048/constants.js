@@ -8,6 +8,7 @@ export const pallettes = {
 };
 export const COLORS = {
   red: 0xff0000,
+  white: 0xffffff,
   primary: pallettes[1][0],
   secundary: pallettes[1][1],
   accent: pallettes[1][2],
@@ -16,7 +17,6 @@ export const COLORS = {
 export const switchRndPallette = (n) => {
   let rnd = parseInt(Math.random(0) * pallettes.total + pallettes.min);
   let pallettePicked = pallettes[rnd];
-  console.log("rnd", rnd, pallettePicked);
   COLORS.primary = pallettePicked[0];
   COLORS.secundary = pallettePicked[1];
   COLORS.accent = pallettePicked[2];

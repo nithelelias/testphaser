@@ -14,3 +14,12 @@ body {
   background-color: #fff;
   box-sizing: border-box;
 }
+
+@font-face {
+  font-family: "alter-font";
+  src: url("assets/fonts/bebas.ttf") format("truetype");
+}
+@font-face {
+  font-family: "main-font";
+  src: url("assets/fonts/troika.otf") format("truetype");
+}

@@ -20,6 +20,7 @@ export default class Main extends Phaser.Scene {
   create() {
     window.main = this;
     this.points = 0;
+    this.maxReach = 0;
     this.current = null;
     this.pointer = { x: 0, y: 0 };
     this.nextPointRnd = this.getRandPoint();
@@ -29,6 +30,7 @@ export default class Main extends Phaser.Scene {
     this.createScore();
     this.createGameBounds();
     this.createMusicBg();
+    this.createReloadButton();
 
     //
     this.initPointerListener();
@@ -40,38 +42,64 @@ export default class Main extends Phaser.Scene {
       if (objectA.gameObject && objectB.gameObject) {
         //this.validateCollision(objectA.gameObject, objectB.gameObject);
         this.evaluateCollisionPool();
-      } else {
-        this.playNew("drop");
+      } else if (objectB.gameObject ) {
+        objectB.gameObject.dropEffect();
       }
     });
   }
-  createMusicBg() {
-    const img_size = 16;
-    const music = this.sound.get("music") || this.sound.add("music");
-    music.setVolume(0.5);
-    music.loop = true;
-    if (!music.isPlaying) {
-      music.play();
-    }
-    const toggleSound = () => {
-      if (music.isPlaying) {
-        music.stop();
-        control.setTexture("sound-muted");
-      } else {
-        music.play();
-        control.setTexture("sound-playing");
-      }
-    };
-    const control = this.add.image(
-      32,
-      this.scale.height - img_size,
-      "sound-playing"
-    );
+  createUIButton(x, y, image, onClick) {
+    const img_size = 32;
+    const control = this.add.image(x, y, image);
+
     const rate = img_size / control.width;
     control.setDisplaySize(rate * control.width, rate * control.height);
     control.setInteractive();
     control.on("pointerdown", (event) => {
-      toggleSound();
+      onClick();
+    });
+    return control;
+  }
+  createMusicBg() {
+    let storage = localStorage.hasOwnProperty("music_on")
+      ? localStorage.getItem("music_on")
+      : 1;
+    storage = isNaN(storage) ? 1 : parseInt(storage);
+    let music_on = storage !== 0;
+    const music = this.sound.get("music") || this.sound.add("music");
+    music.setVolume(0.5);
+    music.loop = true;
+    music.stop();
+    if (!music.isPlaying && music_on) {
+      music.play();
+    }
+
+    const control = this.createUIButton(
+      32,
+      this.scale.height - 32,
+      "sound-playing",
+      () => {
+        if (music.isPlaying) {
+          music.stop();
+        } else {
+          music.play();
+        }
+        localStorage.setItem("music_on", music.isPlaying ? 1 : 0);
+        control.update();
+      }
+    );
+    control.update = () => {
+      if (music.isPlaying) {
+        control.setTexture("sound-playing");
+      } else {
+        control.setTexture("sound-muted");
+      }
+    };
+
+    control.update();
+  }
+  createReloadButton() {
+    this.createUIButton(76, this.scale.height - 32, "replay", () => {
+      this.endGame();
     });
   }
   createParticleEmitter() {
@@ -366,6 +394,7 @@ export default class Main extends Phaser.Scene {
     this.validateGameEnd();
   }
   createCirc(x, y, points = 1) {
+    this.maxReach = Math.max(this.maxReach, points);
     const picked = animals[points - 1];
     const radius = 16 + 16 * points;
     const configs = {};
@@ -398,6 +427,17 @@ export default class Main extends Phaser.Scene {
       }
       circle.destroy();
     };
+    let effect_busy = false;
+    circle.dropEffect = () => {
+      if (effect_busy) {
+        return;
+      }
+      effect_busy = true;
+      let audio = this.playNew("drop");
+      setTimeout(() => {
+        effect_busy = false;
+      }, audio.duration * 1000);
+    };
     if (!this.collisionPool[points]) {
       this.collisionPool[points] = [];
     }
@@ -407,118 +447,10 @@ export default class Main extends Phaser.Scene {
 
   endGame() {
     this.__unbind_listener();
-    let maxPoints = localStorage.getItem("max-points") || 0;
-    let oldMaxPoints = maxPoints + 0;
-    let newRecord = this.points > maxPoints;
-    maxPoints = Math.max(maxPoints, this.points);
-    localStorage.setItem("max-points", maxPoints);
-    const container = this.add.container(0, 0, [
-      this.add
-        .rectangle(
-          0,
-          0,
-          this.scale.width,
-          this.scale.height,
-          COLORS.accent,
-          0.8
-        )
-        .setOrigin(0),
-    ]);
-    container.setDepth(1000);
-    let title = this.add
-      .text(this.scale.width / 2, this.scale.height / 2 - 100, "GAME OVER", {
-        fontFamily: "main-font",
-        fontSize: 64,
-        color: COLORS.text,
-      })
-      .setShadow(2, 2, "#333333", 2, false, true)
-      .setOrigin(0.5);
-
-    let pointsText = this.add
-      .text(
-        this.scale.width / 2,
-        title.y + title.height + 32,
-        ["TOTAL POINTS", this.points],
-        {
-          fontFamily: "main-font",
-          fontSize: 24,
-          align: "center",
-          color: COLORS.text,
-        }
-      )
-      .setShadow(2, 2, "#333333", 2, false, true)
-      .setOrigin(0.5);
-    let newRecordText = this.add
-      .text(
-        this.scale.width / 2,
-        pointsText.y + pointsText.height + 16,
-        newRecord ? ["¡¡NEW RECORD!!"] : [""],
-        {
-          fontFamily: "main-font",
-          fontSize: 20,
-          align: "center",
-          color: COLORS.secundary,
-        }
-      )
-      .setShadow(2, 2, "#333333", 2, false, true)
-      .setOrigin(0.5);
-
-    let maxScoreTxt = this.add
-      .text(
-        this.scale.width / 2,
-        newRecordText.y + newRecordText.height + 16,
-        newRecord
-          ? ["new  Best: " + oldMaxPoints + " -> " + maxPoints]
-          : ["Personal Best: " + maxPoints],
-        {
-          fontFamily: "main-font",
-          fontSize: 16,
-          align: "center",
-          color: "#FFFFFF",
-        }
-      )
-      .setShadow(2, 2, "#333333", 2, false, true)
-      .setOrigin(0.5);
-
-    let button = this.add.container(
-      this.scale.width / 2,
-      this.scale.height - 230,
-      [
-        this.add.rectangle(
-          0,
-          0,
-          100,
-          30,
-          Number(COLORS.secundary.replace("#", "0x")),
-          0.1
-        ),
-        this.add
-          .text(0, 0, ["Play again"], {
-            fontFamily: "main-font",
-            fontSize: 22,
-            align: "center",
-            color: COLORS.text,
-          })
-          .setShadow(2, 2, "#333333", 2, false, true)
-          .setOrigin(0.5),
-      ]
-    );
-    button.list[0].setDisplaySize(
-      button.list[1].width + 8,
-      button.list[1].height + 8
-    );
-    button.setSize(button.list[1].width, button.list[1].height);
-    button.setInteractive();
-    button.on("pointerdown", () => {
-      button.list[1].setScale(0.8);
-      this.input.once("pointerup", () => {
-        button.list[1].setScale(1);
-      });
-      button.once("pointerup", () => {
-        this.resetGame();
-      });
-    });
-    container.add([title, pointsText, newRecordText, maxScoreTxt, button]);
+    this.scene.pause();
+    this.game.points = this.points;
+    this.game.maxReach = this.maxReach;
+    this.scene.run("end");
   }
   resetGame() {
     //this.sound.stopAll();
