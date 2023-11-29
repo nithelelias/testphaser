@@ -182,7 +182,7 @@ export default class End extends Phaser.Scene {
     const loader = this.createLoadingContainer();
     const container = this.add.container(0, 0, [loader]);
 
-    //container.add(this.obtainTestRanking());
+    // container.add(this.obtainTestRanking());
     this.requestRankingToServerSide(container).then(() => {
       container.remove(loader);
       loader.destroy();
@@ -386,6 +386,9 @@ export default class End extends Phaser.Scene {
 
       input.onkeydown = (e) => {
         if (e.code === "Enter") {
+          if (input.value.trim().length === 0) {
+            return false;
+          }
           onEnd();
           clearInterval(interval);
           input.remove();
@@ -406,6 +409,9 @@ export default class End extends Phaser.Scene {
     };
     const onKeyDown = (event) => {
       if (event.keyCode === 13) {
+        if (textEntry.text.trim().length === 0) {
+          return;
+        }
         unbind();
         return;
       }
