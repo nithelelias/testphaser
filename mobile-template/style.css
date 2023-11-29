@@ -1,0 +1,31 @@
+body {
+  margin: 0px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+#gameWrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+.fixed-hidden{
+  position: fixed;
+  top:0;
+  left: 0;
+  opacity: 0;
+  z-index: 100;
+}
+@font-face {
+  font-family: "alter-font";
+  src: url("assets/fonts/bebas.ttf") format("truetype");
+}
+@font-face {
+  font-family: "main-font";
+  src: url("assets/fonts/troika.otf") format("truetype");
+}
