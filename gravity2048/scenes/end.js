@@ -18,7 +18,7 @@ const isMobile = () => {
 const getanimalByPoints = (max_points) => {
   let idx = max_points;
 
-  let animal = animals[idx];
+  let animal = animals[Math.min(idx,animals.length-1)];
   return animal;
 };
 const newicon = (x, y, texture, frame, size = 32) => {
