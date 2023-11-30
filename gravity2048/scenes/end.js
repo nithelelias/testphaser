@@ -182,11 +182,11 @@ export default class End extends Phaser.Scene {
     const loader = this.createLoadingContainer();
     const container = this.add.container(0, 0, [loader]);
 
-    container.add(this.obtainTestRanking());
-    /*  this.requestRankingToServerSide(container).then(() => {
+    // container.add(this.obtainTestRanking());
+    this.requestRankingToServerSide(container).then(() => {
       container.remove(loader);
       loader.destroy();
-    }); */
+    });
     return container;
   }
   requestRankingToServerSide(container) {
@@ -339,7 +339,7 @@ export default class End extends Phaser.Scene {
             row.list[0].setFontSize(20).setScale(1);
             row.list[2].setFontSize(20).setScale(1);
             row.list[3].setFontSize(20).setScale(1);
-            // this.storeToServerSide(usernameTxt.text);
+            this.storeToServerSide(usernameTxt.text);
           },
           () => {
             label.setText(["press   enter   to   save"]);
@@ -375,7 +375,7 @@ export default class End extends Phaser.Scene {
   createInputListener(textEntry, onEnd, onTypeStart) {
     textEntry.setText("");
 
-    let wrapper = document.createElement("div");    
+    let wrapper = document.createElement("div");
     wrapper.id = "mobile-input";
     wrapper.innerHTML = `
       <div class="mobile-input-card">
@@ -399,7 +399,7 @@ export default class End extends Phaser.Scene {
       wrapper.remove();
       return true;
     };
-    button.onclick = () => { 
+    button.onclick = () => {
       validateEnd();
     };
     input.focus();
