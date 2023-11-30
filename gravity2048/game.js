@@ -1,8 +1,7 @@
-import { COLORS } from "./constants.js";
+import { COLORS } from "./constants.js"; 
 import Boot from "./scenes/boot.js";
 import End from "./scenes/end.js";
-import Main from "./scenes/main.js";
-import Test from "./scenes/test.js";
+import Main from "./scenes/main.js"; 
 let parent = document.querySelector("#gameWrapper");
 parent.style.backgroundColor = COLORS.secundary;
 const config = {
@@ -15,7 +14,7 @@ const config = {
   scale: {
     mode: Phaser.Scale.FIT,
   },
-  scene: [Boot, Main, End, Test],
+  scene: [Boot, Main, End ],
 };
 
 const game = new Phaser.Game(config);

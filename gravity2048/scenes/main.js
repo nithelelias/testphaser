@@ -6,7 +6,7 @@ export default class Main extends Phaser.Scene {
       key: "main",
       physics: {
         matter: {
-          // debug: true,
+          //debug: true,
           gravity: { y: 3 },
         },
       },
@@ -25,6 +25,22 @@ export default class Main extends Phaser.Scene {
     this.pointer = { x: 0, y: 0 };
     this.nextPointRnd = this.getRandPoint();
     this.collisionPool = {};
+    this.bonusEvent = {
+      cocodrile: {
+        wait: 100,
+        count: 0,
+        ready: false,
+        busy: false,
+        deploy: false,
+        reset: function () {
+          this.deploy = false;
+          this.busy = false;
+          this.ready = false;
+          this.count++;
+          this.wait = 100;
+        },
+      },
+    };
     this.createParticleEmitter();
     this.createNextPointInfo();
     this.createScore();
@@ -42,7 +58,7 @@ export default class Main extends Phaser.Scene {
       if (objectA.gameObject && objectB.gameObject) {
         //this.validateCollision(objectA.gameObject, objectB.gameObject);
         this.evaluateCollisionPool();
-      } else if (objectB.gameObject ) {
+      } else if (objectB.gameObject) {
         objectB.gameObject.dropEffect();
       }
     });
@@ -74,8 +90,8 @@ export default class Main extends Phaser.Scene {
     }
 
     const control = this.createUIButton(
-     this.scale.width- 32,
-       32,
+      this.scale.width - 32,
+      32,
       "sound-playing",
       () => {
         if (music.isPlaying) {
@@ -98,7 +114,7 @@ export default class Main extends Phaser.Scene {
     control.update();
   }
   createReloadButton() {
-    this.createUIButton(this.scale.width-92,  32, "replay", () => {
+    this.createUIButton(this.scale.width - 92, 32, "replay", () => {
       this.endGame();
     });
   }
@@ -222,6 +238,10 @@ export default class Main extends Phaser.Scene {
       this.pointer.x = pointer.x;
     };
     const on_pointerdown = (pointer, gameobject) => {
+      if (this.current && this.current.go) {
+        this.current.go();
+        return;
+      }
       if (!this.current || gameobject.length > 0) {
         return;
       }
@@ -283,8 +303,19 @@ export default class Main extends Phaser.Scene {
       image,
       text,
     ]);
+    let unbinds = () => null;
     this.__updateNextInfo = () => {
-      image.setFrame(animals[this.nextPointRnd - 1] + ".png");
+      if (
+        this.bonusEvent.cocodrile.ready &&
+        !this.bonusEvent.cocodrile.deploy
+      ) {
+        this.bonusEvent.cocodrile.deploy = true;
+        this.playOnce("dragon-roar");
+        unbinds = this.makeItCocoGlow(image);
+      } else {
+        unbinds();
+        image.setFrame(animals[this.nextPointRnd - 1] + ".png");
+      }
     };
   }
   createScore() {
@@ -334,6 +365,9 @@ export default class Main extends Phaser.Scene {
     if (!(bodyA && bodyB && bodyA.scene && bodyB.scene)) {
       return;
     }
+    if (!bodyA.dropped || !bodyB.dropped) {
+      return;
+    }
     let dist = Phaser.Math.Distance.BetweenPoints(
       { x: bodyA.x, y: bodyA.y },
       { x: bodyB.x, y: bodyB.y }
@@ -341,15 +375,14 @@ export default class Main extends Phaser.Scene {
 
     dist -= bodyA.radius;
     dist -= bodyB.radius;
-    if (dist > 8) {
+    if (dist > 12) {
       return false;
     }
-    if (bodyA.dropped && bodyB.dropped) {
-      if (this.validateMerge(bodyA, bodyB)) {
-        this.playNew("pop");
-      } else {
-        //this.playNew("drop");
-      }
+
+    if (this.validateMerge(bodyA, bodyB)) {
+      this.playNew("pop");
+    } else {
+      //this.playNew("drop");
     }
   }
   validateMerge(objectA, objectB) {
@@ -375,23 +408,35 @@ export default class Main extends Phaser.Scene {
     return true;
   }
   createNew(x) {
+    if (this.bonusEvent.cocodrile.deploy) {
+      if (!this.bonusEvent.cocodrile.busy) {
+        this.bonusEvent.cocodrile.busy = true;
+        this.__updateNextInfo();
+        let coco = this.createCocodrileEat(x, this.START_Y, () => {
+          this.bonusEvent.cocodrile.reset();
+          this.createNew(x);
+        });
+        this.current = coco;
+      }
+      return;
+    }
     const rndpoints = this.nextPointRnd;
     const circle = this.createCirc(x, this.START_Y, rndpoints);
     circle.setIgnoreGravity(true);
     circle.body.velocity.y = 0;
     let firstDrop = true;
-    circle.body.onCollideCallback = (event) => {
-      //if (circle.body.velocity.y > 4) {
-
+    circle.body.onCollideCallback = () => {
       if (firstDrop) {
         firstDrop = false;
         this.playOnce("drop");
       }
     };
+
     this.current = circle;
     this.nextPointRnd = this.getRandPoint();
     this.__updateNextInfo();
     this.validateGameEnd();
+    this.triggerSomeEvent();
   }
   createCirc(x, y, points = 1) {
     this.maxReach = Math.max(this.maxReach, points);
@@ -445,17 +490,6 @@ export default class Main extends Phaser.Scene {
     return circle;
   }
 
-  endGame() {
-    this.__unbind_listener();
-    this.scene.pause();
-    this.game.points = this.points;
-    this.game.maxReach = this.maxReach;
-    this.scene.run("end");
-  }
-  resetGame() {
-    //this.sound.stopAll();
-    this.scene.restart();
-  }
   evaluateCollisionPool() {
     for (let i in this.collisionPool) {
       for (let j in this.collisionPool[i]) {
@@ -480,5 +514,113 @@ export default class Main extends Phaser.Scene {
       }
     }
   }
-  update() {}
+  triggerSomeEvent() {
+    this.bonusEvent.cocodrile.wait--;
+    if (this.bonusEvent.cocodrile.wait < 0) {
+      this.bonusEvent.cocodrile.ready = Phaser.Math.Between(0, 10) > 5;
+    }
+  }
+  endGame() {
+    this.__unbind_listener();
+    this.scene.pause();
+    this.game.points = this.points;
+    this.game.maxReach = this.maxReach;
+    this.scene.run("end");
+  }
+  resetGame() {
+    //this.sound.stopAll();
+    this.scene.restart();
+  }
+
+  makeItCocoGlow(image) {
+    image.setFrame("crocodile.png");
+    image.setTint(0xfff000);
+    image.preFX.setPadding(32);
+    const fx = image.preFX.addGlow();
+    let tween = this.tweens.add({
+      targets: fx,
+      outerStrength: 10,
+      yoyo: true,
+      loop: -1,
+      ease: "sine.inout",
+    });
+    return () => {
+      image.clearTint();
+      tween.destroy();
+      fx.destroy();
+    };
+  }
+  createCocodrileEat(x, y, onEnd) {
+    this.current = null;
+    let activated = false;
+    let coco = this.add.sprite(x, y, "animals", "crocodile.png").setOrigin(0.5);
+    coco.radius = 128;
+    coco.eat_dist = 64;
+    let rate = coco.radius / coco.width;
+    coco.setDisplaySize(rate * coco.width, rate * coco.height);
+    let unbind = this.makeItCocoGlow(coco);
+    let validateCollision = () => {
+      let toBeEated = [];
+      for (let i in this.collisionPool) {
+        for (let j in this.collisionPool[i]) {
+          let mob = this.collisionPool[i][j];
+          if (mob.dropped) {
+            let dist = Phaser.Math.Distance.BetweenPoints(
+              { x: mob.x, y: mob.y },
+              { x: coco.x, y: coco.y }
+            );
+
+            dist -= mob.radius;
+            dist -= coco.eat_dist;
+            if (dist < 12) {
+              toBeEated.push(mob);
+            }
+          }
+        }
+      }
+      if (toBeEated.length > 0) {
+        this.playOnce("eat");
+
+        for (let i in toBeEated) {
+          this.addScore(toBeEated[i].points);
+          toBeEated[i].eat();
+        }
+      }
+    };
+    coco.go = () => {
+      if (activated) {
+        return;
+      }
+      activated = true;
+      let finalY = this.scale.height * 1.2;
+      let speed = 200;
+      let steps = parseInt(finalY / speed);
+      let duration = 2000 / steps;
+      let tweens = new Array(steps).fill(1).map((_, idx) => {
+        return {
+          delay: 100,
+          y: "+=" + speed,
+          ease: "quart.in",
+          duration,
+          onComplete: () => {
+            this.cameras.main.shake(300, 0.01);
+            this.playOnce("stomp")
+            validateCollision();
+          },
+        };
+      });
+
+      this.tweens.chain({
+        targets: coco,
+        tweens,
+
+        onComplete: () => {
+          coco.destroy();
+          unbind();
+          onEnd();
+        },
+      });
+    };
+    return coco;
+  }
 }

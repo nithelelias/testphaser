@@ -182,11 +182,11 @@ export default class End extends Phaser.Scene {
     const loader = this.createLoadingContainer();
     const container = this.add.container(0, 0, [loader]);
 
-    // container.add(this.obtainTestRanking());
-    this.requestRankingToServerSide(container).then(() => {
+    container.add(this.obtainTestRanking());
+    /*  this.requestRankingToServerSide(container).then(() => {
       container.remove(loader);
       loader.destroy();
-    });
+    }); */
     return container;
   }
   requestRankingToServerSide(container) {
@@ -339,7 +339,7 @@ export default class End extends Phaser.Scene {
             row.list[0].setFontSize(20).setScale(1);
             row.list[2].setFontSize(20).setScale(1);
             row.list[3].setFontSize(20).setScale(1);
-            this.storeToServerSide(usernameTxt.text);
+            // this.storeToServerSide(usernameTxt.text);
           },
           () => {
             label.setText(["press   enter   to   save"]);
@@ -375,61 +375,47 @@ export default class End extends Phaser.Scene {
   createInputListener(textEntry, onEnd, onTypeStart) {
     textEntry.setText("");
 
-    if (isMobile()) {
-      let input = document.createElement("input");
-      input.classList.add("fixed-hidden");
-      document.body.appendChild(input);
-      let interval = setInterval(() => {
-        input.focus();
-        textEntry.setText(input.value.substring(0, 20));
-      }, 100);
+    let wrapper = document.createElement("div");    
+    wrapper.id = "mobile-input";
+    wrapper.innerHTML = `
+      <div class="mobile-input-card">
+        <div class="mobile-input-card__wrapper" >
+          <h1>CONGRATULATIONS!!</h1>
+          <p> You reach to the top 5!! </p>
+          <input  id='input-name' placeholder="type your name "/>
+          <button id='button-save-name'>SAVE</button>
+        </div>
+      </div>
+      `;
+    document.body.appendChild(wrapper);
 
-      input.onkeydown = (e) => {
-        if (e.code === "Enter") {
-          if (input.value.trim().length === 0) {
-            return false;
-          }
-          onEnd();
-          clearInterval(interval);
-          input.remove();
-          return true;
-        }
-        if (!/^([A-Za-z]|\d)+$/.test(e.key)) {
-          return false;
-        }
-
-        onTypeStart();
-      };
-
-      return;
-    }
-    const unbind = () => {
-      this.input.keyboard.off("keydown", onKeyDown);
+    let input = document.querySelector("#input-name");
+    let button = document.querySelector("#button-save-name");
+    let validateEnd = () => {
+      if (input.value.trim().length === 0) {
+        return false;
+      }
       onEnd();
+      wrapper.remove();
+      return true;
     };
-    const onKeyDown = (event) => {
-      if (event.keyCode === 13) {
-        if (textEntry.text.trim().length === 0) {
-          return;
-        }
-        unbind();
-        return;
+    button.onclick = () => { 
+      validateEnd();
+    };
+    input.focus();
+
+    input.onkeydown = (e) => {
+      if (e.code === "Enter") {
+        return validateEnd();
+      }
+      if (!/^([A-Za-z]|\d)+$/.test(e.key)) {
+        return false;
       }
 
-      if (event.keyCode === 8 && textEntry.text.length > 0) {
-        textEntry.text = textEntry.text.substr(0, textEntry.text.length - 1);
-        return;
-      }
-      if (textEntry.text.length > 8) {
-        return;
-      }
-      if (event.keyCode === 32 || (event.keyCode >= 48 && event.keyCode < 90)) {
-        textEntry.text += event.key;
-        onTypeStart();
-        return;
-      }
+      onTypeStart();
     };
-    this.input.keyboard.on("keydown", onKeyDown);
+
+    return;
   }
   storeToServerSide(username) {
     storeScore(username, this.game.points, this.game.maxReach);

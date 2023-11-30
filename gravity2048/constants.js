@@ -21,7 +21,16 @@ export const switchRndPallette = (n) => {
   COLORS.secundary = pallettePicked[1];
   COLORS.accent = pallettePicked[2];
   COLORS.text = pallettePicked[3];
+
+  document.documentElement.style.setProperty("--color-primary", COLORS.primary);
+  document.documentElement.style.setProperty(
+    "--color-secundary",
+    COLORS.secundary
+  );
+  document.documentElement.style.setProperty("--color-accent", COLORS.accent);
+  document.documentElement.style.setProperty("--color-text", COLORS.text);
 };
+
 export const animals = [
   "chick", //2
   "chicken", //4
@@ -140,7 +149,7 @@ export const shapes = {
         circle: {
           x: 48,
           y: 58,
-          radius: 46,
+          radius: 48,
         },
       },
     ],
