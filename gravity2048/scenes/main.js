@@ -27,7 +27,7 @@ export default class Main extends Phaser.Scene {
     this.collisionPool = {};
     this.bonusEvent = {
       cocodrile: {
-        wait: 100,
+        wait: Phaser.Math.Between(100, 1000),
         count: 0,
         ready: false,
         busy: false,
@@ -37,7 +37,7 @@ export default class Main extends Phaser.Scene {
           this.busy = false;
           this.ready = false;
           this.count++;
-          this.wait = 100;
+          this.wait = Phaser.Math.Between(100, 1000) * (this.count * 2);
         },
       },
     };
@@ -47,6 +47,7 @@ export default class Main extends Phaser.Scene {
     this.createGameBounds();
     this.createMusicBg();
     this.createReloadButton();
+    this.createRankingButton();
 
     //
     this.initPointerListener();
@@ -91,7 +92,7 @@ export default class Main extends Phaser.Scene {
 
     const control = this.createUIButton(
       this.scale.width - 32,
-      32,
+      24,
       "sound-playing",
       () => {
         if (music.isPlaying) {
@@ -114,9 +115,15 @@ export default class Main extends Phaser.Scene {
     control.update();
   }
   createReloadButton() {
-    this.createUIButton(this.scale.width - 92, 32, "replay", () => {
+    this.createUIButton(this.scale.width - 92, 24, "replay", () => {
       this.endGame();
     });
+  }
+  createRankingButton() {
+    this.createUIButton(32, 24, "crown", () => {
+      this.scene.pause();
+      this.scene.run("ranking");
+    }).setTintFill(0xffffff);
   }
   createParticleEmitter() {
     this.emitter = this.add
@@ -604,7 +611,7 @@ export default class Main extends Phaser.Scene {
           duration,
           onComplete: () => {
             this.cameras.main.shake(300, 0.01);
-            this.playOnce("stomp")
+            this.playOnce("stomp");
             validateCollision();
           },
         };
