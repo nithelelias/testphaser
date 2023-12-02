@@ -395,6 +395,7 @@ export default class End extends Phaser.Scene {
       if (input.value.trim().length === 0) {
         return false;
       }
+      textEntry.setText(input.value);
       onEnd();
       wrapper.remove();
       return true;
@@ -418,7 +419,15 @@ export default class End extends Phaser.Scene {
     return;
   }
   storeToServerSide(username) {
-    storeScore(username, this.game.points, this.game.maxReach);
+    if (username.length > 0) {
+      storeScore(
+        username,
+        this.game.points,
+        this.game.maxReach,
+        this.game.startDate,
+        Date.now()
+      );
+    }
   }
   resetGame() {
     this.scene.restart("main");

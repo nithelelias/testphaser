@@ -19,6 +19,7 @@ export default class Main extends Phaser.Scene {
 
   create() {
     window.main = this;
+    this.game.startDate = Date.now();
     this.points = 0;
     this.maxReach = 0;
     this.current = null;
@@ -27,7 +28,7 @@ export default class Main extends Phaser.Scene {
     this.collisionPool = {};
     this.bonusEvent = {
       cocodrile: {
-        wait: Phaser.Math.Between(100, 1000),
+        wait: Phaser.Math.Between(1000, 10000),
         count: 0,
         ready: false,
         busy: false,
@@ -37,7 +38,7 @@ export default class Main extends Phaser.Scene {
           this.busy = false;
           this.ready = false;
           this.count++;
-          this.wait = Phaser.Math.Between(100, 1000) * (this.count * 2);
+          this.wait = Phaser.Math.Between(1000, 10000) * (this.count * 2);
         },
       },
     };
@@ -524,7 +525,7 @@ export default class Main extends Phaser.Scene {
   triggerSomeEvent() {
     this.bonusEvent.cocodrile.wait--;
     if (this.bonusEvent.cocodrile.wait < 0) {
-      this.bonusEvent.cocodrile.ready = Phaser.Math.Between(0, 10) > 5;
+      this.bonusEvent.cocodrile.ready = Phaser.Math.Between(0, 100) < 5;
     }
   }
   endGame() {

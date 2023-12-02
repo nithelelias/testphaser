@@ -3,7 +3,7 @@ import BeatBeat from "../beat.js";
 const rail_colors = [0xff0000, 0x00ff00, 0x0000ff, 0xfff000, 0x00ffff];
 const rail_border_color = 0xffffff;
 const control_directions = ["left", "down", "right", "up"];
-const song_name="MYKKA"
+const song_name = "star";
 function getTimeNow() {
   return Main.current.time.now;
 }
@@ -296,7 +296,7 @@ export default class Main extends Phaser.Scene {
       frameWidth: ASSET_MAPTILE.sprite_size,
       frameHeight: ASSET_MAPTILE.sprite_size,
     });
-    this.load.audio("music", "./assets/music/"+song_name+".mp3");
+    this.load.audio("music", "./assets/music/" + song_name + ".mp3");
   }
   create() {
     Main.current = this;
@@ -495,7 +495,7 @@ export default class Main extends Phaser.Scene {
   async startLevel() {
     const sound = new BeatBeat(
       new AudioContext(),
-      "./assets/music/"+song_name+".mp3",
+      "./assets/music/" + song_name + ".mp3",
       {
         filterFrequency: 1000,
         threshold: 0.5,
@@ -520,7 +520,7 @@ export default class Main extends Phaser.Scene {
     mapDatSound(2);
     mapDatSound(3);
     let delay = firstEntryNote * 1000 + 0;
-    console.log("delay", delay);
+    console.log("delay", delay, sound.channels);
 
     this.track.setTrack(parsedTrack);
     this.track.start();

@@ -105,6 +105,7 @@ export default class BeatBeat {
     const buffer = await offlineContext.startRendering();
 
     const data = buffer.getChannelData(0);
+    console.log(buffer)
     let songData = [];
     for (let i = 0; i < data.length; ++i) {
       if (data[i] > this.threshold) {
@@ -143,13 +144,20 @@ export default class BeatBeat {
     const filter = offlineContext.createBiquadFilter();
     filter.type = "allpass";
     filter.gain.value = 0;
+
+    const filterhigh = offlineContext.createBiquadFilter();
+    filterhigh.type = "highpass";
+    filterhigh.frequency.value = 440;
+    filterhigh.Q.value = 0;
+
     const filter2 = offlineContext.createBiquadFilter();
     filter2.type = "peaking";
     filter2.frequency.value = 720;
     filter2.Q.value = 1;
     filter2.gain.value = this.peakGain;
 
-    source.connect(filter2);
+    source.connect(filterhigh);
+    filterhigh.connect(filter2)
     filter2.connect(filter);
     filter.connect(offlineContext.destination);
   }
