@@ -218,10 +218,17 @@ export default class Main extends Phaser.Scene {
         })
         .setOrigin(0.5, 0);
     this.guessText = this.add
+      .text(this.scale.width / 2, 204, ["Coinciden: 0"], {
+        color: COLORS.text,
+        fontSize: 20,
+      })
+      .setOrigin(0.5, 0);
+
+    this.help = this.add
       .text(
         this.scale.width / 2,
-        204,
-        ["Adivinados: 0", "Click en color para intercambiar"],
+        704,
+        ["Click en el color para intercambiar"],
         {
           color: COLORS.text,
           fontSize: 20,
@@ -363,7 +370,7 @@ export default class Main extends Phaser.Scene {
       this.cameras.main.shake(300, 0.005, false);
     }
     this.current_guess = guesses;
-    this.guessText.setText([`Adivinados: ${this.current_guess}`]);
+    this.guessText.setText([`Coinciden: ${this.current_guess}`]);
 
     this.actionsText.setText([`${new Array(this.hearts).fill("❤️").join("")}`]);
     if (guesses === 5 || this.hearts < 1) {
