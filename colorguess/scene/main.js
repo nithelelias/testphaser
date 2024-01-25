@@ -89,6 +89,16 @@ export default class Main extends Phaser.Scene {
     super("main");
     window.main = this;
   }
+  init() {
+    let element = document.createElement("style");
+
+    document.head.appendChild(element);
+
+    element.sheet.insertRule(
+      '@font-face { font-family: "gamefont"; src: url("fonts/gamefont.ttf") format("truetype"); }',
+      0
+    );
+  }
   preload() {
     this.load.audio("click", "audio/click.mp3");
     this.load.audio("drop", "audio/drop.mp3");
@@ -97,8 +107,22 @@ export default class Main extends Phaser.Scene {
     this.load.audio("lose", "audio/lose.mp3");
     this.load.audio("melody", "audio/melody.mp3");
     this.load.audio("boing", "audio/boing.mp3");
+    this.load.script(
+      "webfont",
+      "https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"
+    );
   }
   create() {
+    WebFont.load({
+      custom: {
+        families: ["gamefont"],
+      },
+      active: () => {
+        this.postCreate();
+      },
+    });
+  }
+  postCreate() {
     this.audios = {
       click: this.sound.add("click"),
       drop: [this.sound.add("drop"), this.sound.add("drop")],
@@ -215,12 +239,14 @@ export default class Main extends Phaser.Scene {
         .text(this.scale.width / 2, 64, ["ORDENA LOS COLORES "], {
           color: COLORS.text,
           fontSize: 24,
+          fontFamily: "gamefont",
         })
         .setOrigin(0.5, 0);
     this.guessText = this.add
       .text(this.scale.width / 2, 204, ["Coinciden: 0"], {
         color: COLORS.text,
         fontSize: 20,
+        fontFamily: "gamefont",
       })
       .setOrigin(0.5, 0);
 
@@ -232,6 +258,7 @@ export default class Main extends Phaser.Scene {
         {
           color: COLORS.text,
           fontSize: 20,
+          fontFamily: "gamefont",
         }
       )
       .setOrigin(0.5, 0);
@@ -244,6 +271,7 @@ export default class Main extends Phaser.Scene {
         {
           color: COLORS.text,
           fontSize: 32,
+          fontFamily:"gamefont"
         }
       )
       .setOrigin(0.5, 1);
@@ -401,6 +429,7 @@ export default class Main extends Phaser.Scene {
         {
           color: COLORS.text,
           align: "center",
+          fontFamily:"gamefont"
         }
       )
       .setOrigin(0.5, 1);
