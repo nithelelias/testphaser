@@ -421,18 +421,9 @@ export default class Main extends Phaser.Scene {
       this.audios.lose.play();
     }
     this.blackBox.setVisible(false);
-    this.add
-      .text(
-        this.scale.width / 2,
-        this.scale.height / 2 + 232,
-        [win ? "GANASTE!!" : "Perdiste!", "click para volver a jugar"],
-        {
-          color: COLORS.text,
-          align: "center",
-          fontFamily:"gamefont"
-        }
-      )
-      .setOrigin(0.5, 1);
+    this.help.setText([win ? "GANASTE!!" : "Perdiste!", "click para volver a jugar"])
+    this.help.setFontSize(24)
+    this.help.setAlign("center")
 
     this.input.on("pointerdown", () => {
       this.restart();
