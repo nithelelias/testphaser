@@ -38,9 +38,11 @@ export default class Main extends Phaser.Scene {
     this.platformcontainer = platformcontainer;
     //  The platforms group contains the ground and the 2 ledges we can jump on
     const platforms = this.physics.add.group({ runChildUpdate: true });
+    const floor = this.physics.add.group({ runChildUpdate: true });
 
     this.platforms = platforms;
 
+    //this.createFloor(floor);
     const player = this.physics.add.sprite(100, center.y - 50, "dude", 5);
     player.doJump = () => {
       if (!player.body.touching.down) {
@@ -97,33 +99,45 @@ export default class Main extends Phaser.Scene {
       }); */
     }
     this.physics.add.collider(player, platforms);
+    this.physics.add.collider(player, floor);
 
     //  Input Events
-    if (isMobile()) {
-      console.log("MOBILE");
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.input.on("pointerdown", (e, g) => {
-        if (g.length > 0) {
-          return;
-        }
-        player.doJump();
-      });
-      this.input.on("pointerup", () => {
-        player.jumping = false;
-      });
-    } else {
-      console.log("PC");
-      var spaceBar = this.input.keyboard.addKey(
-        Phaser.Input.Keyboard.KeyCodes.SPACE
-      );
-      spaceBar.on("down", () => {
-        player.doJump();
-      });
-      spaceBar.on("up", () => {
-        player.jumping = false;
-      });
-    }
+
+    console.log("MOBILE");
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.input.on("pointerdown", (e, g) => {
+      if (g.length > 0) {
+        return;
+      }
+      player.doJump();
+    });
+    this.input.on("pointerup", () => {
+      player.jumping = false;
+    });
+
+    console.log("PC");
+    var spaceBar = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
+    spaceBar.on("down", () => {
+      player.doJump();
+    });
+    spaceBar.on("up", () => {
+      player.jumping = false;
+    });
+
     this.fsbutton();
+  }
+  createFloor(floorGroup) {
+    const floor = floorGroup
+      .create(0, this.scale.height, "ground")
+      .setDisplaySize(this.scale.width, 10);
+
+    //platform.body.x = platform.x - width / 2;
+    floor.body.setAllowGravity(false);
+    floor.body.setSize(platform.width, 10);
+
+    return platform;
   }
   addPlatForm(x, y, width, height, _lastplatform) {
     const platform = this.platforms

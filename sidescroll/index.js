@@ -1,14 +1,13 @@
 import Intro from "./scenes/intro.js";
-import LockToPortrait from "./scenes/locktoportrait.js";
 import Main from "./scenes/main.js";
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: document.querySelector("#game"),
   pixelArt: true,
-  width: 720,
-  height: 320,
-  scene: [Intro, Main, LockToPortrait],
+  width: 320,
+  height: 720,
+  scene: [Intro, Main],
   physics: {
     default: "arcade",
     arcade: {
@@ -17,7 +16,7 @@ const game = new Phaser.Game({
     },
   },
   scale: {
-     mode: Phaser.Scale.FIT,  
+    mode: Phaser.Scale.FIT,
   },
 });
 window.game = game;
