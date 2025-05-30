@@ -196,7 +196,6 @@ export default class Main extends Phaser.Scene {
       this.input.once("dragstart", (pointer, dragX, dragY) => {
         piece.setDepth(100);
         piece.setScale(1.1);
-        console.log("dragstart");
       });
       this.input.once("dragend", () => {
         const col = Math.floor(piece.x / GRID.size);
@@ -207,7 +206,6 @@ export default class Main extends Phaser.Scene {
       });
 
       piece.on("drag", onDrag);
-      console.log("drag star");
     });
   }
   initWorldPaint() {
