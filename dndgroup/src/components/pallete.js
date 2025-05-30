@@ -1,6 +1,6 @@
 import RESOURCES from "../constants/resources.js";
 import { GRID } from "../constants/values.js";
-import WorldLayer from "./WorldLayer.js";
+import WorldLayer from "./worldLayer.js";
 
 const padding = 32;
 const fsize = 32;

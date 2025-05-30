@@ -2,7 +2,7 @@ import { COLORS, GRID } from "../src/constants/values.js";
 import { CURSOR, PLAYERS, WORLD } from "../src/constants/data.js";
 import Pice from "../src/components/piece.js";
 import { restoreFromLocal } from "../src/components/localStore.js";
-import WorldLayer from "../src/components/WorldLayer.js";
+import WorldLayer from "../src/components/worldLayer.js";
 import Pallete from "../src/components/pallete.js";
 import Button from "../src/components/button.js";
 
