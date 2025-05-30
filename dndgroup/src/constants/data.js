@@ -69,8 +69,8 @@ export var PLAYERS = [
 ];
 export var CURSOR = {
   zoom: 1,
-  x: 3200,
-  y: 3200,
+  x: 800,
+  y: 480,
 };
 
 export var WORLD = {};
