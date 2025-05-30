@@ -87,9 +87,7 @@ Ratones, gatos, pájaros… cualquier bicho pequeño lo pone histérico.
 23 Recita frases filosóficas innecesarias
 En medio del combate suelta cosas como: “El tiempo es una rueda, amigos…”.
 
-24 Se burla de los enemigos en voz alta
-No puede evitar provocar a todos los monstruos que encuentran.
-
+24 Se burla de los enemigos en voz alta No puede evitar provocar a todos los monstruos que encuentran.
 
 # 10 razas básicas de D&D
 
