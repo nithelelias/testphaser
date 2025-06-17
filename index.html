@@ -8,84 +8,48 @@
     <style>
       body {
         background-color: #f1f1f1;
-      }
-
-      main {
-        background-color: #fff;
 
         width: fit-content;
         margin: 0 auto;
         padding: 12px;
         text-align: center;
       }
+      .grid-responsive-8 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 16px;
+      }
 
-      ul {
-        list-style: none;
+      /* Ajustes para pantallas pequeñas */
+      @media (max-width: 768px) {
+        .grid-responsive-8 {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .grid-responsive-8 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .box-option {
         display: flex;
+        flex-direction: column;
+        align-items: center;
         justify-content: center;
         gap: 10px;
-        margin: 0 auto;
-        border: thin solid;
-        width: 100%;
-        padding: 0px;
-      }
-
-      li {
-        cursor: pointer;
-        border: thin solid #d1d1d1;
-        color: blue;
-        padding: 2px 6px;
-      }
-
-      #gameframe {
-        width: 80vw;
-        height: 90vh;
-        background-color: #111;
+        padding: 20px;
+        border: solid thin #c1c1c1;
+        border-radius: 5px;
+        box-sizing: border-box;
+        height: 80px;
       }
     </style>
   </head>
 
   <body>
-    <main>
-      <h1>Learning phaser</h1>
-      <nav>
-        <ul id="links"></ul>
-      </nav>
-      <br />
-      <a href="https://github.com/nithelelias/testphaser"
-        >https://github.com/nithelelias/testphaser</a
-      >
-    </main>
-    <script>
-      const games = [
-        "phasertest",
-        "match3",
-        "iguales",
-        "balas",
-        "tetris",
-        "snake",
-        "OSU!",
-        "pacman",
-        "developer",
-      ];
-      const parentUl = document.getElementById("links");
-      const gameframe = document.getElementById("gameframe");
-      const elements = document.querySelectorAll("linkgame");
+    <h1>Lista de los intentos de nithel para creacion de videjuegos</h1>
 
-      const opengame = (target) => {
-        // gameframe.src="./game"+target+"/";
-        location.href = "./game" + target + "/";
-      };
-      (() => {
-        games.forEach((gamename, index) => {
-          const li = document.createElement("li");
-          li.innerHTML = gamename;
-          li.onclick = () => {
-            opengame(index + 1);
-          };
-          parentUl.appendChild(li);
-        });
-      })();
-    </script>
+    <script src="folder-renderer.js" />
   </body>
 </html>
