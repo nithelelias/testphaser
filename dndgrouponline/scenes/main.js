@@ -5,6 +5,7 @@ import { onUpdate } from "../src/components/storage.js";
 import WorldLayer from "../src/components/worldLayer.js";
 import Pallete from "../src/components/pallete.js";
 import Button from "../src/components/button.js";
+import { onListen } from "../connect.js";
 
 export default class Main extends Phaser.Scene {
   static current = null;
@@ -152,12 +153,14 @@ export default class Main extends Phaser.Scene {
     });
   }
   createPieces() {
+    const pieces = [];
     PLAYERS.forEach((item, idx) => {
       const pice = new Pice(this, 0, 0, 1, item.frame);
       pice.setData("index", idx);
       pice.sprite.setTint(item.color);
       pice.putAt(item.col, item.row);
       pice.setInteractive({ cursor: "grab" });
+      pieces.push(pice);
     });
     let dragging = false;
     this.input.on("pointerover", (pointer, gameObjects) => {
@@ -183,6 +186,11 @@ export default class Main extends Phaser.Scene {
         const idx = gameObjects[0].getData("index");
         PLAYERS[idx].col = gameObjects[0].col;
         PLAYERS[idx].row = gameObjects[0].row;
+      });
+    });
+    onListen((JSON) => {
+      JSON.PLAYERS.forEach((player, idx) => {
+        pieces[idx].putAt(player.col, player.row);
       });
     });
   }
