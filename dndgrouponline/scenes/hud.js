@@ -1,5 +1,6 @@
 import Button from "../src/components/button.js";
 import { saveToLocal } from "../src/components/storage.js";
+import ThrowDice from "../src/components/throwdice.js";
 import { CLIENT } from "../src/constants/data.js";
 import RESOURCES from "../src/constants/resources.js";
 import { COLORS, GRID } from "../src/constants/values.js";
@@ -53,10 +54,22 @@ export default class SceneHud extends Phaser.Scene {
     const btnSave = new Button(this, 0, 0, "Guardar", () => {
       saveToLocal();
     });
-    const buttons = [btnCenter, btnSave];
+
+    const thrower = new ThrowDice(this);
+    thrower.setVisible(false);
+    const dceButton = new Button(this, 0, 0, "Dado", () => {
+      thrower.toggle()
+      /* thrower.throwDice().then(() => {
+        thrower.setVisible(false);
+      }); */
+    });
+
+    const buttons = [btnCenter, btnSave, dceButton];
     container.add(buttons);
+    let startX = 0;
     buttons.forEach((btn, i) => {
-      btn.x = i * (btn.width + 10);
+      btn.x = startX;
+      startX += btn.width + 10;
     });
   }
 }

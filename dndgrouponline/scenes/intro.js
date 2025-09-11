@@ -1,5 +1,5 @@
 import Button from "../src/components/button.js";
-import { init, restoreFromLocal } from "../src/components/storage.js";
+import { init, restoreFromLocal } from "../src/components/storage.js"; 
 import { CLIENT } from "../src/constants/data.js";
 
 export default class IntroScene extends Phaser.Scene {

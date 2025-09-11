@@ -1,4 +1,4 @@
- import RESOURCES from "../src/constants/resources.js";
+import RESOURCES from "../src/constants/resources.js";
 
 export default class Boot extends Phaser.Scene {
   constructor() {
@@ -14,8 +14,11 @@ export default class Boot extends Phaser.Scene {
       "assets/fonts/gem.png",
       "assets/fonts/gem.xml"
     );
+    this.load.image('dice20',"./assets/dice20.png")
+    this.load.audio("sfx-dice", "./assets/sfx-dice.mp3");
+    this.load.audio("sfx-pop", "./assets/sfx-pop.mp3");
   }
-  create() { 
+  create() {
     this.game.events.emit("game-ready");
     this.scene.start("intro");
   }
