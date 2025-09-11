@@ -12,6 +12,7 @@ export default class SceneHud extends Phaser.Scene {
   create({ main }) {
     this.mainScene = main;
     this.createZoomControl();
+    this.createChronometer();
     if (CLIENT.type === 2) this.createCenterButton();
   }
   createZoomControl() {
@@ -58,7 +59,7 @@ export default class SceneHud extends Phaser.Scene {
     const thrower = new ThrowDice(this);
     thrower.setVisible(false);
     const dceButton = new Button(this, 0, 0, "Dado", () => {
-      thrower.toggle()
+      thrower.toggle();
       /* thrower.throwDice().then(() => {
         thrower.setVisible(false);
       }); */
@@ -71,5 +72,61 @@ export default class SceneHud extends Phaser.Scene {
       btn.x = startX;
       startX += btn.width + 10;
     });
+  }
+  createChronometer() {
+    const timerText = this.add
+      .text(this.scale.width, 100, "00:00", {
+        color: "#000000",
+        fontSize: 24,
+        align: "right",
+        backgroundColor: "#ffffff",
+        padding: {
+          x: 10,
+          y: 5,
+        },
+      })
+      .setOrigin(1);
+    const calcTimeRemain = () => {
+      const ahora = new Date();
+      const objetivo = new Date(ahora);
+
+      // Establecer la hora objetivo (18:00)
+      objetivo.setHours(18, 0, 0, 0);
+
+      // Si ya pasó las 6 PM, establecer para mañana
+      if (ahora > objetivo) {
+        objetivo.setDate(objetivo.getDate() + 1);
+      }
+
+      // Calcular la diferencia en milisegundos
+      const diferencia = objetivo - ahora;
+
+      // Convertir a horas, minutos y segundos
+      const segundosTotales = Math.floor(diferencia / 1000);
+      const horas = Math.floor(segundosTotales / 3600);
+      const minutos = Math.floor((segundosTotales % 3600) / 60);
+      const segundos = segundosTotales % 60;
+
+      // Formatear con ceros a la izquierda
+      const horasStr = horas.toString().padStart(2, "0");
+      const minutosStr = minutos.toString().padStart(2, "0");
+      const segundosStr = segundos.toString().padStart(2, "0");
+
+      return `${horasStr}:${minutosStr}:${segundosStr}`;
+    };
+    const updateTimer = () => {
+      const timeRemain = calcTimeRemain();
+      timerText.setText(
+        `${timeRemain} tiempo restante `
+      );
+    };
+
+    this.time.addEvent({
+      delay: 1000,
+      loop: true,
+      callback: updateTimer,
+    });
+
+    updateTimer();
   }
 }
