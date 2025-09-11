@@ -5,7 +5,7 @@ import { onUpdate } from "../src/components/storage.js";
 import WorldLayer from "../src/components/worldLayer.js";
 import Pallete from "../src/components/pallete.js";
 import Button from "../src/components/button.js";
-import { onListen } from "../connect.js"; 
+import { onListen } from "../connect.js";
 
 export default class Main extends Phaser.Scene {
   static current = null;
@@ -30,7 +30,7 @@ export default class Main extends Phaser.Scene {
     this.listenMouseCameraMove();
     this.createPieces();
     this.initWorldPaint();
-    
+
     if (CLIENT.type === 2) this.initPaintMode();
 
     this.cameras.main.scrollX = CURSOR.x;
@@ -163,6 +163,7 @@ export default class Main extends Phaser.Scene {
       pice.setInteractive({ cursor: "grab" });
       pieces.push(pice);
     });
+    if (CLIENT.type === 1) return;
     let dragging = false;
     this.input.on("pointerover", (pointer, gameObjects) => {
       if (dragging) return;
@@ -315,5 +316,4 @@ export default class Main extends Phaser.Scene {
       this.input.off("pointermove", onPointerMove);
     };
   }
-
 }
