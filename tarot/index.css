@@ -2,7 +2,7 @@
 :root {
   --color-bg:           #0a0a0f;
   --color-surface:      #12121a;
-  --color-border:       #2a2a3a;
+  --color-border:       #c9a227;
   --color-gold:         #c9a227;
   --color-gold-light:   #f0d060;
   --color-purple:       #5c2d91;
@@ -93,6 +93,7 @@ img { display: block; max-width: 100%; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 40%;
   -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.7) 20%, transparent 65%);
   mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.7) 20%, transparent 65%);
 }
@@ -113,7 +114,7 @@ img { display: block; max-width: 100%; }
 }
 
 .splash__symbol {
-  font-size: 3.5rem;
+  font-size: clamp(3rem, 10vw, 4rem);
   color: var(--color-gold);
   text-shadow: 0 0 24px var(--color-gold), 0 0 48px rgba(201,162,39,0.4);
   margin-bottom: var(--space-sm);
@@ -122,7 +123,7 @@ img { display: block; max-width: 100%; }
 
 .splash__title {
   font-family: var(--font-title);
-  font-size: 3rem;
+  font-size: clamp(2.4rem, 9vw, 3.2rem);
   font-weight: 700;
   color: var(--color-gold-light);
   text-shadow: 0 0 20px rgba(240,208,96,0.5);
@@ -328,7 +329,7 @@ img { display: block; max-width: 100%; }
 
 .slot {
   flex: 1;
-  max-width: 110px;
+  max-width: clamp(80px, 26vw, 110px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -336,7 +337,7 @@ img { display: block; max-width: 100%; }
   border: 2px dashed var(--color-border);
   border-radius: var(--radius-card);
   padding: 0.4rem 0.3rem;
-  min-height: 150px;
+  min-height: clamp(120px, 38vw, 160px);
   transition: border-color 0.2s, background 0.2s;
 }
 
@@ -365,7 +366,9 @@ img { display: block; max-width: 100%; }
   font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--color-purple-light);
+  color: var(--color-gold-light);
+  text-align: center;
+  width: 100%;
 }
 
 .slot__img {
@@ -403,7 +406,7 @@ img { display: block; max-width: 100%; }
 
 .deck {
   position: relative;
-  width: 130px;
+  width: clamp(120px, 32vw, 150px);
   aspect-ratio: 2 / 3;
 }
 
@@ -582,7 +585,7 @@ img { display: block; max-width: 100%; }
 }
 
 .flip-card {
-  width: 28vw;
+  width: clamp(22vw, 26vw, 110px);
   max-width: 110px;
   aspect-ratio: 2 / 3;
   perspective: 900px;
@@ -635,7 +638,7 @@ img { display: block; max-width: 100%; }
   align-items: center;
   justify-content: center;
   padding-bottom: 220px;
-  background: radial-gradient(ellipse at center, #120d20 0%, var(--color-bg) 80%);
+  background: var(--color-bg);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
   will-change: transform, opacity;
 }

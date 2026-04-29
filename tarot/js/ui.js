@@ -263,7 +263,6 @@ function _setupCardDrag(appEl, onDrop, onSkip) {
     let activeSlot = null;
 
     function slotUnder(x, y) {
-      
       ghost.style.display = "none";
       const el = document.elementFromPoint(x, y);
       ghost.style.display = "";
@@ -365,7 +364,7 @@ function _setupCardDrag(appEl, onDrop, onSkip) {
             topCard.style.transition = "";
             topCard.style.opacity = "";
             onSkip(cartaId);
-            playReturn()
+            playReturn();
           },
           { once: true },
         );
@@ -497,10 +496,10 @@ export function renderInterpretacion(resultado) {
   let isMuted = false;
 
   // ── Botón mute ──
-  const muteBtn = screenEl.querySelector('#btn-mute');
-  muteBtn.addEventListener('click', () => {
+  const muteBtn = screenEl.querySelector("#btn-mute");
+  muteBtn.addEventListener("click", () => {
     isMuted = !isMuted;
-    muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    muteBtn.textContent = isMuted ? "🔇" : "🔊";
     if (isMuted) stopSpeech();
   });
 
@@ -511,31 +510,44 @@ export function renderInterpretacion(resultado) {
   function findFemaleVoice() {
     if (!synth) return;
     const voices = synth.getVoices();
-    femaleVoice = voices.find(v =>
-      v.lang.startsWith('es') && /(female|femenin|mujer|paulina|conchita|mónica|lucia)/i.test(v.name)
-    ) ?? voices.find(v => v.lang.startsWith('es')) ?? null;
+    femaleVoice =
+      voices.find(
+        (v) =>
+          v.lang.startsWith("es") &&
+          /(female|femenin|mujer|paulina|conchita|mónica|lucia)/i.test(v.name),
+      ) ??
+      voices.find((v) => v.lang.startsWith("es")) ??
+      null;
   }
 
   if (synth) {
     findFemaleVoice();
-    synth.addEventListener('voiceschanged', findFemaleVoice);
+    synth.addEventListener("voiceschanged", findFemaleVoice);
   }
 
   function speakText(text) {
-    if (!synth || isMuted) return;
-    synth.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang   = 'es-ES';
-    utter.rate   = 0.95;
-    utter.pitch  = 1.1;
-    utter.volume = 0.6;
-    if (femaleVoice) utter.voice = femaleVoice;
-    synth.speak(utter);
+    try {
+      if (!synth || isMuted) return;
+      synth.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "es-ES";
+      utter.rate = 0.95;
+      utter.pitch = 1.1;
+      utter.volume = 0.6;
+      if (femaleVoice) utter.voice = femaleVoice;
+      synth.speak(utter);
+    } catch (error) {
+      console.warn("Error al reproducir voz:", error);
+    }
   }
 
   function stopSpeech() {
-    if (!synth) return;
-    synth.cancel();
+    try {
+      if (!synth) return;
+      synth.cancel();
+    } catch (error) {
+      console.warn("Error al cancelar voz:", error);
+    }
   }
 
   // Posicionar slides según índice actual
