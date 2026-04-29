@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <title>Reporte diario transaccional</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Evita remaquetado en Apple Mail -->
+  <meta name="x-apple-disable-message-reformatting">
+  <!--[if mso]>
+    <xml>
+      <o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office">
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+    <style> body, table, td {font-family: Arial, sans-serif !important;} </style>
+  <![endif]-->
+  <style>
+    /* Resets seguros */
+    
+    html, body { margin:0 !important; padding:0 !important; height:100% !important; width:100% !important; }
+    * { -ms-text-size-adjust:100%; -webkit-text-size-adjust:100%; }
+    table, td { border-collapse:collapse !important; mso-table-lspace:0pt !important; mso-table-rspace:0pt !important; }
+    img { -ms-interpolation-mode:bicubic; display:block; border:0; outline:none; text-decoration:none; }
+    a { text-decoration:none; }
+    /* Evita auto-links azules iOS/macOS */
+    a[x-apple-data-detectors], .unstyle-auto-detected-links a, .aBn { color:inherit !important; text-decoration:none !important; border-bottom:none !important; cursor:default !important; }
+    /* Gmail iOS fix */
+    u + .body a { color:inherit !important; text-decoration:none !important; }
+    /* Responsive */
+    @media screen and (max-width:600px){
+      .container{ width:100% !important; }
+      .px{ padding-left:20px !important; padding-right:20px !important; }
+      .py{ padding-top:20px !important; padding-bottom:20px !important; }
+      .title{ font-size:22px !important; line-height:28px !important; }
+      .btn{ width:100% !important; }
+    }
+    .card{
+      border: thin solid #e6e9f0;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+
+<body class="body" style="margin:0; padding:0; background:#f4f6fa;">
+  <div style="width:100%; background:#f4f6fa;">
+    <!-- Preheader oculto -->
+    <div style="display:none; font-size:1px; color:#f4f6fa; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">
+      Tu reporte diario de Dispersiones de Redeban está disponible.
+    </div>
+<div class="card">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align="center" style="padding:24px;">
+          <!-- Tarjeta -->
+          <table   role="presentation" width="600" class="container" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+            <!-- Logo -->
+            <tr>
+              <td class="px py" align="center" style="padding:20px 24px;">
+                <img src="https://testdispersionesredeban.com/assets/images/emails/Logotipo_dispersiones.jpg" width="240" height="50" alt="Dispersiones de Redeban" style="height:auto;">
+              </td>
+            </tr>
+
+        
+
+            <!-- Contenido -->
+            <tr style="background-color: #F4F4FA;"  >
+              <td class="px py" style="padding:32px; ">
+             
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; border: 2px solid; "  >
+                  <tr>
+                    
+                    <td align="left" style="font-family:Arial, Helvetica, sans-serif; padding: 32px;">     
+                      <svg  style="padding: 24px 0px;" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="64" height="64" rx="16" fill="#9A97D0"/>
+                      <path d="M10 50L32 12L54 50H10ZM32 44C32.5667 44 33.0417 43.8083 33.425 43.425C33.8083 43.0417 34 42.5667 34 42C34 41.4333 33.8083 40.9583 33.425 40.575C33.0417 40.1917 32.5667 40 32 40C31.4333 40 30.9583 40.1917 30.575 40.575C30.1917 40.9583 30 41.4333 30 42C30 42.5667 30.1917 43.0417 30.575 43.425C30.9583 43.8083 31.4333 44 32 44ZM30 38H34V28H30V38Z" fill="#F4F4FA"/>
+                      </svg>
+
+                      <h1 class="title" style="margin:0 0 18px 0; font-size:26px; line-height:32px; font-weight:700; color:#111111; mso-line-height-rule:exactly;">
+                        Reporte fallo en la dispersión
+                      </h1>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td align="left"  style="font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:22px; color:#111111; mso-line-height-rule:exactly; padding:0 32px;">
+                      <p style="margin:0 0 8px 0;"><strong>[Nombre usuario]:</strong></p>
+                      <p style="margin:0 0 16px 0;">
+                        Detectamos que una de las dispersiones que cargaste correspondiente al día <strong>[Fecha]</strong> presentó un fallo en el proceso de cargue de la información. 
+                        <p>
+                           Te recomendamos ingresar al módulo de <strong>Transacciones y Consultas</strong> y revisar las dispersiones en estado <strong>“Rechazadas”</strong> para conocer la causa del error y tomar las acciones necesarias.
+                        </p>
+                       
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- divisor -->
+                  <tr>
+                    <td style="padding: 24px 32px;">
+                      <hr style="border:none; border-top:1px solid #e6e9f0; margin:0;">
+                    </td>
+                  </tr>
+
+                  <!-- Caja informativa con ícono -->
+                  
+                  <!-- CTA: botón con VML para Outlook -->
+                  <tr>
+                    <td align="left" style="padding: 0 32px;">
+                      <!--[if mso]>
+                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="[URL_DEL_REPORTE]"
+                          style="height:46px; v-text-anchor:middle; width:220px;" arcsize="50%" stroke="f" fillcolor="#2b158f">
+                          <w:anchorlock/>
+                          <center style="color:#ffffff; font-family:Arial, sans-serif; font-size:16px; font-weight:bold;">
+                            Ver reporte
+                          </center>
+                        </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-- -->
+                      <a class="btn" href="[URL_DEL_REPORTE]" target="_blank"
+                         style="background:#231D98; border-radius:24px; color:#ffffff; display:inline-block; font-family:Arial, Helvetica, sans-serif; font-size:16px; font-weight:bold; line-height:46px; text-align:center; width:300px;">
+                        Revisar dispersión en el portal
+                      </a><p></p>
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+
+                  <!-- Enlace alterno -->
+                  <tr>
+                    <td align="left" style="font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; color:#6b6f76; padding: 12px 32px; mso-line-height-rule:exactly;">
+                     Si el problema persiste, no dudes en ponerte en contacto con nuestro equipo de soporte para recibir ayuda.
+                      <a href="[cta_url]" target="_blank" style="color:#231D98; text-decoration:underline;">este enlace</a>.
+                    </td>
+                  
+                  </tr>
+                    <!-- Signature -->
+                      
+                          <td class="px-24" style="padding: 24px 32px; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:14px; line-height:20px;">
+                            <strong>Cordialmente,</strong><br>
+                            <strong>Redeban</strong>
+                          </td>
+                </table>
+              </td>
+            </tr>
+
+            
+                        
+
+            <!-- Pie púrpura -->
+            <tr>
+              <td style="background:#231D98; padding:28px 2px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:20px; color:#ffffff; padding-bottom:12px; mso-line-height-rule:exactly;">
+                      Entérese de todas las novedades de Redeban en nuestras plataformas
+                    </td>
+                  </tr>
+
+                  <!-- Redes -->
+                  <tr>
+                    <td align="center" style="padding-bottom:18px;">
+                      <a href="https://www.facebook.com/RedebanM" target="_blank" style="display:inline-block; margin:0 8px;">
+                        <img src="https://testdispersionesredeban.com/assets/images/emails/akar-icons_facebook-fill.png" width="16" height="16" alt="Facebook">
+                      </a>
+                      <a href="https://www.instagram.com/redebanm/" target="_blank" style="display:inline-block; margin:0 8px;">
+                        <img src="https://testdispersionesredeban.com/assets/images/emails/akar-icons_instagram-fill.png" width="16" height="16" alt="Instagram">
+                      </a>
+                      <a href="https://twitter.com/RedebanM" target="_blank" style="display:inline-block; margin:0 8px;">
+                        <img src="https://testdispersionesredeban.com/assets/images/emails/akar-icons_x-fill.png" width="16" height="16" alt="X">
+                      </a>
+                      <a href="https://www.linkedin.com/company/redeban/" target="_blank" style="display:inline-block; margin:0 8px;">
+                        <img src="https://testdispersionesredeban.com/assets/images/emails/akar-icons_linkedin-fill.png" width="16" height="16" alt="LinkedIn">
+                      </a>
+                      <a href="https://www.youtube.com/user/RBMRedebanMulticolor" target="_blank" style="display:inline-block; margin:0 8px;">
+                        <img src="https://testdispersionesredeban.com/assets/images/emails/akar-icons_youtube-fill.png" width="16" height="16" alt="YouTube">
+                      </a>
+                    </td>
+                  </tr>
+          </table>
+           <!-- Legal -->
+           <tr>
+            <td style="padding:0;">
+              <img src="https://testdispersionesredeban.com/assets/images/emails/Footer_sello.jpg" width="600" alt="Imagen destacada" style="width:100%; height:auto;">
+            </td>
+          </tr>
+
+          <!-- /Tarjeta -->
+        </td>
+      </tr>
+    </table></div>
+
+  </div>
+</body>
+
+</html>

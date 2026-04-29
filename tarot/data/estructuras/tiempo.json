@@ -1,0 +1,39 @@
+{
+  "id": "tiempo",
+  "nombre": "Pasado · Presente · Futuro",
+  "descripcion": "Lectura de línea temporal para entender el origen, el momento actual y lo que se aproxima",
+  "icono": "🕰️",
+  "posiciones": ["pasado", "presente", "futuro"],
+  "contexto": {
+    "pasado": {
+      "intro": [
+        "En el pasado,",
+        "Esto tiene su origen en que"
+      ],
+      "cierre": [
+        "y marcó el rumbo de la situación actual.",
+        "dejando una huella que aún influye en el presente."
+      ]
+    },
+    "presente": {
+      "intro": [
+        "Actualmente,",
+        "En este momento,"
+      ],
+      "cierre": [
+        "conviene observarlo con atención y sin juicios apresurados.",
+        "es importante no asumir más de lo que la situación muestra."
+      ]
+    },
+    "futuro": {
+      "intro": [
+        "Hacia adelante,",
+        "En el futuro cercano,"
+      ],
+      "cierre": [
+        "aunque todo dependerá de las decisiones que se tomen ahora.",
+        "el camino se abrirá según cómo se maneje lo que está presente hoy."
+      ]
+    }
+  }
+}

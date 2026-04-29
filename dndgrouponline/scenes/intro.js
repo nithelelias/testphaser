@@ -1,5 +1,5 @@
 import Button from "../src/components/button.js";
-import { init, restoreFromLocal } from "../src/components/storage.js"; 
+import { init, restoreFromLocal } from "../src/components/storage.js";
 import { CLIENT } from "../src/constants/data.js";
 
 export default class IntroScene extends Phaser.Scene {
@@ -10,24 +10,27 @@ export default class IntroScene extends Phaser.Scene {
   create() {
     const mssg = this.add.text(
       this.scale.width / 2,
-      this.scale.height / 2,
+      this.scale.height / 2 - 200,
       "¿Quien eres?"
     );
 
+    const isAdmin = window.location.hash.includes("admin");
+
     const btn = new Button(
       this,
-      this.scale.width / 2,
-      this.scale.height / 2 + 200,
+      this.scale.width / 2 + 50,
+      this.scale.height / 2 + 100,
       "admin",
       () => {
         CLIENT.type = 2;
         start();
       }
     );
+    
     const btn2 = new Button(
       this,
-      this.scale.width / 2 + 100,
-      this.scale.height / 2 + 200,
+      this.scale.width / 2 + 50,
+      this.scale.height / 2,
       "player",
       () => {
         start();

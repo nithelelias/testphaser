@@ -1,0 +1,422 @@
+{
+  "cartas": {
+    "el_loco": {
+      "id": "el_loco",
+      "nombre": "El Loco",
+      "slug": "el_loco",
+      "base": {
+        "apertura": [
+          "hay un impulso hacia lo desconocido",
+          "existe una energía de inicio sin ataduras"
+        ],
+        "desarrollo": [
+          "la libertad y la espontaneidad son protagonistas",
+          "se actúa desde la intuición más que desde el plan"
+        ],
+        "riesgo": [
+          "lo que puede traer saltos al vacío sin medir consecuencias",
+          "generando una sensación de inestabilidad difícil de ignorar"
+        ]
+      }
+    },
+    "el_mago": {
+      "id": "el_mago",
+      "nombre": "El Mago",
+      "slug": "el_mago",
+      "base": {
+        "apertura": [
+          "hay una capacidad real para manifestar lo que se desea",
+          "se cuenta con las herramientas necesarias para actuar"
+        ],
+        "desarrollo": [
+          "la voluntad y la concentración están en su punto más alto",
+          "cada recurso disponible puede ser usado con maestría"
+        ],
+        "riesgo": [
+          "lo que puede degenerar en manipulación si no se actúa con ética",
+          "generando un poder que seduce pero que también puede corromper"
+        ]
+      }
+    },
+    "la_sacerdotisa": {
+      "id": "la_sacerdotisa",
+      "nombre": "La Sacerdotisa",
+      "slug": "la_sacerdotisa",
+      "base": {
+        "apertura": [
+          "hay un saber intuitivo que todavía no ha sido expresado",
+          "algo importante permanece en silencio, esperando ser escuchado"
+        ],
+        "desarrollo": [
+          "la respuesta ya está dentro, no afuera",
+          "el misterio que rodea la situación es parte del proceso"
+        ],
+        "riesgo": [
+          "lo que puede llevar a una parálisis por exceso de introspección",
+          "generando una distancia emocional que aísla en lugar de proteger"
+        ]
+      }
+    },
+    "la_emperatriz": {
+      "id": "la_emperatriz",
+      "nombre": "La Emperatriz",
+      "slug": "la_emperatriz",
+      "base": {
+        "apertura": [
+          "hay una energía fértil y creativa que busca expresarse",
+          "existe una abundancia que puede ser cultivada con cuidado"
+        ],
+        "desarrollo": [
+          "el cuerpo, la naturaleza y los sentidos juegan un papel central",
+          "nutrir y ser nutrido son necesidades que no deben ignorarse"
+        ],
+        "riesgo": [
+          "lo que puede volverse sofocante si el cuidado se convierte en control",
+          "generando dependencias emocionales que limitan el crecimiento"
+        ]
+      }
+    },
+    "el_emperador": {
+      "id": "el_emperador",
+      "nombre": "El Emperador",
+      "slug": "el_emperador",
+      "base": {
+        "apertura": [
+          "hay una necesidad de estructura y orden en esta situación",
+          "existe una autoridad que define los límites del terreno"
+        ],
+        "desarrollo": [
+          "la disciplina y la firmeza son los pilares del momento",
+          "la lógica y la estrategia prevalecen sobre el impulso"
+        ],
+        "riesgo": [
+          "lo que puede transformarse en rigidez que impide adaptarse",
+          "generando un control que sofoca en lugar de sostener"
+        ]
+      }
+    },
+    "el_hierofante": {
+      "id": "el_hierofante",
+      "nombre": "El Hierofante",
+      "slug": "el_hierofante",
+      "base": {
+        "apertura": [
+          "hay una influencia de tradiciones o sistemas de creencias establecidos",
+          "existe una guía externa que está siendo buscada o impuesta"
+        ],
+        "desarrollo": [
+          "los valores heredados y las normas sociales tienen peso aquí",
+          "aprender de quien tiene experiencia puede ser valioso en este momento"
+        ],
+        "riesgo": [
+          "lo que puede convertirse en dogmatismo si no se cuestiona lo recibido",
+          "generando una dependencia de la aprobación ajena que limita la autonomía"
+        ]
+      }
+    },
+    "los_enamorados": {
+      "id": "los_enamorados",
+      "nombre": "Los Enamorados",
+      "slug": "los_enamorados",
+      "base": {
+        "apertura": [
+          "hay una elección importante que involucra el corazón",
+          "existe una conexión profunda que pone a prueba los valores propios"
+        ],
+        "desarrollo": [
+          "el amor, la afinidad y la alineación personal están en juego",
+          "decidir desde el alma y no desde el miedo es el verdadero reto"
+        ],
+        "riesgo": [
+          "lo que puede derivar en indecisión paralizante ante dos caminos igualmente válidos",
+          "generando conflictos entre el deseo y lo que se considera correcto"
+        ]
+      }
+    },
+    "el_carro": {
+      "id": "el_carro",
+      "nombre": "El Carro",
+      "slug": "el_carro",
+      "base": {
+        "apertura": [
+          "hay un impulso de avanzar con determinación hacia una meta",
+          "existe una fuerza de voluntad que busca dominar la situación"
+        ],
+        "desarrollo": [
+          "el movimiento y la dirección son claves en este momento",
+          "controlar fuerzas opuestas requiere enfoque y disciplina"
+        ],
+        "riesgo": [
+          "lo que puede convertirse en arrogancia si se pierde la humildad en el camino",
+          "generando una velocidad tan alta que impide ver lo que se deja atrás"
+        ]
+      }
+    },
+    "la_fuerza": {
+      "id": "la_fuerza",
+      "nombre": "La Fuerza",
+      "slug": "la_fuerza",
+      "base": {
+        "apertura": [
+          "hay una fortaleza interior que supera cualquier obstáculo externo",
+          "existe una valentía silenciosa que sostiene desde adentro"
+        ],
+        "desarrollo": [
+          "la paciencia y la compasión son más poderosas que la imposición",
+          "dominar los propios impulsos es la verdadera prueba de este momento"
+        ],
+        "riesgo": [
+          "lo que puede resultar agotador si se carga con demasiado sin pedir ayuda",
+          "generando una supresión de emociones que eventualmente busca salida"
+        ]
+      }
+    },
+    "el_ermitano": {
+      "id": "el_ermitano",
+      "nombre": "El Ermitaño",
+      "slug": "el_ermitano",
+      "base": {
+        "apertura": [
+          "hay un llamado a retirarse y buscar respuestas en el interior",
+          "existe una sabiduría que solo se encuentra en el silencio"
+        ],
+        "desarrollo": [
+          "la soledad elegida se convierte en fuente de claridad",
+          "el camino se ilumina dando un paso a la vez con conciencia"
+        ],
+        "riesgo": [
+          "lo que puede volverse aislamiento si el retiro se prolonga más allá de lo necesario",
+          "generando una desconexión del mundo que resulta difícil de revertir"
+        ]
+      }
+    },
+    "la_rueda": {
+      "id": "la_rueda",
+      "nombre": "La Rueda de la Fortuna",
+      "slug": "la_rueda",
+      "base": {
+        "apertura": [
+          "hay un cambio de ciclo que ya está en marcha",
+          "existe una fuerza mayor que mueve las circunstancias sin pedir permiso"
+        ],
+        "desarrollo": [
+          "el destino y el azar tienen un papel importante aquí",
+          "lo que sube eventualmente baja, y viceversa"
+        ],
+        "riesgo": [
+          "lo que puede resultar desestabilizador si se resiste el cambio inevitable",
+          "generando una sensación de falta de control que alimenta la ansiedad"
+        ]
+      }
+    },
+    "la_justicia": {
+      "id": "la_justicia",
+      "nombre": "La Justicia",
+      "slug": "la_justicia",
+      "base": {
+        "apertura": [
+          "hay una necesidad de equilibrio y de enfrentar las consecuencias de las acciones",
+          "existe una evaluación objetiva de la situación que no admite parcialidades"
+        ],
+        "desarrollo": [
+          "la verdad y la honestidad son la base sobre la cual todo se sostiene",
+          "cada acción tiene su peso y su resultado justo"
+        ],
+        "riesgo": [
+          "lo que puede volverse frío e inflexible si se pierde la empatía en el juicio",
+          "generando una severidad que no deja espacio para el error humano"
+        ]
+      }
+    },
+    "el_colgado": {
+      "id": "el_colgado",
+      "nombre": "El Colgado",
+      "slug": "el_colgado",
+      "base": {
+        "apertura": [
+          "hay una pausa forzada que invita a ver las cosas desde otro ángulo",
+          "existe una suspensión temporal que tiene su propio propósito"
+        ],
+        "desarrollo": [
+          "soltar el control y rendirse al proceso trae más claridad que luchar",
+          "el sacrificio voluntario de algo abre una comprensión más profunda"
+        ],
+        "riesgo": [
+          "lo que puede prolongarse innecesariamente si no se acepta la lección",
+          "generando una sensación de victimismo que impide avanzar"
+        ]
+      }
+    },
+    "la_muerte": {
+      "id": "la_muerte",
+      "nombre": "La Muerte",
+      "slug": "la_muerte",
+      "base": {
+        "apertura": [
+          "hay un final inevitable que abre paso a algo completamente nuevo",
+          "existe una transformación profunda que no se puede evitar ni postergar"
+        ],
+        "desarrollo": [
+          "dejar ir lo que ya no sirve es el acto más valioso posible ahora",
+          "el fin de un ciclo es siempre el inicio de otro"
+        ],
+        "riesgo": [
+          "lo que puede generar resistencia y dolor si se intenta aferrarse a lo que ya terminó",
+          "generando un duelo que se niega a cerrar y congela el presente"
+        ]
+      }
+    },
+    "la_templanza": {
+      "id": "la_templanza",
+      "nombre": "La Templanza",
+      "slug": "la_templanza",
+      "base": {
+        "apertura": [
+          "hay un proceso de integración y equilibrio que está ocurriendo",
+          "existe una armonía posible si se combina lo que antes parecía opuesto"
+        ],
+        "desarrollo": [
+          "la paciencia y la moderación son las claves del momento",
+          "mezclar con cuidado las partes de la situación conduce al resultado correcto"
+        ],
+        "riesgo": [
+          "lo que puede perderse si se actúa con prisa o se fuerza el proceso",
+          "generando desequilibrios por querer llegar demasiado rápido al resultado"
+        ]
+      }
+    },
+    "el_diablo": {
+      "id": "el_diablo",
+      "nombre": "El Diablo",
+      "slug": "el_diablo",
+      "base": {
+        "apertura": [
+          "hay una atadura o dependencia que limita la libertad real",
+          "existe una seducción poderosa que distrae de lo verdaderamente importante"
+        ],
+        "desarrollo": [
+          "los miedos y los deseos más oscuros tienen un papel protagonista",
+          "lo que ata a esta situación requiere ser nombrado con honestidad"
+        ],
+        "riesgo": [
+          "lo que puede volverse una trampa si no se reconoce el propio papel en ella",
+          "generando ciclos repetitivos de comportamiento difíciles de romper"
+        ]
+      }
+    },
+    "la_torre": {
+      "id": "la_torre",
+      "nombre": "La Torre",
+      "slug": "la_torre",
+      "base": {
+        "apertura": [
+          "hay una ruptura repentina que sacude las estructuras establecidas",
+          "existe una revelación impactante que cambia la perspectiva de golpe"
+        ],
+        "desarrollo": [
+          "lo que se construyó sobre bases falsas no puede sostenerse más",
+          "el caos momentáneo es el preludio necesario de una reconstrucción más sólida"
+        ],
+        "riesgo": [
+          "lo que puede sentirse devastador si no se acepta que había algo que necesitaba caer",
+          "generando una crisis de identidad profunda ante la pérdida de certezas"
+        ]
+      }
+    },
+    "la_estrella": {
+      "id": "la_estrella",
+      "nombre": "La Estrella",
+      "slug": "la_estrella",
+      "base": {
+        "apertura": [
+          "hay una esperanza genuina que ilumina el camino a seguir",
+          "existe una renovación del espíritu que llega después de una etapa difícil"
+        ],
+        "desarrollo": [
+          "la fe en el proceso y en uno mismo resulta sanadora",
+          "confiar en el flujo natural de la vida abre puertas inesperadas"
+        ],
+        "riesgo": [
+          "lo que puede convertirse en ingenuidad si se idealiza demasiado la situación",
+          "generando una desconexión de la realidad práctica al enfocarse solo en el ideal"
+        ]
+      }
+    },
+    "la_luna": {
+      "id": "la_luna",
+      "nombre": "La Luna",
+      "slug": "la_luna",
+      "base": {
+        "apertura": [
+          "hay una sensación de confusión que nubla la percepción clara",
+          "algo no se percibe con total claridad en este momento"
+        ],
+        "desarrollo": [
+          "puede haber cosas que no se están diciendo o mostrando directamente",
+          "es posible que existan interpretaciones equivocadas de la realidad"
+        ],
+        "riesgo": [
+          "lo que puede llevar a malentendidos y decisiones basadas en ilusiones",
+          "generando dudas e inseguridades que se alimentan de sí mismas"
+        ]
+      }
+    },
+    "el_sol": {
+      "id": "el_sol",
+      "nombre": "El Sol",
+      "slug": "el_sol",
+      "base": {
+        "apertura": [
+          "hay una claridad y vitalidad que iluminan todo a su alrededor",
+          "existe una energía positiva y expansiva que no puede ocultarse"
+        ],
+        "desarrollo": [
+          "la alegría, el éxito y la confianza son los colores de este momento",
+          "todo lo que se muestra con autenticidad encuentra su recompensa"
+        ],
+        "riesgo": [
+          "lo que puede volverse cegador si el exceso de optimismo impide ver los matices",
+          "generando una soberbia sutil que desestima las señales de alerta"
+        ]
+      }
+    },
+    "el_juicio": {
+      "id": "el_juicio",
+      "nombre": "El Juicio",
+      "slug": "el_juicio",
+      "base": {
+        "apertura": [
+          "hay un llamado a despertar y responder a algo más grande que lo cotidiano",
+          "existe una oportunidad de redención o renovación profunda"
+        ],
+        "desarrollo": [
+          "revisar el pasado con honestidad permite integrar lo que quedó pendiente",
+          "una nueva comprensión de quién se es y hacia dónde se va está emergiendo"
+        ],
+        "riesgo": [
+          "lo que puede paralizarse si el miedo al juicio ajeno supera al llamado interior",
+          "generando una autocrítica destructiva que impide soltar el pasado"
+        ]
+      }
+    },
+    "el_mundo": {
+      "id": "el_mundo",
+      "nombre": "El Mundo",
+      "slug": "el_mundo",
+      "base": {
+        "apertura": [
+          "hay un ciclo que se está completando de manera plena y satisfactoria",
+          "existe una sensación de logro y totalidad que pocas veces se alcanza"
+        ],
+        "desarrollo": [
+          "todo lo aprendido en el camino converge en este punto de integración",
+          "el éxito alcanzado es el resultado de un proceso largo y consciente"
+        ],
+        "riesgo": [
+          "lo que puede estancarse si no se tiene el valor de comenzar un nuevo ciclo",
+          "generando un apego al logro que impide seguir creciendo y explorando"
+        ]
+      }
+    }
+  }
+}
