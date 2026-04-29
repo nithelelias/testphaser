@@ -6,6 +6,7 @@
 - Tecnología: JS puro + HTML/CSS (sin frameworks)
 - 22 arcanos mayores con imágenes propias del usuario
 - Sistema de interpretación modular basado en archivos JSON por estructura
+- Lectura con voz (TTS) automática en español
 
 ---
 
@@ -13,113 +14,161 @@
 
 ```
 [PANTALLA 0: Splash/Intro]
-         ↓ (tap o timeout 2.5s)
+         ↓ (timeout 2.5s)
 [PANTALLA 1: Selección de Estructura]
          ↓ (tap en estructura)
-[PANTALLA 2: Selección de Cartas — posición 1: Pasado]
-         ↓ (tap en carta)
-[PANTALLA 2: Selección de Cartas — posición 2: Presente]
-         ↓ (tap en carta)
-[PANTALLA 2: Selección de Cartas — posición 3: Futuro]
-         ↓ (tap en carta → auto-avanza)
-[PANTALLA 3: Confirmación]
-         ↓ (tap "Revelar")
+         ├── Si estructura normal → PANTALLA 2
+         └── Si estructura con sub-selección (Ciclo Mujer) ↓
+             [PANTALLA 1.5: Selección de Fase]
+                ├── Elige fase directamente → PANTALLA 2
+                └── "No sé" → muestra guía → elige fase → PANTALLA 2
+[PANTALLA 2: Selección de Cartas (drag & drop)]
+         ↓ (todos los slots llenos → tap "Revelar")
 [PANTALLA 4: Revelación animada]
          ↓ (animación completa → auto-avanza)
-[PANTALLA 5: Interpretación]
+[PANTALLA 5: Interpretación (slides + TTS)]
          ↓ (tap "Nueva tirada")
 [PANTALLA 1: Selección de Estructura]  ← loop
 ```
 
 ---
 
-## 2. Mapa de Pantallas
+## 2. Estructuras Disponibles
+
+| Estructura | Posiciones | Archivo JSON |
+|---|---|---|
+| 🌙 Ciclo Mujer (sub-selección) | — | Redirige a P1.5 |
+| ├── 🩸 Menstruación | energía actual · qué necesitas hoy · consejo para fluir | `ciclo_mujer_menstruacion.json` |
+| ├── 🌱 Fase Folicular | energía actual · qué necesitas hoy · consejo para fluir | `ciclo_mujer_folicular.json` |
+| ├── 🌕 Ovulación | energía actual · qué necesitas hoy · consejo para fluir | `ciclo_mujer_ovulacion.json` |
+| └── 🍂 Fase Lútea | energía actual · qué necesitas hoy · consejo para fluir | `ciclo_mujer_lutea.json` |
+| 🕰️ Pasado · Presente · Futuro | pasado · presente · futuro | `tiempo.json` |
+| ❤️ Tirada del Amor | tú · la otra persona · la conexión · el obstáculo · el consejo | `amor.json` |
+
+---
+
+## 3. Mapa de Pantallas
 
 ### PANTALLA 0 — Splash / Intro
 
 - Fondo negro con gradiente radial central (negro → púrpura oscuro)
-- Logo o símbolo central (img/svg) con animación `fade-in` + leve `scale` al entrar
-- Título de la app centrado con tipografía mística y efecto glow dorado
-- Subtítulo o tagline breve
-- Transición automática a los 2.5s o al primer tap del usuario
+- Símbolo central ✦ con efecto glow dorado
+- Título "Tarot" centrado con tipografía Cinzel
+- Subtítulo: "Descubre lo que las cartas revelan"
+- Transición automática a P1 a los 2.5s
 
 ---
 
 ### PANTALLA 1 — Selección de Estructura
 
 - Encabezado: "¿Qué deseas explorar?"
-- Scroll horizontal de cards de estructura
+- Lista vertical de cards de estructura (`.estructura-card`)
 - Cada card muestra:
-  - Ícono representativo (emoji o svg)
-  - Nombre de la estructura (ej: "Tiempo", "Amor", "Trabajo")
+  - Ícono representativo (emoji)
+  - Nombre de la estructura
   - Descripción breve de 1 línea
-- Al seleccionar: feedback visual (borde dorado + escala) → navega a P2
+- **Si la estructura tiene `subSeleccion: true`** (Ciclo Mujer): navega a P1.5
+- **Si no**: carga la estructura JSON, inicializa selecciones dinámicas y navega a P2
 
 ---
 
-### PANTALLA 2 — Selección de Cartas
+### PANTALLA 1.5 — Selección de Fase (exclusiva Ciclo Mujer)
 
-- Encabezado con nombre de la posición actual (ej: **"PASADO"**, **"PRESENTE"**, **"FUTURO"**)
-- Indicador de progreso (ej: "Carta 1 de 3") como pills o barra
-- Grid de las 22 cartas (2–3 columnas):
-  - Imagen de la carta (`assets/cards/<slug>.jpg`)
-  - Nombre del arcano centrado bajo la imagen
-- **Estado seleccionada/usada:** overlay semitransparente + ícono ✓, `pointer-events: none`
-- Al tocar una carta disponible: micro-animación de tap (scale) → avanza a siguiente posición o P3
+- Encabezado: "¿En qué fase estás?"
+- Subtítulo: "Elige tu fase actual del ciclo"
+- 4 botones de fase (`.fase-card`), cada uno con:
+  - Ícono (🩸 🌱 🌕 🍂)
+  - Nombre de la fase
+  - Descripción breve
+- Botón "🤔 No sé en qué fase estoy":
+  - Toggle: muestra/oculta panel `.guia-fases`
+  - Panel con 4 preguntas numeradas, una por fase
+  - Cada pregunta incluye botón "Sí, es mi fase → [nombre]" que selecciona esa fase
+- Botón "← Volver" regresa a P1
+- Al elegir fase → carga la sub-estructura correspondiente y navega a P2
 
 ---
 
-### PANTALLA 3 — Confirmación
+### PANTALLA 2 — Selección de Cartas (Drag & Drop)
 
-- Título: "Tu tirada"
-- Las 3 cartas elegidas en fila o columna vertical:
-  - Imagen de la carta
-  - Nombre del arcano
-  - Badge de posición (Pasado / Presente / Futuro)
-- Botón CTA centrado: **"Revelar"** — dorado, tamaño grande
-- Botón secundario: "Volver a elegir" (resetea selecciones, vuelve a P2 pos. 1)
+- Encabezado: "Elige tus cartas"
+- Instrucción: "Arrastra la carta a su posición"
+- **Zona superior**: slots vacíos (`.slots-area`) según las posiciones de la estructura
+  - Cada slot muestra el nombre de la posición y un icono ✦
+  - Atributo `data-slot-count` para estilos responsive según cantidad de slots
+  - Al recibir carta: muestra imagen (dorso) + nombre, borde dorado sólido
+- **Zona inferior**: mazo apilado (`.deck-area`)
+  - Hasta 3 sombras decorativas bajo la carta superior
+  - Carta superior visible con dorso, arrastrable (`pointer events`)
+  - Contador: "N cartas en el mazo"
+- **Mecánica de drag**:
+  - `pointerdown`: crea ghost semi-transparente que sigue al cursor/dedo
+  - `pointermove`: detecta hover sobre slots vacíos (borde dorado + fondo sutil)
+  - `pointerup`:
+    - **Sobre slot vacío** → carta se deposita, `playPut()`, mazo se actualiza
+    - **Sobre el mazo** → snap back con animación, carta no se mueve
+    - **Fuera** → carta vuela al centro del mazo, se reordena al fondo (skip)
+- **Cuando todos los slots están llenos**: el mazo se reemplaza por:
+  - Botón "Revelar" (dorado, primario)
+  - Botón "Volver a empezar" (ghost)
 
 ---
 
 ### PANTALLA 4 — Revelación
 
-- Fondo oscuro con efecto sutil (gradiente, partículas opcionales)
-- Las 3 cartas se revelan **una a una** con delay de ~800ms entre cada una:
-  - Animación **flip 3D** (rotateY 180°): cara trasera genérica → imagen del arcano
-  - Duración del flip: 600ms con `cubic-bezier`
-- Al completar las 3 revelaciones: transición automática a P5
+- Fondo oscuro con gradiente radial púrpura
+- Las cartas seleccionadas se muestran en fila horizontal (`.flip-card`)
+- Cada carta se revela con animación **flip 3D** (`rotateY(180deg)`):
+  - Dorso genérico → imagen del arcano
+  - Duración: 600ms con cubic-bezier
+  - Delay escalonado: 900ms entre cada carta
+- Al completar todas las revelaciones → transición automática a P5
 
 ---
 
-### PANTALLA 5 — Interpretación
+### PANTALLA 5 — Interpretación (Slides + TTS)
 
-- Scroll vertical largo
-- Por cada carta (pasado → presente → futuro):
-  - Imagen de la carta (centrada, aspect-ratio 2/3)
-  - Badge de posición con color temático
-  - Nombre del arcano (h2, tipografía Cinzel)
-  - Texto interpretativo completo generado por el engine
-  - Separador visual entre cartas
-- Botón **"Nueva tirada"** al final (resetea estado → vuelve a P1)
+- Pantalla fullscreen con slides verticales (`.lectura-slide`)
+- Cada slide muestra la imagen de la carta centrada
+- **Panel inferior fijo** (`.lectura-panel`) con gradiente fade-to-black:
+  - Badge de posición (color púrpura)
+  - Nombre del arcano (Cinzel, dorado)
+  - Texto interpretativo completo (itálica, ligero)
+- **Navegación entre slides**:
+  - Desktop: scroll wheel (deltaY)
+  - Mobile: touch swipe vertical (threshold 40px o velocidad 0.3)
+  - Transición: `translateY` con ease-out + fade de opacity
+- **TTS automático**: lee el texto de cada slide en voz femenina español
+  - Botón mute flotante (esquina superior derecha)
+  - Al cambiar de slide: pausa speech actual, fade out panel, reposiciona, fade in, speak
+- Botón "Nueva tirada" en el último slide → resetea estado → P1
 
 ---
 
-## 3. Interacciones y Transiciones
+## 4. Interacciones y Transiciones
 
 | Transición / Interacción | Descripción |
 |---|---|
-| Splash → Estructuras | Fade-out de splash + fade-in de P1 |
-| Entre pantallas generales | Slide horizontal (`translateX`) con ease-out, ~300ms |
-| Tap en carta (selección) | Scale breve (0.95 → 1.05 → 1.0) + overlay inmediato |
-| Carta seleccionada (usada) | Overlay semitransparente + ícono ✓, `pointer-events: none` |
-| Flip de carta en revelación | `rotateY(180deg)` en `.card-inner`, duración 600ms cubic-bezier |
-| Delay entre cartas reveladas | 800ms de separación entre cada flip (`setTimeout` escalonado) |
-| Botón "Revelar" | Pulse / glow dorado al hover/tap |
-| Botón "Nueva tirada" | Fade-out P5 → fade-in P1 con reset de estado |
+| Splash → Estructuras | Auto-avance 2.5s, animación `slideIn` |
+| Entre pantallas | Slide horizontal (`translateX(28px)`) con ease-out, 320ms |
+| Tap en estructura | Feedback active: `scale(0.97)` + borde dorado |
+| Selección de fase | Misma interacción que estructura |
+| "No sé" toggle | Muestra/oculta panel con `hidden` attribute |
+| Drag carta (inicio) | Ghost clone escala 1.08 + rotación 3° + sombra intensa |
+| Drag carta (hover slot) | Slot: borde dorado + fondo `rgba(gold, 0.08)` + glow |
+| Drop en slot | Animación `slotFill` (scale 0.82→1, opacity 0→1), 320ms |
+| Drop fuera (skip) | Ghost vuela al centro del mazo con ease-in-out, 350ms |
+| Snap back al mazo | Ghost regresa al origen con cubic-bezier, 280ms |
+| Nueva carta en mazo | Animación `deckCardIn` (translateY -10px, scale 0.96), 280ms |
+| Flip revelación | `rotateY(180deg)` en `.flip-card__inner`, 650ms cubic-bezier |
+| Delay entre flips | 900ms escalonado entre cada carta |
+| Slides lectura | `translateY(±100%)` + opacity 0↔1, 500ms ease |
+| Panel lectura | Opacity 0→1 con transición 400ms |
+| Botón mute | `scale(0.9)` al tap |
 
 ---
 
-## 4. Sistema Visual
+## 5. Sistema Visual
 
 ### Paleta de Colores
 
@@ -149,25 +198,62 @@
 ### Estilo General
 
 - Mobile-first, `max-width: 430px`, centrado con `margin: 0 auto`
-- `border-radius: 12px` para cards de arcanos
-- `border-radius: 8px` para cards de estructura
+- `border-radius: 12px` para cards de arcanos y slots
+- `border-radius: 8px` para cards de estructura y fase
 - Sombras con color dorado o púrpura suave (`box-shadow`)
 - Imágenes de cartas con `aspect-ratio: 2 / 3`, `object-fit: cover`
+- Slots adaptativos: `data-slot-count` controla tamaño para tiradas de 5+ cartas
 
 ---
 
-## 5. Estructura de Imágenes
+## 6. Estructura de Datos
+
+### Estructura JSON de tirada
+
+```json
+{
+  "id": "ciclo_mujer_menstruacion",
+  "nombre": "Ciclo Mujer · Menstruación",
+  "descripcion": "Fase de soltar, descansar y reconectar con tu interior",
+  "icono": "🩸",
+  "posiciones": ["energía actual", "qué necesitas hoy", "consejo para fluir"],
+  "contexto": {
+    "energía actual": {
+      "intro": ["Frase de apertura 1,", "Frase de apertura 2,"],
+      "cierre": ["Frase de cierre 1.", "Frase de cierre 2."]
+    }
+  }
+}
+```
+
+### Estado global (app.js)
+
+```javascript
+state = {
+  pantalla: 0,
+  estructuraId: null,    // id de la estructura cargada
+  estructura: null,      // objeto JSON de la estructura
+  cartasData: null,      // { el_loco: {...}, el_mago: {...}, ... }
+  selecciones: [],       // array dinámico según posiciones (N nulls → N cartas)
+  deck: [],              // cartas restantes (shuffled)
+  resultado: [],         // [{posicion, carta, texto}] generado por engine
+}
+```
+
+---
+
+## 7. Estructura de Imágenes
 
 ### Convención de nombres
 
-Las imágenes deben ubicarse en `assets/cards/` con el slug en minúsculas y sin tildes:
+Las imágenes se ubican en `cards/` con el slug en minúsculas y sin tildes:
 
 ```
-assets/cards/el_loco.jpg
-assets/cards/el_mago.jpg
-assets/cards/la_sacerdotisa.jpg
+cards/el_loco.jpg
+cards/el_mago.jpg
+cards/la_sacerdotisa.jpg
 ... (un archivo por arcano)
-assets/cards/fallback.jpg   ← imagen de respaldo si falta la original
+cards/back.jpg   ← dorso genérico
 ```
 
 ### Tabla de los 22 Arcanos Mayores
@@ -198,6 +284,33 @@ assets/cards/fallback.jpg   ← imagen de respaldo si falta la original
 | XXI | El Mundo | The World | `el_mundo` |
 
 ---
+
+## 8. Archivos del Proyecto
+
+```
+index.html
+index.css
+index.js
+js/
+  app.js          — Estado global, navegación, delegación de eventos
+  ui.js           — Renderizado de cada pantalla
+  engine.js       — Lógica de interpretación de tirada
+  data.js         — Carga de JSON, estructuras disponibles, fases del ciclo
+  cards-map.js    — Mapeo de slugs a rutas de imagen
+  sfx.js          — Sonidos (click, flip, put, return, melodía)
+  cosmic-bg.js    — Fondo animado (canvas)
+data/
+  cartas.json     — Definición de los 22 arcanos
+  estructuras/
+    tiempo.json
+    amor.json
+    ciclo_mujer_menstruacion.json
+    ciclo_mujer_folicular.json
+    ciclo_mujer_ovulacion.json
+    ciclo_mujer_lutea.json
+cards/              — Imágenes de las cartas
+sounds/             — Archivos de audio
+```
 
 ## 6. Estructura de Archivos del Proyecto
 

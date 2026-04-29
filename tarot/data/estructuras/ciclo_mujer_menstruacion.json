@@ -1,0 +1,39 @@
+{
+  "id": "ciclo_mujer_menstruacion",
+  "nombre": "Ciclo Mujer · Menstruación",
+  "descripcion": "Fase de soltar, descansar y reconectar con tu interior",
+  "icono": "🩸",
+  "posiciones": ["energía actual", "qué necesitas hoy", "consejo para fluir"],
+  "contexto": {
+    "energía actual": {
+      "intro": [
+        "Internamente en esta fase menstrual,",
+        "Tu energía interna durante la menstruación muestra que"
+      ],
+      "cierre": [
+        "es momento de honrar tu necesidad de reposo y silencio.",
+        "tu cuerpo te pide bajar el ritmo y escucharte."
+      ]
+    },
+    "qué necesitas hoy": {
+      "intro": [
+        "Lo que tu cuerpo, mente y emociones requieren hoy es",
+        "En este momento de tu ciclo necesitas"
+      ],
+      "cierre": [
+        "date permiso para atender esa necesidad sin culpa.",
+        "nutrirte desde adentro hará que el ciclo fluya con más suavidad."
+      ]
+    },
+    "consejo para fluir": {
+      "intro": [
+        "Para fluir mejor en esta fase, las cartas recomiendan",
+        "La acción que te ayudará a transitar esta menstruación es"
+      ],
+      "cierre": [
+        "recordando que soltar es también una forma de fortaleza.",
+        "abraza el descanso como parte sagrada de tu ciclo."
+      ]
+    }
+  }
+}

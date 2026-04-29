@@ -52,6 +52,60 @@ export function renderEstructuras(estructuras) {
   `);
 }
 
+// ─── PANTALLA 1.5: Selección de fase del ciclo ──────────────────────────────
+
+export function renderSeleccionFase(fases) {
+  const cards = fases
+    .map(
+      (f) => `
+    <button class="fase-card" data-fase-id="${f.id}">
+      <span class="fase-card__icon">${f.icono}</span>
+      <span class="fase-card__nombre">${f.nombre}</span>
+      <span class="fase-card__desc">${f.descripcion}</span>
+    </button>
+  `,
+    )
+    .join("");
+
+  const preguntas = fases
+    .map(
+      (f, i) => `
+    <div class="guia-fase">
+      <span class="guia-fase__num">${i + 1}.</span>
+      <div class="guia-fase__body">
+        <p class="guia-fase__pregunta">${f.pregunta}</p>
+        <button class="guia-fase__btn" data-fase-id="${f.id}">
+          ${f.icono} Sí, es mi fase → ${f.nombre}
+        </button>
+      </div>
+    </div>
+  `,
+    )
+    .join("");
+
+  render(`
+    <div class="screen screen--fases">
+      <header class="screen__header">
+        <h2 class="screen__title">¿En qué fase estás?</h2>
+        <p class="fases__subtitle">Elige tu fase actual del ciclo</p>
+      </header>
+      <div class="fases-list">
+        ${cards}
+      </div>
+      <button class="btn btn--ghost fases__no-se" id="btn-no-se">
+        🤔 No sé en qué fase estoy
+      </button>
+      <div class="guia-fases" id="guia-fases" hidden>
+        <p class="guia-fases__intro">Responde estas preguntas para identificar tu fase:</p>
+        ${preguntas}
+      </div>
+      <button class="btn btn--ghost fases__volver" id="btn-volver-estructuras">
+        ← Volver
+      </button>
+    </div>
+  `);
+}
+
 // ─── PANTALLA 2: Selección de cartas (render inicial) ───────────────────────
 
 export function renderSeleccionCartas(
@@ -86,7 +140,7 @@ export function renderSeleccionCartas(
         <h2 class="screen__title">Elige tus cartas</h2>
         <p class="seleccion__instruccion">Arrastra la carta a su posición</p>
       </header>
-      <div class="slots-area">${slotItems}</div>
+      <div class="slots-area" data-slot-count="${estructura.posiciones.length}">${slotItems}</div>
       <div class="deck-area">
         <div class="deck">
           ${shadows}

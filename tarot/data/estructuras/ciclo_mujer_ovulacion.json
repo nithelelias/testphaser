@@ -1,0 +1,39 @@
+{
+  "id": "ciclo_mujer_ovulacion",
+  "nombre": "Ciclo Mujer · Ovulación",
+  "descripcion": "Fase de plenitud, magnetismo y máxima expresión",
+  "icono": "🌕",
+  "posiciones": ["energía actual", "qué necesitas hoy", "consejo para fluir"],
+  "contexto": {
+    "energía actual": {
+      "intro": [
+        "Internamente en esta fase de ovulación,",
+        "Tu energía interna en tu punto de plenitud muestra que"
+      ],
+      "cierre": [
+        "estás en tu momento de mayor poder y magnetismo.",
+        "tu luz interior brilla con toda su fuerza."
+      ]
+    },
+    "qué necesitas hoy": {
+      "intro": [
+        "Lo que tu cuerpo, mente y emociones requieren hoy es",
+        "En este momento de máxima energía necesitas"
+      ],
+      "cierre": [
+        "canaliza esta potencia hacia lo que más importa.",
+        "comparte tu energía radiante con quienes te rodean."
+      ]
+    },
+    "consejo para fluir": {
+      "intro": [
+        "Para fluir mejor en esta fase, las cartas recomiendan",
+        "La acción que elevará tu ovulación es"
+      ],
+      "cierre": [
+        "brilla sin miedo, este es tu momento de manifestar.",
+        "expresa tu verdad con confianza y autenticidad."
+      ]
+    }
+  }
+}

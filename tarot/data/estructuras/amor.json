@@ -1,0 +1,59 @@
+{
+  "id": "amor",
+  "nombre": "Tirada del Amor",
+  "descripcion": "Explora los sentimientos, la conexión y el destino de una relación",
+  "icono": "❤️",
+  "posiciones": ["tú", "la otra persona", "la conexión", "el obstáculo", "el consejo"],
+  "contexto": {
+    "tú": {
+      "intro": [
+        "En cuanto a tus sentimientos,",
+        "Desde tu corazón,"
+      ],
+      "cierre": [
+        "esto refleja cómo vives el amor en este momento.",
+        "y define la energía que aportas a la relación."
+      ]
+    },
+    "la otra persona": {
+      "intro": [
+        "La otra persona siente que",
+        "Desde el otro lado,"
+      ],
+      "cierre": [
+        "aunque sus emociones pueden no ser del todo visibles.",
+        "y esto influye en cómo se relaciona contigo."
+      ]
+    },
+    "la conexión": {
+      "intro": [
+        "Entre ambos existe",
+        "La energía que los une muestra que"
+      ],
+      "cierre": [
+        "y es lo que define la esencia de este vínculo.",
+        "esa conexión merece ser observada con honestidad."
+      ]
+    },
+    "el obstáculo": {
+      "intro": [
+        "Lo que dificulta esta relación es",
+        "El principal desafío entre ambos tiene que ver con"
+      ],
+      "cierre": [
+        "pero reconocerlo es el primer paso para superarlo.",
+        "enfrentarlo con madurez puede transformar la situación."
+      ]
+    },
+    "el consejo": {
+      "intro": [
+        "Las cartas aconsejan",
+        "El mensaje para esta relación es"
+      ],
+      "cierre": [
+        "seguir este consejo puede abrir nuevos caminos en el amor.",
+        "recordando que el amor también requiere valentía y paciencia."
+      ]
+    }
+  }
+}

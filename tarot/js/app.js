@@ -2,12 +2,13 @@
  * app.js — Estado global, navegación y orquestación de la app
  */
 
-import { loadCartas, loadEstructura, getEstructurasDisponibles } from './data.js';
+import { loadCartas, loadEstructura, getEstructurasDisponibles, getFasesCicloMujer } from './data.js';
 import { interpretarTirada } from './engine.js';
 import { playClick, startMelody } from './sfx.js';
 import {
   renderSplash,
   renderEstructuras,
+  renderSeleccionFase,
   renderSeleccionCartas,
   updateSlot,
   updateDeck,
@@ -41,7 +42,7 @@ function resetState() {
   state.pantalla = 1;
   state.estructuraId = null;
   state.estructura = null;
-  state.selecciones = [null, null, null];
+  state.selecciones = [];
   state.deck = shuffle(Object.keys(state.cartasData));
   state.resultado = [];
 }
@@ -113,11 +114,49 @@ document.getElementById('app').addEventListener('click', async (e) => {
     startMelody();
     playClick();
     const id = estructuraCard.dataset.id;
+
+    // Si la estructura tiene sub-selección (ciclo_mujer), mostrar pantalla de fases
+    const est = getEstructurasDisponibles().find(e => e.id === id);
+    if (est && est.subSeleccion) {
+      renderSeleccionFase(getFasesCicloMujer());
+      return;
+    }
+
     state.estructuraId = id;
     state.estructura = await loadEstructura(id);
-    state.selecciones = [null, null, null];
+    state.selecciones = new Array(state.estructura.posiciones.length).fill(null);
     state.deck = shuffle(Object.keys(state.cartasData));
     navigate(2);
+    return;
+  }
+
+  // P1.5 → seleccionar fase del ciclo
+  const faseCard = e.target.closest('[data-fase-id]');
+  if (faseCard) {
+    playClick();
+    const id = faseCard.dataset.faseId;
+    state.estructuraId = id;
+    state.estructura = await loadEstructura(id);
+    state.selecciones = new Array(state.estructura.posiciones.length).fill(null);
+    state.deck = shuffle(Object.keys(state.cartasData));
+    navigate(2);
+    return;
+  }
+
+  // P1.5 → "No sé en qué fase estoy"
+  if (e.target.id === 'btn-no-se') {
+    playClick();
+    const guia = document.getElementById('guia-fases');
+    if (guia) {
+      guia.hidden = !guia.hidden;
+    }
+    return;
+  }
+
+  // P1.5 → Volver a estructuras
+  if (e.target.id === 'btn-volver-estructuras') {
+    playClick();
+    navigate(1);
     return;
   }
 
@@ -136,7 +175,7 @@ document.getElementById('app').addEventListener('click', async (e) => {
   // P2 → volver a empezar
   if (e.target.id === 'btn-volver') {
     playClick();
-    state.selecciones = [null, null, null];
+    state.selecciones = new Array(state.estructura.posiciones.length).fill(null);
     state.deck = shuffle(Object.keys(state.cartasData));
     navigate(2);
     return;

@@ -81,8 +81,23 @@ img { display: block; max-width: 100%; }
 }
 
 /* ─── Splash ─────────────────────────────────────────────────────────────────── */
+/* ─── Fondo global ───────────────────────────────────────────────────────────── */
+.global-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.global-bg__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.7) 20%, transparent 65%);
+  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.7) 20%, transparent 65%);
+}
+
 .screen--splash {
-  background: radial-gradient(ellipse at center, #1a0f2e 0%, var(--color-bg) 70%);
   align-items: center;
   justify-content: center;
   animation: fadeInScale 1s ease-out;
@@ -93,7 +108,9 @@ img { display: block; max-width: 100%; }
   to   { opacity: 1; transform: scale(1); }
 }
 
-.splash__content { text-align: center; }
+.splash__content {
+  text-align: center;
+}
 
 .splash__symbol {
   font-size: 3.5rem;
@@ -162,6 +179,136 @@ img { display: block; max-width: 100%; }
   font-size: 0.8rem;
   color: var(--color-text-muted);
   font-weight: 300;
+}
+
+/* ─── Fases del ciclo ────────────────────────────────────────────────────────── */
+.screen--fases {
+  gap: var(--space-sm);
+  overflow-y: auto;
+}
+
+.fases__subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 300;
+}
+
+.fases-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  padding: 0 var(--space-xs);
+}
+
+.fase-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.fase-card:active {
+  transform: scale(0.96);
+  border-color: var(--color-gold);
+}
+
+.fase-card__icon { font-size: 1.8rem; }
+
+.fase-card__nombre {
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  color: var(--color-gold-light);
+  letter-spacing: 0.04em;
+}
+
+.fase-card__desc {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+.fases__no-se {
+  margin-top: var(--space-xs);
+}
+
+.fases__volver {
+  margin-top: auto;
+  font-size: 0.85rem;
+  min-height: 40px;
+  padding: 0.5rem var(--space-md);
+}
+
+/* Guía "No sé en qué fase estoy" */
+.guia-fases {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: var(--space-sm);
+  margin-top: var(--space-xs);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.guia-fases__intro {
+  font-size: 0.82rem;
+  color: var(--color-gold-light);
+  font-weight: 400;
+  text-align: center;
+}
+
+.guia-fase {
+  display: flex;
+  gap: 0.5rem;
+  padding: var(--space-sm);
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.guia-fase__num {
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  color: var(--color-gold);
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.guia-fase__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.guia-fase__pregunta {
+  font-size: 0.82rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+.guia-fase__btn {
+  align-self: flex-start;
+  font-size: 0.78rem;
+  color: var(--color-gold-light);
+  background: rgba(201,162,39,0.12);
+  border: 1px solid rgba(201,162,39,0.3);
+  border-radius: 99px;
+  padding: 0.4rem 0.9rem;
+  transition: background 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+
+.guia-fase__btn:active {
+  transform: scale(0.96);
+  background: rgba(201,162,39,0.25);
 }
 
 /* ─── Selección nueva: slots + mazo ─────────────────────────────────────────── */

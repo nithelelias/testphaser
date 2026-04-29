@@ -1,0 +1,39 @@
+{
+  "id": "ciclo_mujer_folicular",
+  "nombre": "Ciclo Mujer · Fase Folicular",
+  "descripcion": "Fase de renacimiento, creatividad y nuevas intenciones",
+  "icono": "🌱",
+  "posiciones": ["energía actual", "qué necesitas hoy", "consejo para fluir"],
+  "contexto": {
+    "energía actual": {
+      "intro": [
+        "Internamente en esta fase folicular,",
+        "Tu energía interna mientras renaces muestra que"
+      ],
+      "cierre": [
+        "la primavera interior despierta nuevas posibilidades.",
+        "es el momento perfecto para sembrar intenciones."
+      ]
+    },
+    "qué necesitas hoy": {
+      "intro": [
+        "Lo que tu cuerpo, mente y emociones requieren hoy es",
+        "En este momento de crecimiento necesitas"
+      ],
+      "cierre": [
+        "confía en la energía ascendente que te impulsa.",
+        "permítete explorar y soñar sin limitaciones."
+      ]
+    },
+    "consejo para fluir": {
+      "intro": [
+        "Para fluir mejor en esta fase, las cartas recomiendan",
+        "La acción que potenciará tu fase folicular es"
+      ],
+      "cierre": [
+        "aprovecha esta chispa creativa para iniciar algo nuevo.",
+        "el universo apoya tus planes cuando te alineas con tu ciclo."
+      ]
+    }
+  }
+}

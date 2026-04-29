@@ -1,0 +1,39 @@
+{
+  "id": "ciclo_mujer_lutea",
+  "nombre": "Ciclo Mujer · Fase Lútea",
+  "descripcion": "Fase de introspección, sensibilidad y preparación para soltar",
+  "icono": "🍂",
+  "posiciones": ["energía actual", "qué necesitas hoy", "consejo para fluir"],
+  "contexto": {
+    "energía actual": {
+      "intro": [
+        "Internamente en esta fase lútea,",
+        "Tu energía interna mientras te preparas para soltar muestra que"
+      ],
+      "cierre": [
+        "la sensibilidad que sientes es sabiduría disfrazada.",
+        "tu cuerpo te invita a recoger tu energía hacia adentro."
+      ]
+    },
+    "qué necesitas hoy": {
+      "intro": [
+        "Lo que tu cuerpo, mente y emociones requieren hoy es",
+        "En este momento de recogimiento necesitas"
+      ],
+      "cierre": [
+        "sé compasiva contigo misma y respeta tus límites.",
+        "honra lo que sientes sin juzgarte."
+      ]
+    },
+    "consejo para fluir": {
+      "intro": [
+        "Para fluir mejor en esta fase, las cartas recomiendan",
+        "La acción que te ayudará a transitar la fase lútea es"
+      ],
+      "cierre": [
+        "prepárate para cerrar este ciclo con amor propio.",
+        "lo que sueltas con consciencia regresa transformado."
+      ]
+    }
+  }
+}
